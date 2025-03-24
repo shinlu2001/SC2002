@@ -1,5 +1,7 @@
 package SC2002.Project;
 
+
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -45,10 +47,11 @@ public class BTOsystem {
                     case 3:
                         System.out.println("Loading data from excel sheets...");
                         //to test on your own system, change the file paths to match those of yours
-                        load_data("C:\\Users\\USER\\OneDrive - Nanyang Technological University\\Y1S2\\SC2002\\Project\\ApplicantList.csv", 'a');
-                        load_data("C:\\Users\\USER\\OneDrive - Nanyang Technological University\\Y1S2\\SC2002\\Project\\OfficerList.csv", 'o');
-                        load_data("C:\\Users\\USER\\OneDrive - Nanyang Technological University\\Y1S2\\SC2002\\Project\\ManagerList.csv", 'm');
-                        load_data("C:\\Users\\USER\\OneDrive - Nanyang Technological University\\Y1S2\\SC2002\\Project\\ProjectList.csv", 'p');
+                        load_data("SC2002/Project/files/ApplicantList.csv", 'a');
+                        load_data("SC2002/Project/files/ApplicantList.csv", 'a');
+                        load_data("SC2002/Project/files/OfficerList.csv", 'o');
+                        load_data("SC2002/Project/files/ManagerList.csv", 'm');
+
                         System.out.println("Data loaded!");
                         System.out.println("--------------------------------");
                         break;
