@@ -14,6 +14,8 @@ public abstract class User {
     private String marital_status;
     private int age;
     private String type;
+    // A Menu instance that will be used throughout the class and in its subclasses.
+    protected Menu menu;
     // private boolean logged_in=false;
     public User(String nric, String firstname, String lastname, String marital_status, int age) {
         this.nric = nric;
@@ -21,6 +23,9 @@ public abstract class User {
         this.lastname = lastname;
         this.marital_status = marital_status;
         this.age = age;
+
+        // Initialize the menu once so it is available for all methods
+        this.menu = new Menu();
     }
     public String get_firstname() {
         return firstname;
@@ -79,7 +84,7 @@ class Applicant extends User {
         int choice=0;
         do {
             try {
-                System.out.println("Please choose an option:");
+                /* System.out.println("Please choose an option:");
                 System.out.println("1. Apply for a project");
                 System.out.println("2. View active application");
                 System.out.println("3. View all listings");
@@ -89,7 +94,8 @@ class Applicant extends User {
                 System.out.println("7. Change account password");
                 System.out.println("8. Apply to become an officer");
                 System.out.println("9. Log out and return to main program");
-                System.out.print("Enter your choice: ");
+                System.out.print("Enter your choice: "); */
+                menu.printApplicantMenu();
                 
                 choice = scanner.nextInt();
                 // scanner.nextLine();
@@ -184,14 +190,14 @@ class Applicant extends User {
         System.out.println("---Enquiry menu---");
         do {
             try {
-                System.out.println("Please choose an option:");
+                /* System.out.println("Please choose an option:");
                 System.out.println("1. Make enquiry");
                 System.out.println("2. Edit enquiry");
                 System.out.println("3. View all enquiry");
                 System.out.println("4. Delete enquiry");
                 System.out.println("5. Return to applicant menu");
-                System.out.print("Enter your choice: ");
-
+                System.out.print("Enter your choice: "); */
+                menu.printEnquiryMenu();
                 choice = scanner.nextInt();
                 System.out.println("--------------------------------");
                 switch (choice) {
@@ -334,47 +340,4 @@ class HDB_Officer extends Applicant {
     }
 }
 
-class BTOapplication {
-    public void get_details() {
-        System.out.println("a");
-    }
-}
-class Enquiry {
-    private String content;
-    private String response="";
-    private Project project=null;
-    private User createdBy;
-    private User repliedBy=null;
-    public Enquiry(User user, String content) {
-        createdBy = user;
-        this.content = content;
-    }
-    public void setEnquiry(String r) {
-        content = r;
-    }
-    public void setResponse(String r) {
-        response = r;
-    }
-    public String getResponse() {
-        return response;
-    }
-    public String getEnquiry() {
-        return content;
-    }
-    public void setStaffReply(User staff) {
-        repliedBy = staff;
-    }
-    public User getStaff() {
-        return repliedBy;
-    }
-    public User getCreatedByUser() {
-        return createdBy;
-    }
-    public void setProject(Project p) {
-        project = p;
-    }
-    public Project getProject() {
-        return project;
-    }
-}
 

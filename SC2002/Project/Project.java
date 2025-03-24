@@ -183,6 +183,7 @@ public class Project {
     public void setmaxOfficerSlots(int maxOfficerSlots) {
         this.maxOfficerSlots = maxOfficerSlots;
     }
+    
 
     public int getAvailableOfficerSlots() {
         return availableOfficerSlots;

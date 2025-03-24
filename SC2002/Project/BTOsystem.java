@@ -16,25 +16,26 @@ public class BTOsystem {
     private static List<HDB_Officer> officers = new ArrayList<>();
     private static List<HDB_Manager> managers = new ArrayList<>();
     private static List<Project> projects = new ArrayList<>();
+    static Menu menu = new Menu();
+        
+        public static void main(String args[]) {
+            mainMenu();
+        }
     
-    public static void main(String args[]) {
-        mainMenu();
-    }
-
-    public static void mainMenu() {
-        System.out.println("Welcome to the BTO management system!");
-        int choice=0;
-        Scanner scanner = new Scanner(System.in);
-        do {
-            try {
-                System.out.println("Please choose an option:");
-                System.out.println("1. Log in");
-                System.out.println("2. Register user");
-                System.out.println("3. Fetch data from excel sheets");
-                System.out.println("4. Exit program");
-                // System.out.println("4. Exit program");
-                System.out.print("Enter your choice: ");
-
+        public static void mainMenu() {
+            
+            System.out.println("Welcome to the BTO management system!");
+            int choice=0;
+            Scanner scanner = new Scanner(System.in);
+            do {
+                try {
+                    /* System.out.println("Please choose an option:");
+                    System.out.println("1. Log in");
+                    System.out.println("2. Register user");
+                    System.out.println("3. Fetch data from excel sheets");
+                    System.out.println("4. Exit program");
+                    System.out.print("Enter your choice: "); */
+                    menu.printWelcomeMenu();
                 choice = scanner.nextInt();
                 System.out.println("--------------------------------");
                 switch (choice) {
@@ -73,9 +74,7 @@ public class BTOsystem {
     }
     public static void login(Scanner sc) {
         if (applicants.size() == 0) {
-            System.out.println("No accounts in database.");
-            System.out.println("Please register a new user or load data from excel sheets.");
-            System.out.println("--------------------------------");
+            menu.printloginError();
         } else {
             sc.nextLine();
             System.out.println("Welcome, login to your account to continue");
@@ -170,11 +169,12 @@ public class BTOsystem {
         
         do {
             try {
-                System.out.println("Pick an option:");
+                /* System.out.println("Pick an option:");
                 System.out.println("1. Applicant");
                 System.out.println("2. HDB Officer");
                 System.out.println("3. HDB Manager");
-                System.out.print("Enter your choice: ");
+                System.out.print("Enter your choice: "); */
+                menu.printSelectRole();
                 int choice = sc.nextInt();
                 System.out.println("--------------------------------");
                 switch (choice) {
