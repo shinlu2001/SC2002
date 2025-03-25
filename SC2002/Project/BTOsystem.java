@@ -10,6 +10,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class BTOsystem {
     private static List<Applicant> applicants = new ArrayList<>();
@@ -48,10 +49,10 @@ public class BTOsystem {
                     case 3:
                         System.out.println("Loading data from excel sheets...");
                         //to test on your own system, change the file paths to match those of yours
-                        load_data("SC2002/Project/files/ApplicantList.csv", 'a');
-                        load_data("SC2002/Project/files/ApplicantList.csv", 'a');
+                        load_data("SC2002/Project/files/ManagerList.csv", 'm');  // First
                         load_data("SC2002/Project/files/OfficerList.csv", 'o');
-                        load_data("SC2002/Project/files/ManagerList.csv", 'm');
+                        load_data("SC2002/Project/files/ApplicantList.csv", 'a');
+                        load_data("SC2002/Project/files/ProjectList.csv", 'p');
 
                         System.out.println("Data loaded!");
                         System.out.println("--------------------------------");
@@ -62,11 +63,12 @@ public class BTOsystem {
                         scanner.close();
                         break;
                     default:
-                        System.out.println("Invalid choice. Please try again.");
+                        System.out.println("Error: Invalid choice. Please try again.");
                         System.out.println("--------------------------------");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
+                System.out.println("--------------------------------");
+                System.out.println("Error: Invalid input. Please enter a number.");
                 System.out.println("--------------------------------");
                 scanner.next(); 
             }
@@ -126,10 +128,10 @@ public class BTOsystem {
                 if (nric.length()==9 && (nric.charAt(0)=='S' || nric.charAt(0)=='T') && Character.isLetter(nric.charAt(nric.length() - 1))) {
                     break;
                 } else {
-                    System.out.println("Invalid input. Please enter a valid NRIC.");
+                    System.out.println("Error: Invalid input. Please enter a valid NRIC.");
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid NRIC.");
+                System.out.println("Error: Invalid input. Please enter a valid NRIC.");
                 sc.next(); 
             }
         } while (true);
@@ -147,7 +149,7 @@ public class BTOsystem {
                     break;
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter either 'm' or 's'.");
+                System.out.println("Error: Invalid input. Please enter either 'm' or 's'.");
                 sc.next(); 
             }
         } while (true);
@@ -162,7 +164,7 @@ public class BTOsystem {
                 age = sc.nextInt();
                 break;
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
+                System.out.println("Error: Invalid input. Please enter a number.");
                 sc.next(); 
             }
         } while (true);
@@ -186,7 +188,7 @@ public class BTOsystem {
                 }
                 break;
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
+                System.out.println("Error: Invalid input. Please enter a number.");
                 sc.next(); 
             }
         } while (true);
@@ -217,17 +219,36 @@ public class BTOsystem {
             }
         } else if (type=='m') { // for manager
             for (String[] row : rows) {
-                HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]));
+                HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]), projects);
                 managers.add(a);
             }
         } else if (type=='p') { // for project
+            // System.out.println(managers.get(1).get_firstname());
             for (String[] row : rows) {
-                // List<HDB_Officer> assigned_officers = new ArrayList<>();
-                Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), LocalDate.parse(row[8]), LocalDate.parse(row[9]), false, Integer.parseInt(row[11]));
-                
+                String dateStr1 = row[8];  // Example: "20/3/2025"
+                String dateStr2 = row[9];  // Example: "15/7/2024"
+
+                // Define a formatter matching the input format
+                DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+                // Parse both date strings to LocalDate
+                LocalDate formattedDate1 = LocalDate.parse(dateStr1, inputFormatter);
+                LocalDate formattedDate2 = LocalDate.parse(dateStr2, inputFormatter);
+
+                // Now you can use formattedDate1 and formattedDate2
+                Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), formattedDate1, formattedDate2, false, Integer.parseInt(row[11]));
+                // System.out.println(row[10]);
                 for (HDB_Manager man: managers) {
+                    // System.out.println(man.get_firstname());
                     if (man.get_firstname().equals(row[10])) {
+                        // System.out.println(a);
                         a.setManager(man);
+
+                        // Add to manager's project list - to view the list of projects own by current manager
+                        man.getManagerProjects().add(a);    
+                        // Add to static allProjects list - to view the list of all projects
+                        HDB_Manager.getAllProjects().add(a);
+                        
                         break;
                     }
                 }
@@ -243,12 +264,11 @@ public class BTOsystem {
                 }
 
                 projects.add(a);
-                System.out.println(a);
-
+                System.out.println(a);   //prints tostring in project
+                // System.out.println(a.toString());
+                // System.out.println(a.getManager().get_firstname());
             }
         }
             
     }
 }
-
-

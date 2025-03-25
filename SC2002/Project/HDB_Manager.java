@@ -1,5 +1,7 @@
 package SC2002.Project;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -9,186 +11,865 @@ public class HDB_Manager extends User {
     private static int hdb_man_id = -1;
     private int manager_id;
     private String type="MANAGER";
-    private List<BTOapplication> allApplications = new ArrayList<>();
 
-    public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {
+    private static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
+    private List<Project> managerProjects = new ArrayList<>();  // List to store own projects - for manager to view own projects
+    private List<Project> projects; //store the projects list
+    
+    // static Scanner scan = new Scanner(System.in);
+    public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age, List<Project> projects) {
         super(nric, firstname, lastname, marital_status, age);
+        this.managerProjects = new ArrayList<>();
+        this.projects = projects;  // Initialize the projects list
         manager_id = ++hdb_man_id;
     }
-    public void reply_enquiry(Enquiry enquiry, String response) {
-        enquiry.setStaffReply(this);
-        enquiry.setResponse(response);;
+    public List<Project> getManagerProjects() {
+        return managerProjects;
     }
-  
-
-    @Override
+    
+    public static List<Project> getAllProjects() {
+        return allProjects;
+    }
     public void start_menu(Scanner sc) {
+        System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
+
         int choice = 0;
-        do {
-            System.out.println("\n=== HDB Manager Menu ===");
-            System.out.println("1.  Create BTO Project Listing");
-            System.out.println("2.  Edit BTO Project Listing");
-            System.out.println("3.  Delete BTO Project Listing");
-            System.out.println("4.  Toggle Project Visibility");
-            System.out.println("5.  View All Projects (Regardless of Visibility)");
-            System.out.println("6.  View Only Projects I Created");
-            System.out.println("7.  View HDB Officer Registrations (Pending/Approved)");
-            System.out.println("8.  Approve or Reject Officer Registration");
-            System.out.println("9.  Approve or Reject Applicant’s BTO Application");
-            System.out.println("10. Approve or Reject Applicant’s Withdrawal Request");
-            System.out.println("11. Generate Report of Booked Flats (with Filters)");
-            System.out.println("12. View Enquiries for All Projects");
-            System.out.println("13. Reply to Enquiries for My Project");
-            System.out.println("14. Logout / Return to Main Menu");
-            System.out.print("Enter your choice: ");
+        boolean loop = true;  // Control variable for menu loop
 
+        while (loop) {
+        {
             try {
+                System.out.println("\n--- Manager Menu ---");
+                System.out.println("1. Create a Project");
+                System.out.println("2. Edit a Project");
+                System.out.println("3. Delete a Project");
+                System.out.println("4. View All Projects");
+                System.out.println("5. View My Projects");
+                System.out.println("6. View Officer Registrations");
+                System.out.println("7. Handle Officer Registration");
+                System.out.println("8. Handle BTO Applications");
+                System.out.println("9. Handle Withdrawal Requests");
+                System.out.println("10. Generate Applicant Report");
+                System.out.println("11. View All Enquiries");
+                System.out.println("12. Handle Project Enquiries");
+                System.out.println("13. Log out");
+                System.out.println("Enter your choice: ");
+
                 choice = sc.nextInt();
-                sc.nextLine(); // consume newline
+                sc.nextLine(); // Consume leftover newline
+                
+                switch (choice) {
+                    case 1:     // create a new project based by keying input in
+                        
+                        createProject(sc);
+
+                        System.out.println("---------------------------------------------------");
+                        break;
+    
+                    case 2:     // Edit a Project - editProject(project)
+                        System.out.print("Enter the name of the project you wish to edit: ");
+                        
+                        // find if project exists in allProjects then check if the project is under the current manager
+                        Project projectToEdit = findAndValidateProject(sc);
+                        if (projectToEdit != null) {
+                            editProject(projectToEdit, sc);
+                        }
+                        
+                        System.out.println("---------------------------------------------------");
+                        break;
+                        
+                    case 3: // Delete a Project - deleteProject(project)
+                        System.out.print("Enter the name of the project you wish to delete: ");
+                        
+                        // find if project exists in allProjects then check if the project is under the current manager
+                        Project projectToDelete = findAndValidateProject(sc);
+                        if (projectToDelete != null) {
+                            deleteProject(projectToDelete);
+                        }                           
+                    
+                        System.out.println("---------------------------------------------------");
+                        break;
+
+                        case 4:     // view all projects
+                            viewAllProjects();
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 5:     // view own projects
+                            viewOwnProjects();
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 6:     // view officer registration
+                            viewOfficerRegistration();
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 7:     // handle Officer Registration - handleOfficerRegistration(project, officer)
+                            //WHEN CHECK IF PROJECT EXIST OR JUST NOT OWNER OF PROJ REFER TO DELETE SIMILAR^ (see below too)
+                            // System.out.print("Enter Project Name: ");
+                            // // find if project exists in allProjects then check if the project is under the current manager                                                                       
+                            // Project projectForOfficer = findAndValidateProject(sc);
+                            // if (projectForOfficer != null) {
+                            //     // Rest of officer handling logic
+                            // } else {
+                            //     System.out.print("Enter Officer's First Name: ");
+                            //     String officerFirstName = sc.nextLine();
+                            //     HDB_Officer officer = null;
+                            
+                            //     // Find the officer by first name
+                            //     for (HDB_Officer o : HDB_Officer.getOfficerList()) {
+                            //         if (o.get_firstname().equalsIgnoreCase(officerFirstName)) {
+                            //             officer = o;
+                            //             break;
+                            //         }
+                            //     }
+                            
+                            //     if (officer != null) {
+                            //         // Handle the officer registration
+                            //         handleOfficerRegistration(projectForOfficer, officer);
+                            //     } else {
+                            //         System.out.println("Officer not found.");
+                            //     }
+                            // }
+                            System.out.println("---------------------------------------------------");
+                            break;
+                            
+                        case 8:     // handle BTO registration - handleBTOapplication(projectToEdit, application, type)
+                            // System.out.print("Enter Project Name: ");
+                            // // find if project exists in allProjects then check if the project is under the current manager
+                            // Project projectForBTO = findAndValidateProject(sc);
+                            // if (projectForBTO != null) {
+                            //     // Rest of BTO handling logic
+                            // } else {
+                            //     // Here you would need to add code to select an application
+                            //     // This is just a placeholder - you'll need to implement the actual application selection logic
+                            //     System.out.println("BTO application handling functionality would go here");
+                            // }
+                        
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 9:     // handle withdrawel requests - handleWithdrawalRequest(project, application)
+                            // System.out.print("Enter Project Name: ");
+                            // // find if project exists in allProjects then check if the project is under the current manager
+                            // Project projectForWithdrawal = findAndValidateProject(sc);
+                            // if (projectForWithdrawal != null) {
+                            //     // Rest of withdrawal handling logic
+                            // } else {
+                            //     // Here you would need to add code to select an application with a withdrawal request
+                            //     // This is just a placeholder - you'll need to implement the actual application selection logic
+                            //     System.out.println("Withdrawal request handling functionality would go here");
+                            // }
+                    
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 10:     // generate appplicant report - generateReport(applicationList)
+
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 11:     // view all enquiries (across all projects)
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 12:     // handle project enquires (view and reply to enquiries for your projects)
+                            System.out.println("---------------------------------------------------");
+                            break;
+                        
+                        case 13:
+                            System.out.println("Logged out. Returning to main menu...");
+                            System.out.println("---------------------------------------------------");
+                            loop = false;  // Exit the loop
+                            break;
+                        
+                    default:    // executed when input entered is some int that is not btw 1-13
+                        System.out.println("---------------------------------------------------");
+                        System.out.println("Error: Invalid choice. Please try again.");
+                        System.out.println("---------------------------------------------------");
+                }
+            } catch (InputMismatchException e) {    // executed when input entered is any type of input (str,char, etc)
+                System.out.println("---------------------------------------------------");
+                System.out.println("Error: Invalid input. Please try again.");
+                System.out.println("---------------------------------------------------");
+                sc.nextLine();  // Consume leftover newline
+                }
+            }
+        }
+    }
+    // find if project exists in allProjects then check if the project is under the current manager
+    private Project findAndValidateProject(Scanner sc) {
+        String projectName = sc.nextLine();
+        
+        // Find project in allProjects
+        Project project = null;
+        for (Project p : allProjects) {
+            if (p.getProjectName().equalsIgnoreCase(projectName)) {
+                project = p;
+                break;
+            }
+        }
+        
+        // Validate project
+        if (project == null) {
+            System.out.println("---------------------------------------------------");
+            System.out.println("Error: Project does not exist.");
+            return null;
+        }
+        // check if current manager is in charge of the project
+        if (!managerProjects.contains(project)) {
+            System.out.println("---------------------------------------------------");
+            System.out.println("Error: You are not the manager of " + project.getProjectName() + ".");
+            return null;
+        }
+        
+        return project;
+    }
+
+    // public Project createProject(String projectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
+    public Project createProject(Scanner sc) 
+    {
+        //change createProject to load in flat type instead of total2room etc
+        // then from there (flat type) use conditions to input the necessary variables into the Project parameters
+
+        System.out.println("\n----------------Create a BTO Project---------------");
+        System.out.print("Enter Project Name: ");
+        String projectName = sc.nextLine();
+
+        System.out.print("Enter Neighbourhood: ");
+        String neighbourhood = sc.nextLine();
+
+        // System.out.print("Enter Flat Type (2-Room/3-Room):");
+        // // String flatType = scan.next().toLowerCase();
+        // String flatType = scan.next();
+
+        // System.out.print("Enter Number of Units for " + flatType + ".");
+        // int numberUnits = scan.nextInt();
+
+        // int total2Room = 0, total3Room = 0;
+        // if (flatType.equals("2-Room")){
+        //     total2Room = numberUnits;
+        //     total3Room = 0;                                
+        // }
+        // else if (flatType.equals("3-Room")){
+        //     total2Room = 0;
+        //     total3Room = numberUnits;                                
+        // }
+
+        // Continuously loop until a valid (positive) input is entered
+        int total2Room;
+        while (true)
+        {
+            try {
+                System.out.print("Enter number of 2-Room units (none = 0): ");
+                // int total2Room = scan.nextInt();
+                total2Room = (sc.nextInt());
+                sc.nextLine(); // Consume newline
+
+                if (total2Room >= 0) // if input is positive no. = valid, so break the loop and proceed
+                    break;
+
+                // else output error msg and continue looping
+                System.out.println("Error: Number of 2-Room units cannot be negative.");
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                sc.nextLine();
-                continue;
+                System.out.println("Error: Please enter a valid number.");
+                sc.nextLine(); // Clear invalid input
             }
 
-            switch (choice) {
-                case 1:
-                    createProject(sc);
+        }
+
+        // Continuously loop until a valid (positive) input is entered
+        int total3Room;
+        while (true)
+        {
+            try {
+                System.out.print("Enter number of 3-Room units (none = 0): ");
+                total3Room = sc.nextInt();
+                sc.nextLine(); // Consume newline
+                
+                if (total3Room >= 0) // if input is positive no. = valid, so break the loop and proceed
                     break;
-                // ... Other cases for options 2-10 and 12-13 ...
-                case 11:
-                    // Call generateReport with the available list of applications
-                    generateReport(allApplications, sc);
-                    break;
-                case 14:
-                    System.out.println("Logging out. Returning to main menu...");
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+
+                // else output error msg and continue looping
+                System.out.println("Error: Number of 3-Room units cannot be negative.");
+            } catch (InputMismatchException e) {
+                System.out.println("Error: Please enter a valid number.");
+                sc.nextLine(); // Clear invalid input
             }
-        } while (choice != 14);
+        }
+        
+        // Continuously loop until a valid (date format) input is entered
+        LocalDate openDate = null;
+        while(true){
+            try {
+                System.out.print("Enter Application Opening Date for Project " + projectName + " (yyyy-MM-dd): ");
+                openDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                break;
+
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+            }
+        }
+
+        // Continuously loop until a valid (date format) input is entered
+        LocalDate closeDate;
+        while(true){
+            try {
+                System.out.print("Enter  Application Closing Date for " + projectName + " (yyyy-MM-dd): ");
+                closeDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                break;
+            } catch (DateTimeParseException e) {
+                System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+            }
+        }
+        // Continuously loop until a valid (availableOfficerSlots input btw 1-10) input is entered
+        int availableOfficerSlots;
+        while (true)
+        {   try{
+                System.out.print("Enter Available HDB Officer Slots (MAX 10): ");
+                availableOfficerSlots = sc.nextInt();
+                sc.nextLine(); // Consume newline
+
+                // If input(availableOfficerSlots) is NOT btw 1-10, keep looping
+                if (availableOfficerSlots > Project.getmaxOfficerSlots() || availableOfficerSlots <= 0 ) {
+                    System.out.println("Error: Available officer slots must be between 1 and " + Project.getmaxOfficerSlots() + ".");
+
+                }else{  // if input is btw of 1-10 break the loop and proceed
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Error: Please enter a valid number.");
+                sc.nextLine(); // Clear invalid input
+            }
+        }
+
+        // Check if the manager already has a project within the same application period
+        for (Project existingProject : managerProjects) {
+            LocalDate existingOpen = existingProject.getOpenDate();
+            LocalDate existingClose = existingProject.getCloseDate();
+    
+            if (!(closeDate.isBefore(existingOpen) || openDate.isAfter(existingClose))) {  // Check for overlap
+                System.out.println("Error: Failed to create " + projectName + ". You can only manage one project within an application period.");
+                return null;
+            }
+        }
+    
+        // Create project if no conflicts
+        Project project = new Project(projectName, neighbourhood, total2Room, total3Room, openDate, closeDate, false, availableOfficerSlots);
+        project.setManager(this);  // assign the current manager
+        managerProjects.add(project);  // Add the project to the manager's list
+        allProjects.add(project);      // Add the project to the global list
+        System.out.println(projectName + " successfully created.");
+    
+        return project;
     }
 
-    // --- Placeholder methods for other functionalities ---
-    private void createProject(Scanner sc) {
-        System.out.println("Create BTO Project Listing (not yet implemented).");
+    public void viewOwnProjects()
+    {
+        System.out.println("\n--------------------My Projects--------------------");
+        if (!managerProjects.isEmpty())
+        {
+            for (Project p : managerProjects)
+            {
+                if (p.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
+                {
+                    System.out.println(p);
+                }
+            }
+        }
+        else{
+            System.out.println("No projects available.");
+        }
     }
-    // ... Other placeholder methods for editProject, deleteProject, etc. ...
 
-    // --- The generateReport method with filtering options ---
-    public void generateReport(List<BTOapplication> applicationList, Scanner sc) {
+    public static void viewAllProjects()
+    {
+        System.out.println("\n-------------------All Projects--------------------");
+        if (!allProjects.isEmpty())
+        {
+            for (Project p : allProjects) {
+                System.out.println(p);
+            }
+        }
+        else{
+            System.out.println("No projects available.");
+        }
+    }
+
+    // public void editProject(String projectName)
+    public void editProject(Project project, Scanner sc)
+    {
+        int option = 0;
+        // for (Project p: managerProjects)
+        for (Project p: allProjects)
+        {
+            // if (p.getProjectName().equals(projectName))
+            if (p.equals(project))
+            {
+                boolean loop = true;
+
+                while (loop) {
+                    try {
+                        System.out.println("\n--------------Edit BTO Project Listing-------------");
+                        System.out.println("gay: " + p.toString());
+
+                        System.out.println("Select attribute to edit: ");
+                        System.out.println("1. Project Name\n2. Neighbourhood\n3. No. of 2-Room Units\n4. No. of 3-Room Units\n5. Application opening date\n6. Application closing date\n7. Toggle Visibility\n8. Available HDB Officer\n9. All attribute\n10. Return to Manager menu");
+                        
+                        //CREATE ANOTHER CASE FOR FLAT TYPE!!!!!!!!!!!!!!!!!
+                        // int option = scan.nextInt();
+                        System.out.println("Enter your choice: ");
+                        option = sc.nextInt();
+                        sc.nextLine(); // Consume newline
+
+                        switch (option) {
+                            case 1:
+                                System.out.print("Enter new Project Name: ");
+                                p.setProjectName(sc.nextLine());
+                                break;
+
+                            case 2:
+                                System.out.print("Enter new Neighbourhood: ");
+                                p.setneighbourhood(sc.nextLine());
+                                break;
+
+                            case 3:  
+                                int total2Room;
+                                while (true) {
+                                    try {
+                                        System.out.print("Enter updated number of 2-Room units (none = 0): ");
+                                        total2Room = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+                            
+                                        if (total2Room >= 0) {
+                                            p.setTotal2Room(total2Room);
+                                            break;
+                                        }
+                                        System.out.println("Error: Number of 2-Room units cannot be negative.");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+                                break;
+
+                            case 4:
+                                int total3Room;
+                                while (true) {
+                                    try {
+                                        System.out.print("Enter updated number of 3-Room units (none = 0): ");
+                                        total3Room = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+                            
+                                        if (total3Room >= 0) {
+                                            p.setTotal3Room(total3Room);
+                                            break;
+                                        }
+                                        System.out.println("Error: Number of 3-Room units cannot be negative.");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+                                break;
+
+                            case 5:
+                                LocalDate openDate;
+                                while(true){
+                                    try {
+                                        System.out.print("Enter new application opening date (yyyy-MM-dd): ");
+                                        openDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                                        p.setOpenDate(openDate);
+                                        break;
+
+                                    } catch (DateTimeParseException e) {
+                                        System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+                                    }
+                                }
+                                break;
+
+                            case 6:
+                                LocalDate closeDate;
+                                while(true){
+                                    try {
+                                        System.out.print("Enter new application closing date (yyyy-MM-dd): ");
+                                        closeDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                                        p.setCloseDate(closeDate);
+                                        break;
+                                    } catch (DateTimeParseException e) {
+                                        System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+                                    }
+                                }
+                                break;
+
+                            case 7:
+                                p.toggle_visibility();
+                                // toggleVisibility(p);
+                                // p.setVisibility(!p.isVisibility());
+                                break;
+
+                            case 8:
+                                int availableOfficerSlots;
+                                while (true) {
+                                    try {
+                                        // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
+                                        System.out.print("Enter new available number of HDB Officer Slots (max " + Project.getmaxOfficerSlots() + "): ");
+                                        availableOfficerSlots = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+                            
+                                        // Ensure available slots do not exceed maximum slots
+                                        if (availableOfficerSlots > Project.getmaxOfficerSlots() || availableOfficerSlots <= 0) {
+                                            System.out.println("Error: Available officer slots must be between 1 and " + Project.getmaxOfficerSlots() + ".");
+                                            continue;
+                                        }
+                                        
+                                        // Check if the new maximum is less than the current number of assigned officers
+                                        if (availableOfficerSlots < p.getAssignedOfficerList().size()) {
+                                            System.out.println("Error: Cannot set slots below current assigned officers (" + p.getAssignedOfficerList().size() + ").");
+                                            continue;
+                                        }
+                            
+                                        // If all conditions are valid, change available no. of officer slots
+                                        p.setAvailableOfficerSlots(availableOfficerSlots);
+                                        break;
+                                        
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+                                break;
+                                
+                            case 9:
+                                System.out.print("Enter new Project Name: ");
+                                p.setProjectName(sc.nextLine());
+
+                                System.out.print("Enter new Neighbourhood: ");
+                                p.setneighbourhood(sc.nextLine());
+                                
+                                while (true) {
+                                    try {
+                                        System.out.print("Enter updated number of 2-Room units (none = 0): ");
+                                        total2Room = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+                            
+                                        if (total2Room >= 0) {
+                                            p.setTotal2Room(total2Room);
+                                            break;
+                                        }
+                                        System.out.println("Error: Number of 2-Room units cannot be negative.");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+
+                                while (true) {
+                                    try {
+                                        System.out.print("Enter updated number of 3-Room units (none = 0): ");
+                                        total3Room = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+
+                                        if (total3Room >= 0) {
+                                            p.setTotal3Room(total3Room);
+                                            break;
+                                        }
+                                        System.out.println("Error: Number of 3-Room units cannot be negative.");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+                                
+                                while(true){
+                                    try {
+                                        System.out.print("Enter new application opening date (yyyy-MM-dd): ");
+                                        openDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                                        p.setOpenDate(openDate);
+                                        break;
+
+                                    } catch (DateTimeParseException e) {
+                                        System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+                                    }
+                                }
+
+                                while(true){
+                                    try {
+                                        System.out.print("Enter new application closing date (yyyy-MM-dd): ");
+                                        closeDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
+                                        p.setCloseDate(closeDate);
+                                        break;
+                                    } catch (DateTimeParseException e) {
+                                        System.out.println("Error: Invalid format. Use yyyy-MM-dd.");
+                                    }
+                                }
+                                                         
+                                while (true)
+                                {
+                                    System.out.print("Toggle Visibility (yes/no): ");
+                                    String visibility = sc.next().toLowerCase();
+                                    if (visibility.equals("yes") || visibility.equals("no")) {
+                                        if (visibility.equals("yes")) {
+                                            p.toggle_visibility();
+                                        }
+                                        break;
+                                    } else {
+                                        System.out.println("Error: Please enter either 'yes' or 'no'.");
+                                    }
+                                }
+                            
+                                while (true) {
+                                    try {
+                                        // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
+                                        System.out.print("Enter new available number of HDB Officer Slots (max " + Project.getmaxOfficerSlots() + "): ");
+                                        availableOfficerSlots = sc.nextInt();
+                                        sc.nextLine(); // Consume newline
+                            
+                                        // Ensure available slots do not exceed maximum slots
+                                        if (availableOfficerSlots > Project.getmaxOfficerSlots() || availableOfficerSlots <= 0) {
+                                            System.out.println("Error: Available officer slots must be between 1 and " + Project.getmaxOfficerSlots() + ".");
+                                            continue;
+                                        }
+                                        
+                                        // Check if the new maximum is less than the current number of assigned officers
+                                        if (availableOfficerSlots < p.getAssignedOfficerList().size()) {
+                                            System.out.println("Error: Cannot set slots below current assigned officers (" + p.getAssignedOfficerList().size() + ").");
+                                            continue;
+                                        }
+                            
+                                        // If all conditions are valid, change available no. of officer slots
+                                        p.setAvailableOfficerSlots(availableOfficerSlots);
+                                        break;
+                                        
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine(); // Clear invalid input
+                                    }
+                                }
+
+
+                                break;
+
+                            case 10:
+                                System.out.println("Exiting editing mode...");
+                                loop = false;  // Exit the loop
+                                break;
+                            
+                            default:    // executed when input entered is some int that is not btw 1-13
+                                System.out.println("Error: Invalid choice. Please try again.");
+                        }
+                    } catch (InputMismatchException e) {    // executed when input entered is any type of input (str,char, etc)
+                        System.out.println("Error: Invalid input. Please try again.");
+                        sc.nextLine();  // Consume leftover newline
+                    }
+                }
+            }
+        }
+        // System.err.println("Invalid project.");
+    }
+
+    public void deleteProject(Project project)
+    {
+        managerProjects.remove(project);
+        allProjects.remove(project);
+
+        // Unregister officer who had their project deleted
+        List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
+        List<HDB_Officer> officersToRemove = new ArrayList<>(); // list to ollect officers to be removed
+        for (HDB_Officer officer : officerList)
+        {
+            if (officer.getAssignedProject() != null && officer.getAssignedProject().equals(project)) {
+                officer.setAssignedProject(null); // Remove the project reference
+                officer.setRegistrationStatus("Unregistered"); // Reset registration status
+                officersToRemove.add(officer); // Collect officers to remove
+            }
+        }
+        // Remove the collected officers from the officerList
+        officerList.removeAll(officersToRemove);
+        System.out.println("Successfully deleted.");
+    }
+
+    // Approve or reject an officer's registration according to specific conditions
+    public void handleOfficerRegistration(Project project, HDB_Officer officer) {
+        if (!project.equals(officer.getAssignedProject()))
+        {
+            System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " did not register for " + project.getProjectName() + ".");
+            return;
+        }
+
+        // Check if the officer is already assigned to another project within the same application period
+        if (officer.isApplicationPeriodOverlapping(project)) {
+            officer.setRegistrationStatus("Rejected");
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer is already assigned to another project during this application period.");
+            // System.out.println("Warning: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " is already assigned to another project during this application period.");
+            return;
+        }
+
+        // Check if officer has applied to be a Applicant (for this project or other projects)
+        if (officer.hasAppliedAsApplicant()) {
+            officer.setRegistrationStatus("Rejected");
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer has already applied as an applicant.");
+            return;
+        }
+
+        // System.out.print("Do you want to approve Officer " + officer.get_firstname() + " " + officer.get_lastname() + " for " + project.getProjectName() + "? (yes/no): ");
+        // String input = scan.next().toLowerCase();
+
+        // Registration Approved, assign officer into specified project
+        // if (input.equals("yes")) 
+        // {
+            if (project.addOfficer(officer)) {
+                officer.setRegistrationStatus("Approved");
+                officer.setAssignedProject(project);
+                System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to " + project.getProjectName() + ".");
+            } else
+            {
+                officer.setRegistrationStatus("Rejected");
+                System.out.println("Maximum number of officers already assigned to " + project.getProjectName() + ". Officer's registration rejected. ");
+            }
+        // }else{
+        //     officer.setRegistrationStatus("Rejected");
+        //     System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration has been rejected.");
+        // }
+    }
+    
+    // View officer registration under them (manager)
+    public void viewOfficerRegistration()
+    {
+        System.out.println("\n---------------Officer Registrations---------------");
+        List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
+        if (!officerList.isEmpty())
+        {
+            System.out.printf("%-20s %-15s %-20s%n", "Name", "Status", "Project\n");
+            for (HDB_Officer officer : officerList)
+            {   
+                // View all officer registration (including projects under other managers)
+                Project assignedProject = officer.getAssignedProject();
+                if (assignedProject != null && assignedProject.getManager() == this) 
+                {
+                    // Only display officers assigned to projects managed by the current manager
+                    String projectName = assignedProject.getProjectName();
+                    System.out.printf("%-20s %-15s %-20s%n", officer.get_firstname() + " " + officer.get_lastname(),officer.getRegistrationStatus(),projectName);
+                }
+            }
+        }
+        else{
+            System.out.println("No officers available.");
+        }
+        // System.out.println("---------------------------------------------------");
+    }
+    
+    // Automatically approve or reject application according to specific conditions
+    public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
+  
+        // Check if the flat type is valid
+        if (!flatType.equals("2-Room") && !flatType.equals("3-Room")) 
+        {
+            System.out.println("Error: Invalid flat type. Please specify either '2-Room' or '3-Room'.");
+            return;
+        }
+    
+        // Check if there are available units for the requested flat type
+        if (flatType.equals("2-Room") && project.getavailable2Room() <= 0) 
+        {
+            application.setApplicationStatus("Rejected");
+            System.out.println("No available 2-Room units. Application rejected.");
+            // System.out.println("Warning: No available 2-Room units. Application rejected.");
+            return;
+
+        } else if (flatType.equals("3-Room") && project.getavailable3Room() <= 0) 
+        {
+            application.setApplicationStatus("Rejected");
+            System.out.println("No available 3-Room units. Application rejected.");
+            // System.out.println("Warning: No available 3-Room units. Application rejected.");
+            return;
+        }
+        
+        // System.out.print("Do you want to approve the BTO application? (yes/no): ");
+        // String input = scan.next().toLowerCase();
+
+        // Application Approved, decrement the available units
+        // if (input.equals("yes"))
+        // {
+            if (flatType.equals("2-Room")) 
+            {
+                application.setApplicationStatus("Approved");
+                project.setavailable2Room(project.getavailable2Room() - 1);
+                System.out.println("Application for 2-Room flat approved. Remaining 2-Room units: " + project.getavailable2Room());
+
+            } else if (flatType.equals("3-Room")) 
+            {
+                application.setApplicationStatus("Approved");
+                project.setavailable3Room(project.getavailable3Room() - 1);
+                System.out.println("Application for 3-Room flat approved. Remaining 3-Room units: " + project.getavailable3Room());
+            }
+        // } else{
+        //     application.setApplicationStatus("Rejected");
+        //     System.out.println("BTO application rejected.");
+        // }
+    }
+
+    public void handleWithdrawalRequest(Project project, BTOapplication application, Scanner sc) {
+
+        if (!application.getwithdrawalRequested())
+        {
+            System.out.println("Error: Withdrawal was not requested.");
+            return;
+        }
+
+        if (application.getApplicationStatus().equals("Withdrawn")) {
+            System.out.println("Application has already been withdrawn.");
+            return;
+        }
+    
+        System.out.println("Do you want to approve the withdrawal request? (yes/no): ");
+        String input = sc.next().toLowerCase();
+    
+        if (input.equals("yes")) {
+            application.setApplicationStatus("Withdrawn");
+            System.out.println("Withdrawal request approved.");
+        } else {
+            System.out.println("Withdrawal request rejected.");
+        }
+    }
+    
+    public void generateReport(List<BTOapplication> applicationList, Scanner sc)
+    {
         if (applicationList.isEmpty()) {
             System.out.println("No applications available.");
             return;
         }
+        System.out.println("\n---- Generate Report ----");
+        System.out.println("1. View All Applicants");
+        System.out.println("2. Filter by Marital Status");
+        System.out.println("3. Filter by Flat Type");
+        System.out.println("4. Filter by Both Marital Status & Flat Type");
+        System.out.println("Enter your choice: ");
+        int choice = sc.nextInt();
+        sc.nextLine(); // Consume newline
 
-        while (true) {
-            System.out.println("\n--- Generate Report ---");
-            System.out.println("1. View All Applicants");
-            System.out.println("2. Filter by Marital Status");
-            System.out.println("3. Filter by Flat Type");
-            System.out.println("4. Filter by Both Marital Status & Flat Type");
-            System.out.println("5. Return");
-            System.out.print("Enter your choice: ");
+        switch (choice) {
+            case 1:
+                System.out.printf("%-20s %-10s %-15s %-15s %-15s%n", "Applicant Name", "Age", "Marital Status", "Flat Type", "Project Name\n");
+            
+                // for (BTOapplication application : applicationList)
+                // {
+                //     if (application.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
+                //     {
+                //         System.out.println(p);
+                //     }
+                // }
+                
 
-            int choice;
-            try {
-                choice = sc.nextInt();
-                sc.nextLine(); // consume leftover newline
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a number.");
-                sc.nextLine(); // clear invalid input
-                continue;      // re-prompt
-            }
-
-            switch (choice) {
-                case 1:
-                    // 1. Show all applications (no filtering)
-                    printApplicationList(applicationList);
-                    break;
-                case 2:
-                    // 2. Filter by marital status
-                    System.out.print("Enter marital status (Single/Married): ");
-                    String status = sc.nextLine().trim().toLowerCase();
-                    
-                    List<BTOapplication> filteredByMarital = new ArrayList<>();
-                    for (BTOapplication app : applicationList) {
-                        String applicantStatus = app.getApplicant().get_maritalstatus().toLowerCase();
-                        if (applicantStatus.equals(status)) {
-                            filteredByMarital.add(app);
-                        }
-                    }
-                    printApplicationList(filteredByMarital);
-                    break;
-                case 3:
-                    // 3. Filter by flat type
-                    System.out.print("Enter flat type (2-Room/3-Room): ");
-                    String flatType = sc.nextLine().trim();
-                    
-                    List<BTOapplication> filteredByFlat = new ArrayList<>();
-                    for (BTOapplication app : applicationList) {
-                        if (app.getFlatType().equalsIgnoreCase(flatType)) {
-                            filteredByFlat.add(app);
-                        }
-                    }
-                    printApplicationList(filteredByFlat);
-                    break;
-                case 4:
-                    // 4. Filter by both marital status & flat type
-                    System.out.print("Enter marital status (Single/Married): ");
-                    status = sc.nextLine().trim().toLowerCase();
-                    
-                    System.out.print("Enter flat type (2-Room/3-Room): ");
-                    flatType = sc.nextLine().trim();
-                    
-                    List<BTOapplication> filteredByBoth = new ArrayList<>();
-                    for (BTOapplication app : applicationList) {
-                        String applicantStatus = app.getApplicant().get_maritalstatus().toLowerCase();
-                        if (applicantStatus.equals(status) && app.getFlatType().equalsIgnoreCase(flatType)) {
-                            filteredByBoth.add(app);
-                        }
-                    }
-                    printApplicationList(filteredByBoth);
-                    break;
-                case 5:
-                    // 5. Return to the previous menu
-                    System.out.println("Returning...");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
+                break;
+        
+            default:
+                break;
         }
     }
-
-    private void printApplicationList(List<BTOapplication> apps) {
-        if (apps.isEmpty()) {
-            System.out.println("No matching applications found.");
-            return;
-        }
-
-        // Print a header row
-        System.out.printf("%-20s %-5s %-15s %-10s %-15s%n",
-                "Applicant Name", "Age", "Marital Status", "Flat", "Project");
-
-        // Print each record
-        for (BTOapplication app : apps) {
-            Applicant applicant = app.getApplicant();
-            String fullName = applicant.get_firstname() + " " + applicant.get_lastname();
-            int age = applicant.get_age();
-            String marital = applicant.get_maritalstatus();
-            String flat = app.getFlatType();       // e.g., "2-Room" or "3-Room"
-            String project = app.getProjectName();   // or app.getProject().getProjectName()
-
-            System.out.printf("%-20s %-5d %-15s %-10s %-15s%n",
-                    fullName, age, marital, flat, project);
-        }
-    }
-    
-    // Additional methods (e.g., viewAllEnquiries, replyToEnquiriesForMyProject) can follow here.
-    
-    public void to_string() {
-        super.to_string();
-        System.out.println("Account type: " + type);
-        System.out.println("Manager ID: " + manager_id);
+    public void reply_enquiry(Enquiry enquiry, String response) {
+        enquiry.setStaffReply(this);
+        enquiry.setResponse(response);;
     }
 }

@@ -1,6 +1,14 @@
 package SC2002.Project;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BTOapplication {
+    //---------------------add--------------------------
+    private String applicationStatus;
+    private boolean withdrawalRequested;
+    private List<BTOapplication> approvedApplications = new ArrayList<>();
+    //--------------------------------------------------
     private static int nextId = 1;   // auto-incrementing ID
     private int applicationId;
     
@@ -28,6 +36,27 @@ public class BTOapplication {
         this.flatType = flatType;
         this.status = "Pending"; // default status
     }
+    //---------------------add--------------------------
+    public void setApplicationStatus(String applicationStatus)
+    {
+        this.applicationStatus = applicationStatus;
+    }
+
+    public String getApplicationStatus(){
+        return this.applicationStatus;
+    }
+
+    public boolean getwithdrawalRequested()
+    {
+        return withdrawalRequested;
+    }
+
+    public List<BTOapplication> getapprovedApplications()
+    {
+        return approvedApplications;
+    }
+
+    //--------------------------------------------------
 
     // Getters
     public int getApplicationId() {

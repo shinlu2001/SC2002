@@ -308,21 +308,21 @@ class Applicant extends User {
 
 
 
-class HDB_Officer extends Applicant {
-    private String type="Officer";
-    private static int hdb_off_id = -1;
-    private int officer_id;
-    public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
-        super(nric, firstname, lastname, marital_status, age);
-        officer_id = ++hdb_off_id;
-    }
-    public void reply_enquiry(Enquiry enquiry, String response) {
-        enquiry.setStaffReply(this);
-        enquiry.setResponse(response);;
-    }
-    public void start_menu(Scanner sc) {
-        //if want to apply, invoke applicant menu
-    }
-}
+// class HDB_Officer extends Applicant {
+//     private String type="Officer";
+//     private static int hdb_off_id = -1;
+//     private int officer_id;
+//     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
+//         super(nric, firstname, lastname, marital_status, age);
+//         officer_id = ++hdb_off_id;
+//     }
+//     public void reply_enquiry(Enquiry enquiry, String response) {
+//         enquiry.setStaffReply(this);
+//         enquiry.setResponse(response);;
+//     }
+//     public void start_menu(Scanner sc) {
+//         //if want to apply, invoke applicant menu
+//     }
+// }
 
 

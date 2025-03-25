@@ -7,7 +7,6 @@ import java.util.List;
 public class Project {
     private String ProjectName;
     private String neighbourhood;
-    //------------START-----------------
     // Total units when project starts
     private int total2Room; 
     private int total3Room;
@@ -18,9 +17,8 @@ public class Project {
     private LocalDate closeDate;
     private HDB_Manager manager;
     private List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
-    private static int maxOfficerSlots;     //CHANGED
+    private static int maxOfficerSlots;
     private int availableOfficerSlots;
-    //-------------END-----------------
     private boolean visibility=true;
     public void toggle_visibility() {
         if (visibility==true) {
@@ -36,7 +34,6 @@ public class Project {
         this.manager = man;
     }
 
-    //------------START-----------------
     public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
 
         this.ProjectName = ProjectName;
@@ -56,10 +53,10 @@ public class Project {
 
     }
 
-    public Project(String string, String string2, String string3, int i, String string4, int j, double d,
-            LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
-        //TODO Auto-generated constructor stub
-    }
+    // public Project(String string, String string2, String string3, int i, String string4, int j, double d,
+    //         LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
+    //     //TODO Auto-generated constructor stub
+    // }
     // Getter and Setter methods
     public String getProjectName() {
         return ProjectName;
@@ -99,34 +96,25 @@ public class Project {
         return available3Room;
     }
 
-    //CHANGED
     public void setTotal2Room(int total2Room) {
-        if (total2Room < 0) {
-            System.out.println("Invalid Input. Number of units has to be 1 and above.");
-            return;
-        }
         // Calculate the difference and update available rooms
         int difference = total2Room - this.total2Room;
         this.total2Room = total2Room;
         this.available2Room += difference;
-        System.out.println("Updated number of 2-Room units is " + this.total2Room + ".");
+        // System.out.println("Updated number of 2-Room units is " + this.total2Room + ".");
     }
-    //CHANGED
+
     public void setTotal3Room(int total3Room) {
-        if (total3Room < 0) {
-            System.out.println("Invalid Input. Number of units has to be 1 and above.");
-            return;
-        }
         // Calculate the difference and update available rooms
         int difference = total3Room - this.total3Room;
         this.total3Room = total3Room;
         this.available3Room += difference;
-        System.out.println("Updated number of 3-Room units is " + this.total3Room + ".");
+        // System.out.println("Updated number of 3-Room units is " + this.total3Room + ".");
     }
 
     public void setavailable2Room(int available2Room) {
         if (available2Room < 0) {
-            System.out.println("Invalid input. Number of 2-Room units cannot be negative.");
+            System.out.println("Error: Invalid input. Number of 2-Room units cannot be negative.");
             return;
         }
         this.available2Room = available2Room;
@@ -134,7 +122,7 @@ public class Project {
     
     public void setavailable3Room(int available3Room) {
         if (available3Room < 0) {
-            System.out.println("Invalid input. Number of 3-Room units cannot be negative.");
+            System.out.println("Error: Invalid input. Number of 3-Room units cannot be negative.");
             return;
         }
         this.available3Room = available3Room;
@@ -179,7 +167,6 @@ public class Project {
         return manager;
     }
 
-    //CHANGED
     public static int getmaxOfficerSlots() {
         return maxOfficerSlots;
     }
@@ -193,21 +180,9 @@ public class Project {
         return availableOfficerSlots;
     }
 
-    public void setAvailableOfficerSlots(int availableOfficerSlots, Project p) {
-        // Ensure available slots do not exceed maximum slots
-        if (availableOfficerSlots > maxOfficerSlots || availableOfficerSlots <= 0 ) {
-            System.out.println("Invalid input. Available officer slots must be between 1 and " + maxOfficerSlots + ".");
-            return;
-        }
-        // Check if the new maximum is less than the current number of assigned officers
-        if (availableOfficerSlots < p.getAssignedOfficerList().size()) {
-            System.out.println("Invalid input. The new maximum number of officer slots is less than the current number of assigned officers.");
-            return; 
-        }
-
-        // If all conditions are valid, change available no. of officer slots
+    public void setAvailableOfficerSlots(int availableOfficerSlots) {
         this.availableOfficerSlots = availableOfficerSlots;
-        System.out.println("Updated number of available HDB Officer Slots is " + this.availableOfficerSlots + ".");
+        // System.out.println("Updated number of available HDB Officer Slots is " + this.availableOfficerSlots + ".");
     }
     
     // Get the list of assigned officers
@@ -226,5 +201,4 @@ public String toString() {
     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + availableOfficerSlots + "}";
 }
     
-    //-------------END-----------------
 }
