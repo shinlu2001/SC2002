@@ -223,11 +223,61 @@ public class BTOsystem {
                 HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]));
                 managers.add(a);
             }
+//         } else if (type=='p') { // for project
+//             // System.out.println(managers.get(1).get_firstname());
+//             for (String[] row : rows) {
+//                 String dateStr1 = row[8];  // Example: "20/3/2025"
+//                 String dateStr2 = row[9];  // Example: "15/7/2024"
+
+//                 // Define a formatter matching the input format
+//                 DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+//                 // Parse both date strings to LocalDate
+//                 LocalDate formattedDate1 = LocalDate.parse(dateStr1, inputFormatter);
+//                 LocalDate formattedDate2 = LocalDate.parse(dateStr2, inputFormatter);
+
+//                 // Now you can use formattedDate1 and formattedDate2
+//                 Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), formattedDate1, formattedDate2, false, Integer.parseInt(row[11]));
+//                 // System.out.println(row[10]);
+//                 for (HDB_Manager man: managers) {
+//                     // System.out.println(man.get_firstname());
+//                     if (man.get_firstname().equals(row[10])) {
+//                         // System.out.println(a);
+//                         a.setManager(man);
+
+//                         // Add to manager's project list - to view the list of projects own by current manager
+//                         man.getManagerProjects().add(a);    
+//                         // Add to static allProjects list - to view the list of all projects
+//                         HDB_Manager.getAllProjects().add(a);
+                        
+//                         break;
+//                     }
+//                 }
+
+//                 String[] project_officer = row[12].split(",");
+//                 for (int i=0;i<project_officer.length;i++) {
+//                     for (HDB_Officer off: officers) {
+//                         if (off.get_firstname().equals(project_officer[i])) {
+//                             a.assignOfficer(off);
+//                             break;
+//                         }
+//                     }
+//                 }
+
+//                 projects.add(a);
+//                 System.out.println(a);   //prints tostring in project
+//                 // System.out.println(a.toString());
+//                 // System.out.println(a.getManager().get_firstname());
+//             }
+//         }
+            
+//     }
+// }
+// In BTOsystem.java, modify the load_data method for projects (type 'p')
         } else if (type=='p') { // for project
-            // System.out.println(managers.get(1).get_firstname());
             for (String[] row : rows) {
-                String dateStr1 = row[8];  // Example: "20/3/2025"
-                String dateStr2 = row[9];  // Example: "15/7/2024"
+                String dateStr1 = row[8];  // Application opening date
+                String dateStr2 = row[9];  // Application closing date
 
                 // Define a formatter matching the input format
                 DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
@@ -236,24 +286,47 @@ public class BTOsystem {
                 LocalDate formattedDate1 = LocalDate.parse(dateStr1, inputFormatter);
                 LocalDate formattedDate2 = LocalDate.parse(dateStr2, inputFormatter);
 
-                // Now you can use formattedDate1 and formattedDate2
-                Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), formattedDate1, formattedDate2, false, Integer.parseInt(row[11]));
-                // System.out.println(row[10]);
-                for (HDB_Manager man: managers) {
-                    // System.out.println(man.get_firstname());
-                    if (man.get_firstname().equals(row[10])) {
-                        // System.out.println(a);
-                        a.setManager(man);
+                // Create lists for flat types and units
+                List<String> flatTypes = new ArrayList<>();
+                List<Integer> totalUnits = new ArrayList<>();
+                List<Integer> availableUnits = new ArrayList<>();
 
-                        // Add to manager's project list - to view the list of projects own by current manager
-                        man.getManagerProjects().add(a);    
-                        // Add to static allProjects list - to view the list of all projects
+                // Add first flat type (2-Room)
+                flatTypes.add(row[2]);
+                totalUnits.add(Integer.parseInt(row[3]));
+                availableUnits.add(Integer.parseInt(row[3]));
+
+                // Add second flat type (3-Room) if exists
+                if (row.length > 5 && !row[5].isEmpty()) {
+                    flatTypes.add(row[5]);
+                    totalUnits.add(Integer.parseInt(row[6]));
+                    availableUnits.add(Integer.parseInt(row[6]));
+                }
+
+                // Create project with the new constructor
+                Project a = new Project(
+                    row[0],              // project name
+                    row[1],              // neighborhood
+                    flatTypes,           // list of flat types
+                    totalUnits,          // list of total units
+                    availableUnits,      // list of available units
+                    formattedDate1,      // open date
+                    formattedDate2,      // close date
+                    false,               // visibility
+                    Integer.parseInt(row[11]) // available officer slots
+                );
+
+                // Assign manager
+                for (HDB_Manager man: managers) {
+                    if (man.get_firstname().equals(row[10])) {
+                        a.setManager(man);
+                        man.getManagerProjects().add(a);
                         HDB_Manager.getAllProjects().add(a);
-                        
                         break;
                     }
                 }
 
+                // Assign officers
                 String[] project_officer = row[12].split(",");
                 for (int i=0;i<project_officer.length;i++) {
                     for (HDB_Officer off: officers) {
@@ -265,11 +338,8 @@ public class BTOsystem {
                 }
 
                 projects.add(a);
-                System.out.println(a);   //prints tostring in project
-                // System.out.println(a.toString());
-                // System.out.println(a.getManager().get_firstname());
+                System.out.println(a);
             }
         }
-            
     }
 }
