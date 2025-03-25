@@ -55,6 +55,10 @@ public class Project {
 
     }
 
+    public Project(String string, String string2, String string3, int i, String string4, int j, double d,
+            LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
+        //TODO Auto-generated constructor stub
+    }
     // public Project(String string, String string2, String string3, int i, String string4, int j, double d,
     //         LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
     //     //TODO Auto-generated constructor stub

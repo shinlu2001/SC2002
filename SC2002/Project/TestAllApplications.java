@@ -1,4 +1,4 @@
-/* package SC2002.Project;
+package SC2002.Project;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -63,4 +63,3 @@ public class TestAllApplications {
         sc.close();
     }
 }
- */
