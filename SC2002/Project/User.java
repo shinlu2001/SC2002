@@ -306,22 +306,7 @@ class Applicant extends User {
     }
 }
 
-class HDB_Manager extends User {
-    private static int hdb_man_id = -1;
-    private int manager_id;
-    private String type="MANAGER";
-    public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {
-        super(nric, firstname, lastname, marital_status, age);
-        manager_id = ++hdb_man_id;
-    }
-    public void reply_enquiry(Enquiry enquiry, String response) {
-        enquiry.setStaffReply(this);
-        enquiry.setResponse(response);;
-    }
-    public void start_menu(Scanner sc) {
 
-    }
-}
 
 class HDB_Officer extends Applicant {
     private String type="Officer";
