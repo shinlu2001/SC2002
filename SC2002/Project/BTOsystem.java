@@ -219,7 +219,8 @@ public class BTOsystem {
             }
         } else if (type=='m') { // for manager
             for (String[] row : rows) {
-                HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]), projects);
+                // HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]), projects);
+                HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]));
                 managers.add(a);
             }
         } else if (type=='p') { // for project

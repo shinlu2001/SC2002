@@ -17,10 +17,10 @@ public class HDB_Manager extends User {
     private List<Project> projects; //store the projects list
     
     // static Scanner scan = new Scanner(System.in);
-    public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age, List<Project> projects) {
+    public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
         this.managerProjects = new ArrayList<>();
-        this.projects = projects;  // Initialize the projects list
+        // this.projects = projects;  // Initialize the projects list
         manager_id = ++hdb_man_id;
     }
     public List<Project> getManagerProjects() {
@@ -179,6 +179,7 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 13:
+                            System.out.println("---------------------------------------------------");
                             System.out.println("Logged out. Returning to main menu...");
                             System.out.println("---------------------------------------------------");
                             loop = false;  // Exit the loop
@@ -327,7 +328,7 @@ public class HDB_Manager extends User {
         int availableOfficerSlots;
         while (true)
         {   try{
-                System.out.print("Enter Available HDB Officer Slots (MAX 10): ");
+                System.out.print("Enter Available HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
                 availableOfficerSlots = sc.nextInt();
                 sc.nextLine(); // Consume newline
 
@@ -360,6 +361,7 @@ public class HDB_Manager extends User {
         project.setManager(this);  // assign the current manager
         managerProjects.add(project);  // Add the project to the manager's list
         allProjects.add(project);      // Add the project to the global list
+        System.out.println("---------------------------------------------------");
         System.out.println(projectName + " successfully created.");
     
         return project;
@@ -412,9 +414,9 @@ public class HDB_Manager extends User {
                 while (loop) {
                     try {
                         System.out.println("\n--------------Edit BTO Project Listing-------------");
-                        System.out.println("gay: " + p.toString());
+                        System.out.println("Currently Editing: " + p.toString());
 
-                        System.out.println("Select attribute to edit: ");
+                        System.out.println("\nSelect attribute to edit: ");
                         System.out.println("1. Project Name\n2. Neighbourhood\n3. No. of 2-Room Units\n4. No. of 3-Room Units\n5. Application opening date\n6. Application closing date\n7. Toggle Visibility\n8. Available HDB Officer\n9. All attribute\n10. Return to Manager menu");
                         
                         //CREATE ANOTHER CASE FOR FLAT TYPE!!!!!!!!!!!!!!!!!
@@ -514,7 +516,7 @@ public class HDB_Manager extends User {
                                 while (true) {
                                     try {
                                         // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
-                                        System.out.print("Enter new available number of HDB Officer Slots (max " + Project.getmaxOfficerSlots() + "): ");
+                                        System.out.print("Enter new available number of HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
                                         availableOfficerSlots = sc.nextInt();
                                         sc.nextLine(); // Consume newline
                             
@@ -622,7 +624,7 @@ public class HDB_Manager extends User {
                                 while (true) {
                                     try {
                                         // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
-                                        System.out.print("Enter new available number of HDB Officer Slots (max " + Project.getmaxOfficerSlots() + "): ");
+                                        System.out.print("Enter new available number of HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
                                         availableOfficerSlots = sc.nextInt();
                                         sc.nextLine(); // Consume newline
                             
@@ -652,6 +654,7 @@ public class HDB_Manager extends User {
                                 break;
 
                             case 10:
+                                System.out.println("---------------------------------------------------");
                                 System.out.println("Exiting editing mode...");
                                 loop = false;  // Exit the loop
                                 break;
@@ -687,6 +690,7 @@ public class HDB_Manager extends User {
         }
         // Remove the collected officers from the officerList
         officerList.removeAll(officersToRemove);
+        System.out.println("---------------------------------------------------");
         System.out.println("Successfully deleted.");
     }
 

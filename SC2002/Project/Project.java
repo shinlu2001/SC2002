@@ -20,6 +20,8 @@ public class Project {
     private static int maxOfficerSlots;
     private int availableOfficerSlots;
     private boolean visibility=true;
+    // private String flatType1, flatType2;
+
     public void toggle_visibility() {
         if (visibility==true) {
             visibility=false;
