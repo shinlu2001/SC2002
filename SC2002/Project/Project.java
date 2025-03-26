@@ -22,7 +22,7 @@ public class Project {
     private List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
     private static int maxOfficerSlots;
     private int availableOfficerSlots;
-    private boolean visibility=true;
+    private boolean visibility;
     // private String flatType1, flatType2;
 
     public void toggle_visibility() {
@@ -219,7 +219,7 @@ public class Project {
         this.closeDate = closeDate;
     }
 
-    public boolean isVisibility() {
+    public boolean isVisible() {
         return visibility;
     }
 

@@ -1,4 +1,4 @@
-// package SC2002.Project;
+package SC2002.Project;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -44,7 +44,7 @@ public class HDB_Manager extends User {
         {
             try {
                 
-                System.out.println("\n============================================");
+                System.out.println("============================================");
                 System.out.println("         M A N A G E R   M E N U");
                 menu.printManagerMenu();
                 System.out.println("============================================");

@@ -1,6 +1,8 @@
-// package SC2002.Project;
-import java.util.*;
+package SC2002.Project;
 
+import java.util.*;
+// import java.util.ArrayList;
+// import java.util.List;
 public class Applicant extends User {
     private static int nextId = -1;
     private int applicantID;
@@ -22,7 +24,7 @@ public class Applicant extends User {
                 menu.printApplicantMenu();
                 
                 choice = scanner.nextInt();
-                System.out.println("--------------------------------");
+                System.out.println("-----------------------------------------------------------------------------------------------");
                 switch (choice) {
                     case 1:
                         if (application != null) {
@@ -44,8 +46,9 @@ public class Applicant extends User {
                         }
                         break;
                     case 3:
-                        System.out.println(BTOsystem.getProjects());
+                        // System.out.println(BTOsystem.getProjects());
                         view_listings();
+                        scanner.nextLine();
                         break;
                     case 4:
                         System.out.println("Withdraw application");
@@ -173,15 +176,65 @@ public class Applicant extends User {
             }
         } while (choice != 5);
     }
+    // check eligibility of user to apply for flat
+    public boolean getEligibility(String flatType) {
+        if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equals("2-Room")) {
+            return true;
+        } else if (get_maritalstatus().equals("MARRIED") && get_age()>=21) {
+            return true;
+        }
+        return false;
+    }
+
     public void view_listings() {
+        System.out.println("\n====================================================================================================");
+        System.out.println("                                          ALL PROJECTS");
+        System.out.println("====================================================================================================");
+        System.out.printf("%-20s %-15s %-15s %-15s %-15s %-10s %n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Eligibilty");
+                System.err.println("---------------------------------------------------------------------------------------------------");
         List<Project> list = BTOsystem.getProjects();
+        // System.out.println("DEBUG: Number of projects retrieved: " + list.size());
         for (Project p : list) {
+            p.toggle_visibility(); //default is false, so second toggle will become false again (to test only)
             if (p.isVisible()){
-                System.out.println("Enquiry sent!");
-                p.toString();
+                // there are details we want to keep hidden from an applicant e.g. manager name, visibility, etc. so cannot just use toString()
+                System.out.print(viewProjectsApplicant(p));
+                
             }
         }
     }
+
+    public String viewProjectsApplicant(Project p) {
+        StringBuilder sb = new StringBuilder();
+        
+        // sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots"));
+        // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
+        
+        // First line with first flat type and all other details
+        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %n",
+            p.getProjectName(),
+            p.getneighbourhood(),
+            p.getFlatTypes().size() > 0 ? 
+                p.getFlatTypes().get(0) + ": " + (p.getTotalUnits().get(0) - p.getAvailableUnits().get(0)) + "/" + p.getTotalUnits().get(0) : "",
+            p.getOpenDate(), 
+            p.getCloseDate(), 
+            getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible" 
+        ));
+
+    // Additional lines for remaining flat types
+    for (int i = 1; i < p.getFlatTypes().size(); i++) {
+        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %n",
+            "", "",  // Empty project name and neighbourhood
+            p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
+            "", "", getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible"));  // Empty other fields
+    }
+
+    // Add blank line between projects
+    sb.append("\n");
+
+    return sb.toString();
+    }
+
     //to be revised, enruiries tagged to a project
     public void makeEnquiry(Scanner scanner, Project project) {
         System.out.println("Enquiry: ");

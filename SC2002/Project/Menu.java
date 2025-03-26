@@ -46,7 +46,7 @@ public class Menu {
                 "9. Log out and return to main program",
                 "Enter your choice: ");
         this.managerMenu = Arrays.asList(
-            // System.out.println("--- Manager Menu ---");
+           
                 "1. Create a Project",
                 "2. Edit a Project",
                 "3. Delete a Project",

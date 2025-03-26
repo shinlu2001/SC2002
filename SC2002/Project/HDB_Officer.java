@@ -141,7 +141,7 @@ public class HDB_Officer extends Applicant {
                     allProjects = BTOsystem.getProjects();
                     for (int i = 0; i < allProjects.size(); i++) {
                         Project p = allProjects.get(i);
-                        if (p.isVisibility()) {
+                        if (p.isVisible()) {
                             System.out.println("[" + i + "] " + p.getProjectName());
                         }
                     }
@@ -152,7 +152,7 @@ public class HDB_Officer extends Applicant {
                     } catch (InputMismatchException e) {
                         sc.nextLine();
                     }
-                    if (idx >= 0 && idx < allProjects.size() && allProjects.get(idx).isVisibility()) {
+                    if (idx >= 0 && idx < allProjects.size() && allProjects.get(idx).isVisible()) {
                         System.out.println(allProjects.get(idx));
                     } else {
                         System.out.println("No such project or canceled.");
