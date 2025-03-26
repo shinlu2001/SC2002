@@ -14,7 +14,7 @@ public class HDB_Manager extends User {
 
     private static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
     private List<Project> managerProjects = new ArrayList<>();  // List to store own projects - for manager to view own projects
-    private List<Project> projects; //store the projects list
+    private List<Project> projects; //store the projects list //what is this list for? if want to access all projects in system use BTOsystem.getProjects(), this will return you the entire project list, dont need to make a new one -meyling
     
     // static Scanner scan = new Scanner(System.in);
     public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {

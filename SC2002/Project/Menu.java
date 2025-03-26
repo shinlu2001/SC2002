@@ -46,7 +46,6 @@ public class Menu {
                 "9. Log out and return to main program",
                 "Enter your choice: ");
         this.managerMenu = Arrays.asList(
-           
                 "1. Create a Project",
                 "2. Edit a Project",
                 "3. Delete a Project",
@@ -78,11 +77,12 @@ public class Menu {
                 "Enter your choice: ");
         this.enquiryMenu = Arrays.asList(
                 "Please choose an option:",
-                "1. Make enquiry",
-                "2. Edit enquiry",
-                "3. View all enquiry",
-                "4. Delete enquiry",
-                "5. Return to applicant menu",
+                "1. Make enquiry (select if not regarding a specific project)",
+                "2. Make Project-related enquiry",
+                "3. Edit enquiry",
+                "4. View all enquiry",
+                "5. Delete enquiry",
+                "6. Return to applicant menu",
                 "Enter your choice: ");
     }
 
