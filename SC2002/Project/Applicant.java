@@ -1,8 +1,7 @@
 package SC2002.Project;
 
 import java.util.*;
-// import java.util.ArrayList;
-// import java.util.List;
+
 public class Applicant extends User {
     private static int nextId = -1;
     private int applicantID;
@@ -128,13 +127,30 @@ public class Applicant extends User {
                         System.out.println("Enquiry: ");
                         String content = scanner.nextLine();
                         makeEnquiry(content);
-                        // en.setProject(project);
-                        // enquiries.add(en);
                         System.out.println("Enquiry sent!");
-                        // makeEnquiry(scanner);
                         System.out.println("--------------------------------");
                         break;
                     case 2:
+                        view_listings();
+                        System.out.println("Enter ID of project to enquire about: ");
+                        int projectId = scanner.nextInt();
+                        Project p = BTOsystem.getProjects().get(projectId);
+                        while (p==null) {
+                            System.out.println("Invalid ID, try again: ");
+                            projectId = scanner.nextInt();
+                            p = BTOsystem.getProjects().get(projectId);
+                        } 
+                        scanner.nextLine();
+                        System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
+                        String flatType = scanner.nextLine();
+                        System.out.println("Enquiry: ");
+                        String project_content = scanner.nextLine();
+                        makeEnquiry(p, project_content, flatType);
+                        System.out.println("Enquiry sent!");
+                        System.out.println("--------------------------------");
+                        // scanner.nextLine();
+                        break;
+                    case 3:
                         System.out.println("Edit enquiry");
                         
                         view_all_enquiry_for_user();
@@ -148,12 +164,12 @@ public class Applicant extends User {
                         System.out.println("Enquiry edited!");
                         System.out.println("--------------------------------");
                         break;
-                    case 3:
+                    case 4:
                         System.out.println("All enquiries");
                         System.out.println("--------------------------------");
                         view_all_enquiry_for_user();
                         break;
-                    case 4:
+                    case 5:
                         System.out.println("Delete enquiry");
                         System.out.println("--------------------------------");
                         view_all_enquiry_for_user();
@@ -164,7 +180,7 @@ public class Applicant extends User {
                         System.out.println("Enquiry deleted!");
                         System.out.println("--------------------------------");
                         break;
-                    case 5:
+                    case 6:
                         System.out.println("Returning to applicant menu...");
                         break;
                     default:
@@ -187,31 +203,28 @@ public class Applicant extends User {
     }
 
     public void view_listings() {
-        System.out.println("\n====================================================================================================");
+        System.out.println("\n======================================================================================================");
         System.out.println("                                          ALL PROJECTS");
-        System.out.println("====================================================================================================");
-        System.out.printf("%-20s %-15s %-15s %-15s %-15s %-10s %n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Eligibilty");
-                System.err.println("---------------------------------------------------------------------------------------------------");
+        System.out.println("======================================================================================================");
+        System.out.printf("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Eligibilty");
+        System.err.println("------------------------------------------------------------------------------------------------------");
         List<Project> list = BTOsystem.getProjects();
         // System.out.println("DEBUG: Number of projects retrieved: " + list.size());
         for (Project p : list) {
             p.toggle_visibility(); //default is false, so second toggle will become false again (to test only)
-            if (p.isVisible()){
+            if (p.isVisible()) {
                 // there are details we want to keep hidden from an applicant e.g. manager name, visibility, etc. so cannot just use toString()
                 System.out.print(viewProjectsApplicant(p));
                 
             }
         }
+        System.err.println("------------------------------------------------------------------------------------------------------");
     }
 
     public String viewProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
-        
-        // sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots"));
-        // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
-        
-        // First line with first flat type and all other details
-        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %n",
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n",
+            p.getProjectID(),
             p.getProjectName(),
             p.getneighbourhood(),
             p.getFlatTypes().size() > 0 ? 
@@ -223,8 +236,8 @@ public class Applicant extends User {
 
     // Additional lines for remaining flat types
     for (int i = 1; i < p.getFlatTypes().size(); i++) {
-        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %n",
-            "", "",  // Empty project name and neighbourhood
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n",
+            "", "", "",  // Empty project name and neighbourhood
             p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
             "", "", getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible"));  // Empty other fields
     }
@@ -235,24 +248,26 @@ public class Applicant extends User {
     return sb.toString();
     }
 
-    //to be revised, enruiries tagged to a project
-    public void makeEnquiry(Scanner scanner, Project project) {
-        System.out.println("Enquiry: ");
-        String content = scanner.nextLine();
-        Enquiry en = new Enquiry(this, content);
-        en.setProject(project);
-        enquiries.add(en);
-        System.out.println("Enquiry sent!");
-    }
-
     public void makeEnquiry(String content) {
         Enquiry en = new Enquiry(this, content);
         enquiries.add(en);
+        BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+    }
+    //to be revised, enquiries tagged to a project
+    public void makeEnquiry(Project project, String content, String flatType) {
+        // System.out.println("Enquiry: ");
+        Enquiry en = new Enquiry(this, content);
+        en.setProject(project);
+        en.setflatType(flatType);
+        enquiries.add(en);
+        BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+        // System.out.println("Enquiry sent!");
     }
 
     public void view_enquiry(Enquiry en) {
         System.out.println("Enquiry: "+en.getEnquiry());
-        System.out.println("Project: "+en.getProject());
+        System.out.println("Project: "+en.getProject().getProjectName());
+        System.out.println("Flat Type: "+en.getflatType());
         if (en.getStaff()==null) {
             System.out.println("No reply to your enquiry yet.");
         } else {
@@ -261,6 +276,7 @@ public class Applicant extends User {
         }
     }
     public void view_all_enquiry_for_user() {
+        // System.out.println(BTOsystem.getEnquiries().get(0).getCreatedByUser());
         for (Enquiry en : enquiries) {
             System.out.println("#"+enquiries.indexOf(en));
             view_enquiry(en);
