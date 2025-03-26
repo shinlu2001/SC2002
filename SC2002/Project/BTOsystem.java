@@ -9,6 +9,14 @@ public class BTOsystem {
     private static List<HDB_Officer> officers = new ArrayList<>();
     private static List<HDB_Manager> managers = new ArrayList<>();
     protected static List<Project> projects = new ArrayList<>();
+    protected static List<Enquiry> enquiries = new ArrayList<>();
+    public static List<Project> getProjects() {
+        return projects;
+    }
+    public static List<Enquiry> getEnquiries() {
+        return enquiries;
+    }
+    // list of applications submitted : submitted_app
     static Menu menu = new Menu(); 
         public static void main(String args[]) {
             mainMenu();
@@ -101,9 +109,7 @@ public class BTOsystem {
         }
         return null;
     }
-    public static List<Project> getProjects() {
-        return projects;
-    }
+    
     public static void register_user(Scanner sc) {
         System.out.println("Register new user");
         sc.nextLine();
