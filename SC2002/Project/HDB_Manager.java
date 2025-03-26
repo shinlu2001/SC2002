@@ -1,4 +1,4 @@
-package SC2002.Project;
+// package SC2002.Project;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -23,6 +23,10 @@ public class HDB_Manager extends User {
         // this.projects = projects;  // Initialize the projects list
         manager_id = ++hdb_man_id;
     }
+    public void to_string() {
+        super.to_string();
+        System.out.println("ManagerID: " + manager_id);
+    }
     public List<Project> getManagerProjects() {
         return managerProjects;
     }
@@ -39,21 +43,7 @@ public class HDB_Manager extends User {
         while (loop) {
         {
             try {
-                System.out.println("\n--- Manager Menu ---");
-                System.out.println("1. Create a Project");
-                System.out.println("2. Edit a Project");
-                System.out.println("3. Delete a Project");
-                System.out.println("4. View All Projects");
-                System.out.println("5. View My Projects");
-                System.out.println("6. View Officer Registrations");
-                System.out.println("7. Handle Officer Registration");
-                System.out.println("8. Handle BTO Applications");
-                System.out.println("9. Handle Withdrawal Requests");
-                System.out.println("10. Generate Applicant Report");
-                System.out.println("11. View All Enquiries");
-                System.out.println("12. Handle Project Enquiries");
-                System.out.println("13. Log out");
-                System.out.println("Enter your choice: ");
+                menu.printManagerMenu();;
 
                 choice = sc.nextInt();
                 sc.nextLine(); // Consume leftover newline
@@ -177,8 +167,13 @@ public class HDB_Manager extends User {
                         case 12:     // handle project enquires (view and reply to enquiries for your projects)
                             System.out.println("---------------------------------------------------");
                             break;
-                        
-                        case 13:
+                        case 13:     //view manager account details
+                            System.out.println("---------------------------------------------------");
+                            to_string();
+                            System.out.println("---------------------------------------------------");
+                            sc.nextLine();
+                            break;
+                        case 14:
                             System.out.println("---------------------------------------------------");
                             System.out.println("Logged out. Returning to main menu...");
                             System.out.println("---------------------------------------------------");

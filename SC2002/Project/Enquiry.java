@@ -1,5 +1,4 @@
-package SC2002.Project;
-
+// package SC2002.Project;
 class Enquiry {
     private String content;
     private String response="";

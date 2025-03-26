@@ -1,8 +1,6 @@
-package SC2002.Project;
+// package SC2002.Project;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class HDB_Officer extends Applicant {
     private String type="Officer";

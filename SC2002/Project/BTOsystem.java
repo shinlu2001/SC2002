@@ -1,14 +1,6 @@
-package SC2002.Project;
-
-
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+// package SC2002.Project;
+import java.io.*;
+import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -16,7 +8,7 @@ public class BTOsystem {
     private static List<Applicant> applicants = new ArrayList<>();
     private static List<HDB_Officer> officers = new ArrayList<>();
     private static List<HDB_Manager> managers = new ArrayList<>();
-    private static List<Project> projects = new ArrayList<>();
+    protected static List<Project> projects = new ArrayList<>();
     static Menu menu = new Menu();
         
         public static void main(String args[]) {
@@ -30,12 +22,6 @@ public class BTOsystem {
             Scanner scanner = new Scanner(System.in);
             do {
                 try {
-                    /* System.out.println("Please choose an option:");
-                    System.out.println("1. Log in");
-                    System.out.println("2. Register user");
-                    System.out.println("3. Fetch data from excel sheets");
-                    System.out.println("4. Exit program");
-                    System.out.print("Enter your choice: "); */
                     menu.printWelcomeMenu();
                 choice = scanner.nextInt();
                 System.out.println("--------------------------------");
@@ -116,7 +102,9 @@ public class BTOsystem {
         }
         return null;
     }
-
+    public static List<Project> getProjects() {
+        return projects;
+    }
     public static void register_user(Scanner sc) {
         System.out.println("Register new user");
         sc.nextLine();
@@ -171,11 +159,6 @@ public class BTOsystem {
         
         do {
             try {
-                /* System.out.println("Pick an option:");
-                System.out.println("1. Applicant");
-                System.out.println("2. HDB Officer");
-                System.out.println("3. HDB Manager");
-                System.out.print("Enter your choice: "); */
                 menu.printSelectRole();
                 int choice = sc.nextInt();
                 System.out.println("--------------------------------");
@@ -237,12 +220,11 @@ public class BTOsystem {
                 LocalDate formattedDate2 = LocalDate.parse(dateStr2, inputFormatter);
 
                 // Now you can use formattedDate1 and formattedDate2
-                Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), formattedDate1, formattedDate2, false, Integer.parseInt(row[11]));
+                Project a = new Project(row[0], row[1], Integer.parseInt(row[3]), Integer.parseInt(row[6]), formattedDate1, formattedDate2, true, Integer.parseInt(row[11]));
                 // System.out.println(row[10]);
                 for (HDB_Manager man: managers) {
                     // System.out.println(man.get_firstname());
                     if (man.get_firstname().equals(row[10])) {
-                        // System.out.println(a);
                         a.setManager(man);
 
                         // Add to manager's project list - to view the list of projects own by current manager
@@ -265,9 +247,7 @@ public class BTOsystem {
                 }
 
                 projects.add(a);
-                System.out.println(a);   //prints tostring in project
-                // System.out.println(a.toString());
-                // System.out.println(a.getManager().get_firstname());
+                System.out.println(projects);
             }
         }
             
