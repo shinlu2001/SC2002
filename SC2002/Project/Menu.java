@@ -9,6 +9,7 @@ public class Menu {
     private List<String> loginError;
     private List<String> role;
     private List<String> applicantMenu;
+    private List<String> officerMenu;
     private List<String> enquiryMenu;
 
     // Constructor that uses a default welcome menu
@@ -42,6 +43,20 @@ public class Menu {
                 "7. Change account password",
                 "8. Apply to become an officer",
                 "9. Log out and return to main program",
+                "Enter your choice: ");
+        this.officerMenu = Arrays.asList(
+                "Please choose an option:",
+                "1. Apply for a project",
+                "2. View active application",
+                "3. View all listings",
+                "4. Withdraw application",
+                "5. Manage enquiries",
+                "6. View account details",
+                "7. Change account password",
+                "8. Register to be a HDB officer of a project",
+                "9. Check status of registration to be an officer for a project",
+                "10. View project details",
+                "11. Log out and return to main program",
                 "Enter your choice: ");
         this.enquiryMenu = Arrays.asList(
                 "Please choose an option:",
@@ -89,6 +104,11 @@ public class Menu {
 
     public void printEnquiryMenu() {
         for (String option : enquiryMenu) {
+            System.out.println(option);
+        }
+    }
+    public void printOfficerMenu(){
+        for (String option : officerMenu){
             System.out.println(option);
         }
     }

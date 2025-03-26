@@ -18,6 +18,9 @@ public class BTOsystem {
     private static List<HDB_Manager> managers = new ArrayList<>();
     private static List<Project> projects = new ArrayList<>();
     static Menu menu = new Menu();
+    public static List<Project> getProjects() {
+        return projects;
+    }
         
         public static void main(String args[]) {
             mainMenu();

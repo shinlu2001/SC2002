@@ -69,7 +69,7 @@ public abstract class User {
 class Applicant extends User {
     private static int nextId = -1;
     private int applicantID;
-    private BTOapplication application=null;
+    protected BTOapplication application=null;
     private String type="APPLICANT";
     private List<Enquiry> enquiries = new ArrayList<>();
 
