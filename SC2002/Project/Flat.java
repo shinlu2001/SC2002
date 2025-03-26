@@ -6,11 +6,13 @@ package SC2002.Project;
 public class Flat {
     private int flatID;
     private String flatType;   // "2-Room" or "3-Room"
+    private double price;
     private boolean isBooked;
 
     public Flat(int flatID, String flatType, double price) {
         this.flatID = flatID;
         this.flatType = flatType;
+        this.price = price;
         this.isBooked = false;
     }
 
@@ -22,6 +24,9 @@ public class Flat {
         return flatType;
     }
 
+    public double getPrice() {
+        return price;
+    }
 
 
     public boolean isBooked() {
