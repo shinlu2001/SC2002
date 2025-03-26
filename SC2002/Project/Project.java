@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Project {
+    private static int nextId = -1;
     private String ProjectName;
     private String neighbourhood;
     private List<String> flatTypes;
     private List<Integer> totalUnits;
     private List<Integer> availableUnits;
+    private int projectId;
+
     // // Total units when project starts
     // private int total2Room; 
     // private int total3Room;
@@ -40,7 +43,7 @@ public class Project {
     }
 
     // public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
-        public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits, List<Integer> availableUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
+    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits, List<Integer> availableUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
         this.ProjectName = projectName;
         this.neighbourhood = neighbourhood;
         // this.total2Room = total2Room;
@@ -58,7 +61,7 @@ public class Project {
         assignedOfficers = new ArrayList<>();  // Initialize the list to hold assignedOfficers
         maxOfficerSlots = 10;
         this.availableOfficerSlots = availableOfficerSlots;
-
+        projectId = ++nextId; // auto-increment ID
     }
 
     // public Project(String string, String string2, String string3, int i, String string4, int j, double d,
@@ -66,7 +69,9 @@ public class Project {
     //     //TODO Auto-generated constructor stub
     // }
     // Getter and Setter methods
-    
+    public int getProjectID() {
+        return projectId;
+    }
     public String getProjectName() {
         return ProjectName;
     }
