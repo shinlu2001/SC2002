@@ -5,21 +5,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Project {
+    private static int nextId = -1;
     private String ProjectName;
     private String neighbourhood;
-    // Total units when project starts
-    private int total2Room; 
-    private int total3Room;
-    // Remaining units
-    private int available2Room;
-    private int available3Room;
+    private List<String> flatTypes;
+    private List<Integer> totalUnits;
+    private List<Integer> availableUnits;
+    private int projectId;
+
+    // // Total units when project starts
+    // private int total2Room; 
+    // private int total3Room;
+    // // Remaining units
+    // private int available2Room;
+    // private int available3Room;
     private LocalDate openDate;
     private LocalDate closeDate;
     private HDB_Manager manager;
     private List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
     private static int maxOfficerSlots;
     private int availableOfficerSlots;
-    private boolean visibility=true;
+    private boolean visibility;
     // private String flatType1, flatType2;
 
     public void toggle_visibility() {
@@ -36,14 +42,17 @@ public class Project {
         this.manager = man;
     }
 
-    public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
-
-        this.ProjectName = ProjectName;
+    // public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
+    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits, List<Integer> availableUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
+        this.ProjectName = projectName;
         this.neighbourhood = neighbourhood;
-        this.total2Room = total2Room;
-        this.total3Room = total3Room;
-        available2Room = total2Room;
-        available3Room = total3Room;
+        // this.total2Room = total2Room;
+        // this.total3Room = total3Room;
+        // available2Room = total2Room;
+        // available3Room = total3Room;`
+        this.flatTypes = new ArrayList<>(flatTypes);
+        this.totalUnits = new ArrayList<>(totalUnits);
+        this.availableUnits = new ArrayList<>(availableUnits);
         this.openDate = openDate;
         this.closeDate = closeDate;
         this.visibility = visibility;
@@ -52,7 +61,7 @@ public class Project {
         assignedOfficers = new ArrayList<>();  // Initialize the list to hold assignedOfficers
         maxOfficerSlots = 10;
         this.availableOfficerSlots = availableOfficerSlots;
-
+        projectId = ++nextId; // auto-increment ID
     }
 
     public Project(String string, String string2, String string3, int i, String string4, int j, double d,
@@ -64,6 +73,9 @@ public class Project {
     //     //TODO Auto-generated constructor stub
     // }
     // Getter and Setter methods
+    public int getProjectID() {
+        return projectId;
+    }
     public String getProjectName() {
         return ProjectName;
     }
@@ -80,59 +92,125 @@ public class Project {
         this.neighbourhood = neighbourhood;
     }
 
-    public int getTotal2Room()
-    {
-        return total2Room;
-    }
-
-    public int getTotal3Room()
-    {
-        return total3Room;
-    }
-    // public void getTotal2Room(int total2Room)
-    // {
-    //     this.total2Room = total2Room;
-    // }
-
-    public int getavailable2Room() {
-        return available2Room;
-    }
-
-    public int getavailable3Room() {
-        return available3Room;
-    }
-
-    public void setTotal2Room(int total2Room) {
-        // Calculate the difference and update available rooms
-        int difference = total2Room - this.total2Room;
-        this.total2Room = total2Room;
-        this.available2Room += difference;
-        // System.out.println("Updated number of 2-Room units is " + this.total2Room + ".");
-    }
-
-    public void setTotal3Room(int total3Room) {
-        // Calculate the difference and update available rooms
-        int difference = total3Room - this.total3Room;
-        this.total3Room = total3Room;
-        this.available3Room += difference;
-        // System.out.println("Updated number of 3-Room units is " + this.total3Room + ".");
-    }
-
-    public void setavailable2Room(int available2Room) {
-        if (available2Room < 0) {
-            System.out.println("Error: Invalid input. Number of 2-Room units cannot be negative.");
-            return;
-        }
-        this.available2Room = available2Room;
+    public List<String> getFlatTypes() {
+        return new ArrayList<>(flatTypes);
     }
     
-    public void setavailable3Room(int available3Room) {
-        if (available3Room < 0) {
-            System.out.println("Error: Invalid input. Number of 3-Room units cannot be negative.");
-            return;
-        }
-        this.available3Room = available3Room;
+    public List<Integer> getTotalUnits() {
+        return new ArrayList<>(totalUnits);
     }
+    
+    public List<Integer> getAvailableUnits() {
+        return new ArrayList<>(availableUnits);
+    }
+
+    public void addFlatType(String flatType, int units) {
+        flatTypes.add(flatType);
+        totalUnits.add(units);
+        availableUnits.add(units);
+    }
+    public void removeFlatType(String flatType, int units) {
+        int index = flatTypes.indexOf(flatType);
+        if (index != -1 && totalUnits.get(index) == units) {
+            flatTypes.remove(index);
+            totalUnits.remove(index);
+            availableUnits.remove(index);
+        }
+    }
+
+    public void setFlatTypes(List<String> flatTypes) {
+        this.flatTypes = new ArrayList<>(flatTypes);
+    }
+    
+    public void setTotalUnits(List<Integer> totalUnits) {
+        this.totalUnits = new ArrayList<>(totalUnits);
+    }
+    
+    public void setAvailableUnits(List<Integer> availableUnits) {
+        this.availableUnits = new ArrayList<>(availableUnits);
+    }
+    
+    public void updateFlatTypeUnits(String flatType, int newTotalUnits) {
+        int index = flatTypes.indexOf(flatType);
+        if (index >= 0) {
+            // Calculate the difference between new and old total units
+            int diff = newTotalUnits - totalUnits.get(index);
+            
+            // Update total units
+            totalUnits.set(index, newTotalUnits);
+            
+            // Update available units by the same difference
+            int newAvailable = availableUnits.get(index) + diff;
+            if (newAvailable < 0) newAvailable = 0;
+            if (newAvailable > newTotalUnits) newAvailable = newTotalUnits;
+            
+            availableUnits.set(index, newAvailable);
+        } else {
+            System.out.println("Error: Flat type not found.");
+        }
+    }
+    
+    public void updateAvailableUnits(String flatType, int newAvailableUnits) {
+        int index = flatTypes.indexOf(flatType);
+        if (index >= 0) {
+            if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
+                availableUnits.set(index, newAvailableUnits);
+            } else {
+                System.out.println("Error: Available units must be between 0 and total units.");
+            }
+        } else {
+            System.out.println("Error: Flat type not found.");
+        }
+    }
+    // public int getTotal2Room()
+    // {
+    //     return total2Room;
+    // }
+
+    // public int getTotal3Room()
+    // {
+    //     return total3Room;
+    // }
+
+    // public int getavailable2Room() {
+    //     return available2Room;
+    // }
+
+    // public int getavailable3Room() {
+    //     return available3Room;
+    // }
+
+    // public void setTotal2Room(int total2Room) {
+    //     // Calculate the difference and update available rooms
+    //     int difference = total2Room - this.total2Room;
+    //     this.total2Room = total2Room;
+    //     this.available2Room += difference;
+    //     // System.out.println("Updated number of 2-Room units is " + this.total2Room + ".");
+    // }
+
+    // public void setTotal3Room(int total3Room) {
+    //     // Calculate the difference and update available rooms
+    //     int difference = total3Room - this.total3Room;
+    //     this.total3Room = total3Room;
+    //     this.available3Room += difference;
+    //     // System.out.println("Updated number of 3-Room units is " + this.total3Room + ".");
+    // }
+
+    // public void setavailable2Room(int available2Room) {
+    //     if (available2Room < 0) {
+    //         System.out.println("Error: Invalid input. Number of 2-Room units cannot be negative.");
+    //         return;
+    //     }
+    //     this.available2Room = available2Room;
+    // }
+    
+    // public void setavailable3Room(int available3Room) {
+    //     if (available3Room < 0) {
+    //         System.out.println("Error: Invalid input. Number of 3-Room units cannot be negative.");
+    //         return;
+    //     }
+    //     this.available3Room = available3Room;
+    // }
 
     public LocalDate getOpenDate() {
         return openDate;
@@ -150,7 +228,7 @@ public class Project {
         this.closeDate = closeDate;
     }
 
-    public boolean isVisibility() {
+    public boolean isVisible() {
         return visibility;
     }
 
@@ -196,15 +274,65 @@ public class Project {
         return assignedOfficers;
     }
 
+
+//     @Override
+// public String toString() {
+//     String managerName = (manager != null) ? manager.get_firstname() + " " + manager.get_lastname() : "No Manager Assigned";
+//     // System.out.println(manager);
+//     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + availableOfficerSlots + "}";
+// }
+
     // @Override
     // public String toString() {
-    //     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + manager.get_firstname() + " " +  manager.get_lastname() + ", " + (10-assignedOfficers.size()) + "}";
+    //     StringBuilder sb = new StringBuilder();
+    //     sb.append("{").append(ProjectName).append(", ").append(neighbourhood).append(", [");
+        
+    //     for (int i = 0; i < flatTypes.size(); i++) {
+    //         if (i > 0) sb.append(", ");
+    //         sb.append(flatTypes.get(i)).append(": ")
+    //         .append(availableUnits.get(i)).append("/")
+    //         .append(totalUnits.get(i));
+    //     }
+        
+    //     sb.append("], ").append(openDate).append(", ")
+    //     .append(closeDate).append(", ").append(visibility)
+    //     .append(", ").append(manager.get_firstname()).append(", ")
+    //     .append(availableOfficerSlots).append("}");
+        
+    //     return sb.toString();
     // }
-    @Override
-public String toString() {
-    String managerName = (manager != null) ? manager.get_firstname() + " " + manager.get_lastname() : "No Manager Assigned";
-    // System.out.println(manager);
-    return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + availableOfficerSlots + "}";
-}
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        // sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots"));
+        // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
+        
+        // First line with first flat type and all other details
+        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15d%n",
+        ProjectName,
+        neighbourhood,
+        flatTypes.size() > 0 ? 
+            flatTypes.get(0) + ": " + (totalUnits.get(0) - availableUnits.get(0)) + "/" + totalUnits.get(0) : "",
+        openDate,
+        closeDate,
+        visibility,
+        manager.get_firstname(),
+        availableOfficerSlots));
+
+    // Additional lines for remaining flat types
+    for (int i = 1; i < flatTypes.size(); i++) {
+        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n",
+            "", "",  // Empty project name and neighbourhood
+            flatTypes.get(i) + ": " + (totalUnits.get(i) - availableUnits.get(i)) + "/" + totalUnits.get(i),
+            "", "", "", "", ""));  // Empty other fields
+    }
+
+    // Add blank line between projects
+    sb.append("\n");
+
+    return sb.toString();
+    }
+
 }
