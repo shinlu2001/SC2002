@@ -928,7 +928,7 @@ if (!managerProjects.isEmpty())
         // Check if the flat type exists in the project
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
-            application.setApplicationStatus("Rejected");
+            application.setStatus("Rejected");
             return;
         }
         
@@ -937,13 +937,13 @@ if (!managerProjects.isEmpty())
         
         // Check if there are available units for the requested flat type
         if (project.getAvailableUnits().get(index) <= 0) {
-            application.setApplicationStatus("Rejected");
+            application.setStatus("Rejected");
             System.out.println("No available " + flatType + " units. Application rejected.");
             return;
         }
         
         // Application Approved, decrement the available units
-        application.setApplicationStatus("Approved");
+        application.setStatus("Approved");
         
         // Update available units using the Project class method
         int currentAvailable = project.getAvailableUnits().get(index);
@@ -961,7 +961,7 @@ if (!managerProjects.isEmpty())
             return;
         }
 
-        if (application.getApplicationStatus().equals("Withdrawn")) {
+        if (application.getStatus().equals("Withdrawn")) {
             System.out.println("Application has already been withdrawn.");
             return;
         }
@@ -970,7 +970,7 @@ if (!managerProjects.isEmpty())
             String input = sc.next().toLowerCase();
             if (input.equals("yes") || input.equals("no")) {
                 if (input.equals("yes")) {
-                    application.setApplicationStatus("Withdrawn");
+                    application.setStatus("Withdrawn");
                     System.out.println("Withdrawal request approved.");   
                 }else{
                     System.out.println("Withdrawal request rejected.");

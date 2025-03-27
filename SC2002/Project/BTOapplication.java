@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BTOapplication {
     //---------------------add--------------------------
-    private String applicationStatus;
+    // private String applicationStatus;
     private boolean withdrawalRequested;
     private List<BTOapplication> approvedApplications = new ArrayList<>();
     //--------------------------------------------------
@@ -36,14 +36,14 @@ public class BTOapplication {
         this.status = "Pending"; // default status
     }
     //---------------------add--------------------------
-    public void setApplicationStatus(String applicationStatus)
-    {
-        this.applicationStatus = applicationStatus;
-    }
+    // public void setApplicationStatus(String applicationStatus)
+    // {
+    //     this.applicationStatus = applicationStatus;
+    // }
 
-    public String getApplicationStatus(){
-        return this.applicationStatus;
-    }
+    // public String getApplicationStatus(){
+    //     return this.applicationStatus;
+    // }
 
     public boolean getwithdrawalRequested()
     {
