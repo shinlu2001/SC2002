@@ -12,6 +12,7 @@ public class Menu {
     private List<String> officerMenu;
     private List<String> enquiryMenu;
     private List<String> managerMenu;
+    private List<String> reportMenu;
 
     // Constructor that uses a default welcome menu
     public Menu() {
@@ -84,16 +85,25 @@ public class Menu {
                 "5. Delete enquiry",
                 "6. Return to applicant menu",
                 "Enter your choice: ");
+        this.reportMenu = Arrays.asList(
+                "\n---- Generate Report ----",
+                "1. View All Applicants",
+                "2. Filter by Marital Status",
+                "3. Filter by Flat Type",
+                "4. Filter by Both Marital Status & Flat Type",
+                "Enter your choice: ");
     }
 
     // Optional: Constructor to allow passing a custom welcome menu
-    public Menu(List<String> welcomeMenu, List<String> loginError, List<String> role, List<String> applicantMenu, List<String> enquiryMenu, List<String> managerMenu) {
+    public Menu(List<String> welcomeMenu, List<String> loginError, List<String> role, List<String> applicantMenu,
+            List<String> enquiryMenu, List<String> managerMenu,List<String> reportMenu) {
         this.welcomeMenu = welcomeMenu;
         this.loginError = loginError;
         this.role = role;
         this.applicantMenu = applicantMenu;
-        this.enquiryMenu= enquiryMenu;
-        this.managerMenu= managerMenu;
+        this.enquiryMenu = enquiryMenu;
+        this.managerMenu = managerMenu;
+        this.reportMenu = reportMenu;
 
     }
 
@@ -114,16 +124,23 @@ public class Menu {
     public void printSelectRole() {
         printMenu(role);
     }
+
     public void printApplicantMenu() {
         printMenu(applicantMenu);
     }
+
     public void printManagerMenu() {
         printMenu(managerMenu);
     }
+
     public void printEnquiryMenu() {
         printMenu(enquiryMenu);
     }
-    public void printOfficerMenu(){
+
+    public void printOfficerMenu() {
         printMenu(officerMenu);
+    }
+    public void printReportMenu() {
+        printMenu(reportMenu);
     }
 }

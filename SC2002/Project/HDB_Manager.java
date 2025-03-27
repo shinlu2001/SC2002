@@ -988,12 +988,13 @@ if (!managerProjects.isEmpty())
             System.out.println("No applications available.");
             return;
         }
-        System.out.println("\n---- Generate Report ----");
+/*         System.out.println("\n---- Generate Report ----");
         System.out.println("1. View All Applicants");
         System.out.println("2. Filter by Marital Status");
         System.out.println("3. Filter by Flat Type");
         System.out.println("4. Filter by Both Marital Status & Flat Type");
-        System.out.println("Enter your choice: ");
+        System.out.println("Enter your choice: "); */
+        menu.printReportMenu();
         int choice = sc.nextInt();
         sc.nextLine(); // Consume newline
 
