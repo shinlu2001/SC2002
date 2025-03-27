@@ -6,20 +6,21 @@ import java.time.format.DateTimeFormatter;
 
 public class BTOsystem {
     private static List<Applicant> applicants = new ArrayList<>();
-    private static List<HDB_Officer> officers = new ArrayList<>();
-    private static List<HDB_Manager> managers = new ArrayList<>();
-    protected static List<Project> projects = new ArrayList<>();
-    protected static List<Enquiry> enquiries = new ArrayList<>();
-    protected static List<Flat> flats = new ArrayList<>();
-    public static List<Project> getProjects() {
-        return projects;
-    }
-    public static List<Enquiry> getEnquiries() {
-        return enquiries;
-    }
-    public static List<Flat> getFlats() {
-        return flats;
-    }
+    protected static List<HDB_Officer> officers = new ArrayList<>();    //protected?
+    protected static List<HDB_Manager> managers = new ArrayList<>();      //protected?
+    protected static List<Project> projects = new ArrayList<>();    //protected?
+    protected static List<Enquiry> enquiries = new ArrayList<>();   //protected?
+    protected static List<Flat> flats = new ArrayList<>();          //protected?
+
+    // public static List<Project> getProjects() {
+    //     return projects;
+    // }
+    // public static List<Enquiry> getEnquiries() {
+    //     return enquiries;
+    // }
+    // public static List<Flat> getFlats() {
+    //     return flats;
+    // }
     // list of applications submitted : submitted_app
     static Menu menu = new Menu(); 
         public static void main(String args[]) {
@@ -81,6 +82,7 @@ public class BTOsystem {
             String nric = sc.nextLine();
             User user = search_user(applicants, nric);
             if (user==null) {
+                // user = search_user(officers, nric);
                 user = search_user(officers, nric);
             }
             if (user==null) {
@@ -232,18 +234,18 @@ public class BTOsystem {
                 // Create lists for flat types and units
                 List<String> flatTypes = new ArrayList<>();
                 List<Integer> totalUnits = new ArrayList<>();
-                List<Integer> availableUnits = new ArrayList<>();
+                // List<Integer> availableUnits = new ArrayList<>();
 
                 // Add first flat type (2-Room)
                 flatTypes.add(row[2]);
                 totalUnits.add(Integer.parseInt(row[3]));
-                availableUnits.add(Integer.parseInt(row[3]));
+                // availableUnits.add(Integer.parseInt(row[3]));
 
                 // Add second flat type (3-Room) if exists
                 if (row.length > 5 && !row[5].isEmpty()) {
                     flatTypes.add(row[5]);
                     totalUnits.add(Integer.parseInt(row[6]));
-                    availableUnits.add(Integer.parseInt(row[6]));
+                    // availableUnits.add(Integer.parseInt(row[6]));
                 }
 
                 // Create project with the new constructor
@@ -252,7 +254,7 @@ public class BTOsystem {
                     row[1],              // neighborhood
                     flatTypes,           // list of flat types
                     totalUnits,          // list of total units
-                    availableUnits,      // list of available units
+                    // availableUnits,      // list of available units
                     formattedDate1,      // open date
                     formattedDate2,      // close date
                     false,               // visibility
@@ -263,22 +265,65 @@ public class BTOsystem {
                 for (HDB_Manager man: managers) {
                     if (man.get_firstname().equals(row[10])) {
                         a.setManager(man);
-                        man.getManagerProjects().add(a);
-                        HDB_Manager.getAllProjects().add(a);
+                        man.managerProjects.add(a);
+                        // HDB_Manager.getAllProjects().add(a);
+                        HDB_Manager.allProjects.add(a);
                         break;
                     }
                 }
 
                 // Assign officers
-                String[] project_officer = row[12].split(",");
-                for (int i=0;i<project_officer.length;i++) {
-                    for (HDB_Officer off: officers) {
-                        if (off.get_firstname().equals(project_officer[i])) {
-                            a.assignOfficer(off);
+                // String[] project_officer = row[12].split(",");
+                // System.out.println("I DONT");
+                // for (int i=0;i<project_officer.length;i++) {
+                //     System.out.println("WANNA FUCK");
+                //     for (HDB_Officer off: officers) {
+                //         System.out.println("WITH YOU");
+                //         System.out.println("BRUH" + off.get_firstname() + project_officer[i]);
+                //         if (off.get_firstname().equals(project_officer[i])) {
+                //             // a.assignOfficer(off);
+                //             System.out.println("HEYYYYYY");
+                //             off.registerForProject(a);
+                //             a.addOfficer(off);
+                //             break;
+                //         }
+                //     }
+                // }
+                
+                // HARD CODED ONLY WORKS FOR Daniel,Emily -> Name1,Name2
+
+                // System.out.println("Raw data: " + row[12] + row[13] + row[14]);
+                System.out.println("Raw data: " + row[12] + row[13]);
+
+                // First check if we need to reconstruct a quoted field
+                String officerField;
+                if (row.length > 13 && row[12].startsWith("\"") && !row[12].endsWith("\"")) {
+                    // Reconstruct quoted field that was split across columns
+                    officerField = row[12] + "," + row[13];
+                } else {
+                    officerField = row[12];
+                }
+
+                // Now properly parse the officer names
+                String[] project_officer = officerField.replace("\"", "").split(",");
+                System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
+
+                for (String officerName : project_officer) {
+                    officerName = officerName.trim();
+                    System.out.println("Processing officer: " + officerName);
+                    for (HDB_Officer off : officers) {
+                        if (off.get_firstname().equalsIgnoreCase(officerName)) {
+
+                            // off.registerForProject(a);
+                            HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
+                            a.addOfficer(off);
+                            // a.handleOfficerRegistration();
+                            System.out.println("Assigned officer: " + off.get_firstname());
                             break;
                         }
                     }
                 }
+
                 // create flat objects for first type
                 for (int j=0;j<a.getAvailableUnits().get(0);j++){
                     Flat f = new Flat(a, a.getFlatTypes().get(0), Double.parseDouble(row[4]));
@@ -292,6 +337,7 @@ public class BTOsystem {
                 }
             
                 projects.add(a);
+                System.out.println(HDB_Manager.allProjects);
             }
         }
     }

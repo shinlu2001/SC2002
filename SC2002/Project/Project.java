@@ -22,9 +22,10 @@ public class Project {
     private LocalDate openDate;
     private LocalDate closeDate;
     private HDB_Manager manager;
-    private List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
-    private static int maxOfficerSlots;
-    private int availableOfficerSlots;
+    protected List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
+    private static int maxOfficerSlots = 10;
+    private int totalOfficerSlots;
+    // private int availableOfficerSlots;
     private boolean visibility;
     // private String flatType1, flatType2;
 
@@ -42,8 +43,8 @@ public class Project {
         this.manager = man;
     }
 
-    // public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
-    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits, List<Integer> availableUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int availableOfficerSlots) {
+    // public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int totalOfficerSlots) {
+    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int totalOfficerSlots) {
         this.ProjectName = projectName;
         this.neighbourhood = neighbourhood;
         // this.total2Room = total2Room;
@@ -52,14 +53,14 @@ public class Project {
         // available3Room = total3Room;`
         this.flatTypes = new ArrayList<>(flatTypes);
         this.totalUnits = new ArrayList<>(totalUnits);
-        this.availableUnits = new ArrayList<>(availableUnits);
+        this.availableUnits = new ArrayList<>(totalUnits);
         this.openDate = openDate;
         this.closeDate = closeDate;
         this.visibility = visibility;
         
         assignedOfficers = new ArrayList<>();  // Initialize the list to hold assignedOfficers
-        maxOfficerSlots = 10;
-        this.availableOfficerSlots = availableOfficerSlots;
+        this.totalOfficerSlots = totalOfficerSlots;
+        // this.availableOfficerSlots = totalOfficerSlots;
         projectId = ++nextId; // auto-increment ID
     }
 
@@ -67,10 +68,7 @@ public class Project {
             LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
         //TODO Auto-generated constructor stub
     }
-    // public Project(String string, String string2, String string3, int i, String string4, int j, double d,
-    //         LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
-    //     //TODO Auto-generated constructor stub
-    // }
+    
     // Getter and Setter methods
     public int getProjectID() {
         return projectId;
@@ -102,6 +100,7 @@ public class Project {
     public List<Integer> getAvailableUnits() {
         return new ArrayList<>(availableUnits);
     }
+
 
     public void addFlatType(String flatType, int units) {
         flatTypes.add(flatType);
@@ -148,7 +147,7 @@ public class Project {
             System.out.println("Error: Flat type not found.");
         }
     }
-    
+
     public void updateAvailableUnits(String flatType, int newAvailableUnits) {
         int index = flatTypes.indexOf(flatType);
         if (index >= 0) {
@@ -236,13 +235,24 @@ public class Project {
     }
 
     // Add max officer to the project
+    // public boolean addOfficer(HDB_Officer officer) {
+    //     if (assignedOfficers.size() < totalOfficerSlots) {
+    //         assignedOfficers.add(officer);
+    //         // availableOfficerSlots--;
+    //         return true;
+    //     }
+    //     return false;  // Return false if there are already 10 assignedOfficers
+    // }
+
     public boolean addOfficer(HDB_Officer officer) {
-        if (assignedOfficers.size() < availableOfficerSlots) {
+        if (assignedOfficers.size() < totalOfficerSlots) {
             assignedOfficers.add(officer);
-            availableOfficerSlots--;
+            // availableOfficerSlots = totalOfficerSlots - assignedOfficers.size();
+            officer.officerProject = this;
+            officer.registrationStatus = "Approved";
             return true;
         }
-        return false;  // Return false if there are already 10 assignedOfficers
+        return false;
     }
 
     // Getter method for manager
@@ -254,31 +264,37 @@ public class Project {
         return maxOfficerSlots;
     }
 
-    public void setmaxOfficerSlots(int maxOfficerSlots) {
-        Project.maxOfficerSlots = maxOfficerSlots;
+    // public void setmaxOfficerSlots(int maxOfficerSlots) {
+    //     Project.maxOfficerSlots = maxOfficerSlots;
+    // }
+    
+    public int getTotalOfficerSlots() {
+        return totalOfficerSlots;
+    }
+
+    public void setTotalOfficerSlots(int totalOfficerSlots) {
+        this.totalOfficerSlots = totalOfficerSlots;
+        // System.out.println("Updated number of available HDB Officer Slots is " + this.totalOfficerSlots + ".");
     }
     
+    // public int getAvailableOfficerSlots(){
+    //     return availableOfficerSlots;
+    // }
+    // public void setAvailableOfficerSlots(int availableOfficerSlots){
+    //     this.availableOfficerSlots = availableOfficerSlots;
+    // }
 
-    public int getAvailableOfficerSlots() {
-        return availableOfficerSlots;
-    }
-
-    public void setAvailableOfficerSlots(int availableOfficerSlots) {
-        this.availableOfficerSlots = availableOfficerSlots;
-        // System.out.println("Updated number of available HDB Officer Slots is " + this.availableOfficerSlots + ".");
-    }
-    
     // Get the list of assigned officers
-    public List<HDB_Officer> getAssignedOfficerList() {
-        return assignedOfficers;
-    }
+    // public List<HDB_Officer> getAssignedOfficerList() {
+    //     return assignedOfficers;
+    // }
 
 
 //     @Override
 // public String toString() {
 //     String managerName = (manager != null) ? manager.get_firstname() + " " + manager.get_lastname() : "No Manager Assigned";
 //     // System.out.println(manager);
-//     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + availableOfficerSlots + "}";
+//     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + totalOfficerSlots + "}";
 // }
 
     // @Override
@@ -296,7 +312,7 @@ public class Project {
     //     sb.append("], ").append(openDate).append(", ")
     //     .append(closeDate).append(", ").append(visibility)
     //     .append(", ").append(manager.get_firstname()).append(", ")
-    //     .append(availableOfficerSlots).append("}");
+    //     .append(totalOfficerSlots).append("}");
         
     //     return sb.toString();
     // }
@@ -309,7 +325,7 @@ public class Project {
         // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
         
         // First line with first flat type and all other details
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15d%n",
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n",
         projectId,
         ProjectName,
         neighbourhood,
@@ -320,7 +336,9 @@ public class Project {
         closeDate,
         visibility,
         manager.get_firstname(),
-        availableOfficerSlots));
+        assignedOfficers.size() + "/" + totalOfficerSlots));
+        // (totalOfficerSlots-availableOfficerSlots) + "/" + totalOfficerSlots));
+        // (maxOfficerSlots - totalOfficerSlots) + "/" + totalOfficerSlots));
 
     // Additional lines for remaining flat types
     for (int i = 1; i < flatTypes.size(); i++) {
@@ -338,7 +356,8 @@ public class Project {
     }
 
     public double getFlatPrice(String flatType) {
-        Iterator<Flat> iterator = BTOsystem.getFlats().iterator();
+        // Iterator<Flat> iterator = BTOsystem.getFlats().iterator();
+        Iterator<Flat> iterator = BTOsystem.flats.iterator();
         Flat f = iterator.next();
         while (iterator.hasNext()) {
             f = iterator.next();

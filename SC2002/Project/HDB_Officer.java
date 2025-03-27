@@ -10,8 +10,8 @@ public class HDB_Officer extends Applicant {
     private String type="Officer";
     private static int hdb_off_id = -1;
     private int officer_id;
-    private String registrationStatus;
-    private Project officerProject;
+    protected String registrationStatus;
+    protected Project officerProject;
     private static List<HDB_Officer> officerList = new ArrayList<>();
 
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
@@ -82,7 +82,8 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 8:
-                        List<Project> allProjects = BTOsystem.getProjects();
+                        // List<Project> allProjects = BTOsystem.getProjects();
+                        List<Project> allProjects = BTOsystem.projects;
                         System.out.println("=== Choose a project to register as Officer ===");
                         for (int i = 0; i < allProjects.size(); i++) {
                             System.out.println("[" + i + "] " + allProjects.get(i).getProjectName());
@@ -129,7 +130,8 @@ public class HDB_Officer extends Applicant {
                             System.out.println(officerProject.toString());
                         } else {
                             System.out.println("You have no assigned project. You may view any visible projects:");
-                            allProjects = BTOsystem.getProjects();
+                            // allProjects = BTOsystem.getProjects();
+                            allProjects = BTOsystem.projects;
                             for (int i = 0; i < allProjects.size(); i++) {
                                 Project p = allProjects.get(i);
                                 if (p.isVisible()) {
@@ -184,24 +186,24 @@ public class HDB_Officer extends Applicant {
         officerList = newList;
     }
 
-    public String getRegistrationStatus()
-    {
-        return registrationStatus;
-    }
+    // public String getRegistrationStatus()
+    // {
+    //     return registrationStatus;
+    // }
 
-    public void setRegistrationStatus(String status)
-    {
-        registrationStatus = status;
-    }
+    // public void setRegistrationStatus(String status)
+    // {
+    //     registrationStatus = status;
+    // }
 
-    public Project getAssignedProject()
-    {
-        return officerProject;
-    }
-    public void setAssignedProject(Project project)
-    {
-        officerProject = project;
-    }
+    // public Project getAssignedProject()
+    // {
+    //     return officerProject;
+    // }
+    // public void setAssignedProject(Project project)
+    // {
+    //     officerProject = project;
+    // }
 
     public void registerForProject(Project project) {
         if (project == null)
@@ -241,9 +243,11 @@ public class HDB_Officer extends Applicant {
         // Compare date ranges
         if (!(project.getCloseDate().isBefore(officerProject.getOpenDate()) 
            || project.getOpenDate().isAfter(officerProject.getCloseDate()))) {
-            return true; 
+            // return true; 
+            return false;
         }
-        return false;
+        // return false;
+        return true;
     }
 
     // From pdf: No intention to apply for the project as an Applicant (Cannot apply

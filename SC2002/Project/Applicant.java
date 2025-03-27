@@ -7,7 +7,7 @@ public class Applicant extends User {
     private int applicantID;
     protected BTOapplication application=null;
     private String type="APPLICANT";
-    private List<Enquiry> enquiries = new ArrayList<>();
+    protected List<Enquiry> enquiries = new ArrayList<>();
 
     public Applicant(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
@@ -136,11 +136,13 @@ public class Applicant extends User {
                         view_listings();
                         System.out.println("Enter ID of project to enquire about: ");
                         int projectId = scanner.nextInt();
-                        Project p = BTOsystem.getProjects().get(projectId);
+                        // Project p = BTOsystem.getProjects().get(projectId);
+                        Project p = BTOsystem.projects.get(projectId);
                         while (p==null) {
                             System.out.println("Invalid ID, try again: ");
                             projectId = scanner.nextInt();
-                            p = BTOsystem.getProjects().get(projectId);
+                            // p = BTOsystem.getProjects().get(projectId);
+                            p = BTOsystem.projects.get(projectId);
                         } 
                         scanner.nextLine();
                         System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
@@ -218,7 +220,8 @@ public class Applicant extends User {
         System.out.println("================================================================================================================");
         System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
         System.err.println("----------------------------------------------------------------------------------------------------------------");
-        List<Project> list = BTOsystem.getProjects();
+        // List<Project> list = BTOsystem.getProjects();
+        List<Project> list = BTOsystem.projects;
         // System.out.println("DEBUG: Number of projects retrieved: " + list.size());
         for (Project p : list) {
             p.toggle_visibility(); //default is false, so second toggle will become false again (to test only)
@@ -263,7 +266,8 @@ public class Applicant extends User {
     public void makeEnquiry(String content) {
         Enquiry en = new Enquiry(this, content);
         enquiries.add(en);
-        BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+        // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+        BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
     }
     //to be revised, enquiries tagged to a project
     public void makeEnquiry(Project project, String content, String flatType) {
@@ -272,7 +276,8 @@ public class Applicant extends User {
         en.setProject(project);
         en.setflatType(flatType);
         enquiries.add(en);
-        BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+        // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
+        BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
         // System.out.println("Enquiry sent!");
     }
 

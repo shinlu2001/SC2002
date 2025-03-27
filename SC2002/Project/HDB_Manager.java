@@ -12,9 +12,9 @@ public class HDB_Manager extends User {
     private int manager_id;
     private String type="MANAGER";
 
-    private static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
-    private List<Project> managerProjects = new ArrayList<>();  // List to store own projects - for manager to view own projects
-    private List<Project> projects; //store the projects list //what is this list for? if want to access all projects in system use BTOsystem.getProjects(), this will return you the entire project list, dont need to make a new one -meyling
+    protected static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
+    protected List<Project> managerProjects = new ArrayList<>();  // List to store own projects - for manager to view own projects
+    // private List<Project> projects; //store the projects list //what is this list for? if want to access all projects in system use BTOsystem.getProjects(), this will return you the entire project list, dont need to make a new one -meyling
     
     // static Scanner scan = new Scanner(System.in);
     public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {
@@ -27,13 +27,13 @@ public class HDB_Manager extends User {
         super.to_string();
         System.out.println("ManagerID: " + manager_id);
     }
-    public List<Project> getManagerProjects() {
-        return managerProjects;
-    }
+    // public List<Project> getManagerProjects() {
+    //     return managerProjects;
+    // }
     
-    public static List<Project> getAllProjects() {
-        return allProjects;
-    }
+    // public static List<Project> getAllProjects() {
+    //     return allProjects;
+    // }
     public void start_menu(Scanner sc) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
 
@@ -63,7 +63,7 @@ public class HDB_Manager extends User {
                         break;
     
                     case 2:     // Edit a Project - editProject(project)
-                        System.out.print("Enter the name of the project you wish to edit: ");
+                        System.out.print("Enter the ID of the project you wish to edit: ");
                         
                         // find if project exists in allProjects then check if the project is under the current manager
                         Project projectToEdit = findAndValidateProject(sc);
@@ -75,7 +75,7 @@ public class HDB_Manager extends User {
                         break;
                         
                     case 3: // Delete a Project - deleteProject(project)
-                        System.out.print("Enter the name of the project you wish to delete: ");
+                        System.out.print("Enter the ID of the project you wish to delete: ");
                         
                         // find if project exists in allProjects then check if the project is under the current manager
                         Project projectToDelete = findAndValidateProject(sc);
@@ -102,32 +102,35 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 7:     // handle Officer Registration - handleOfficerRegistration(project, officer)
-                            //WHEN CHECK IF PROJECT EXIST OR JUST NOT OWNER OF PROJ REFER TO DELETE SIMILAR^ (see below too)
-                            // System.out.print("Enter Project Name: ");
-                            // // find if project exists in allProjects then check if the project is under the current manager                                                                       
-                            // Project projectForOfficer = findAndValidateProject(sc);
-                            // if (projectForOfficer != null) {
-                            //     // Rest of officer handling logic
-                            // } else {
-                            //     System.out.print("Enter Officer's First Name: ");
-                            //     String officerFirstName = sc.nextLine();
-                            //     HDB_Officer officer = null;
+                            // WHEN CHECK IF PROJECT EXIST OR JUST NOT OWNER OF PROJ REFER TO DELETE SIMILAR^ (see below too)
+                            System.out.print("Enter the Project ID to manage: ");
+                            // find if project exists in allProjects then check if the project is under the current manager                                                                       
+                            Project projectForOfficer = findAndValidateProject(sc);
                             
-                            //     // Find the officer by first name
-                            //     for (HDB_Officer o : HDB_Officer.getOfficerList()) {
-                            //         if (o.get_firstname().equalsIgnoreCase(officerFirstName)) {
-                            //             officer = o;
-                            //             break;
-                            //         }
-                            //     }
+                            if (projectForOfficer.assignedOfficers.size() >= projectForOfficer.getTotalOfficerSlots()) {
+                                System.out.println("Error: Project " + projectForOfficer.getProjectID() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
+                                projectForOfficer.getTotalOfficerSlots() + " slots filled).");
+
+                            } else {
+                                System.out.print("Enter Officer's First Name: ");
+                                String officerFirstName = sc.nextLine();
+                                HDB_Officer officer = null;
                             
-                            //     if (officer != null) {
-                            //         // Handle the officer registration
-                            //         handleOfficerRegistration(projectForOfficer, officer);
-                            //     } else {
-                            //         System.out.println("Officer not found.");
-                            //     }
-                            // }
+                                // Find the officer by first name
+                                for (HDB_Officer o : HDB_Officer.getOfficerList()) {
+                                    if (o.get_firstname().equalsIgnoreCase(officerFirstName)) {
+                                        officer = o;
+                                        break;
+                                    }
+                                }
+                            
+                                if (officer != null) {
+                                    handleOfficerRegistration(projectForOfficer, officer);
+
+                                } else {
+                                    System.out.println("Error: Officer not found.");
+                                }
+                            }
                             System.out.println("---------------------------------------------------");
                             break;
                             
@@ -202,16 +205,28 @@ public class HDB_Manager extends User {
     }
     // find if project exists in allProjects then check if the project is under the current manager
     private Project findAndValidateProject(Scanner sc) {
-        String projectName = sc.nextLine();
-        
+        int projectID = sc.nextInt();
+        sc.nextLine(); // consume newline
+
         // Find project in allProjects
         Project project = null;
         for (Project p : allProjects) {
-            if (p.getProjectName().equalsIgnoreCase(projectName)) {
+            if (p.getProjectID() == projectID) {
                 project = p;
                 break;
             }
         }
+
+        // String projectName = sc.nextLine();
+        
+        // // Find project in allProjects
+        // Project project = null;
+        // for (Project p : allProjects) {
+        //     if (p.getProjectName().equalsIgnoreCase(projectName)) {
+        //         project = p;
+        //         break;
+        //     }
+        // }
         
         // Validate project
         if (project == null) {
@@ -222,7 +237,7 @@ public class HDB_Manager extends User {
         // check if current manager is in charge of the project
         if (!managerProjects.contains(project)) {
             System.out.println("---------------------------------------------------");
-            System.out.println("Error: You are not the manager of " + project.getProjectName() + ".");
+            System.out.println("Error: You are not the manager of Project " + project.getProjectID() + ".");
             return null;
         }
         
@@ -361,7 +376,7 @@ public class HDB_Manager extends User {
         LocalDate openDate = null;
         while(true){
             try {
-                System.out.print("Enter Application Opening Date for Project " + projectName + " (yyyy-MM-dd): ");
+                System.out.print("Enter Application Opening Date for Project (yyyy-MM-dd): ");
                 openDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
                 break;
 
@@ -374,7 +389,7 @@ public class HDB_Manager extends User {
         LocalDate closeDate;
         while(true){
             try {
-                System.out.print("Enter  Application Closing Date for " + projectName + " (yyyy-MM-dd): ");
+                System.out.print("Enter  Application Closing Date for Project (yyyy-MM-dd): ");
                 closeDate = LocalDate.parse(sc.next());  // Convert string to LocalDate
                 break;
             } catch (DateTimeParseException e) {
@@ -382,15 +397,15 @@ public class HDB_Manager extends User {
             }
         }
         // Continuously loop until a valid (availableOfficerSlots input btw 1-10) input is entered
-        int availableOfficerSlots;
+        int totalOfficerSlots;
         while (true)
         {   try{
                 System.out.print("Enter Available HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
-                availableOfficerSlots = sc.nextInt();
+                totalOfficerSlots = sc.nextInt();
                 sc.nextLine(); // Consume newline
 
                 // If input(availableOfficerSlots) is NOT btw 1-10, keep looping
-                if (availableOfficerSlots > Project.getmaxOfficerSlots() || availableOfficerSlots <= 0 ) {
+                if (totalOfficerSlots > Project.getmaxOfficerSlots() || totalOfficerSlots <= 0 ) {
                     System.out.println("Error: Available officer slots must be between 1 and " + Project.getmaxOfficerSlots() + ".");
 
                 }else{  // if input is btw of 1-10 break the loop and proceed
@@ -415,13 +430,13 @@ public class HDB_Manager extends User {
     
         // Create project if no conflicts
         // Project project = new Project(projectName, neighbourhood, total2Room, total3Room, openDate, closeDate, false, availableOfficerSlots);
-        Project project = new Project(projectName, neighbourhood, flatTypes, totalUnits, availableUnits,
-                                openDate, closeDate, false, availableOfficerSlots);
+        Project project = new Project(projectName, neighbourhood, flatTypes, totalUnits,
+                                openDate, closeDate, false, totalOfficerSlots);
         project.setManager(this);  // assign the current manager
         managerProjects.add(project);  // Add the project to the manager's list
         allProjects.add(project);      // Add the project to the global list
         System.out.println("---------------------------------------------------");
-        System.out.println(projectName + " successfully created.");
+        System.out.println(projectName + " successfully created with ID: " + project.getProjectID());
     
         return project;
     }
@@ -435,7 +450,7 @@ public class HDB_Manager extends User {
 if (!managerProjects.isEmpty())
         {
             System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-            System.err.println("----------------------------------------------------------------------------------------------------------------------------------------------------");
+            System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
             for (Project p : managerProjects)
             {
                 if (p.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
@@ -458,7 +473,7 @@ if (!managerProjects.isEmpty())
         if (!allProjects.isEmpty())
                 {
                     System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-                    System.err.println("----------------------------------------------------------------------------------------------------------------------------------------------------");
+                    System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
                     for (Project p : allProjects) {
                         System.out.println(p);
                     }
@@ -486,9 +501,9 @@ if (!managerProjects.isEmpty())
                         System.out.println("              EDITING PROJECT");
                         System.out.println("============================================");
                         System.out.println("Currently Editing:");
-                        System.err.println("-----------------------------------------------------------------------------------------------------------------------------");
-                        System.out.printf("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-                        System.err.println("-----------------------------------------------------------------------------------------------------------------------------");
+                        System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
+                        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
+                        System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
                         System.out.println(project.toString());
 
                         System.out.println("Select attribute to edit: ");
@@ -728,28 +743,28 @@ if (!managerProjects.isEmpty())
                                 break;
 
                             case 9:
-                                int availableOfficerSlots;
+                                int totalOfficerSlots;
                                 while (true) {
                                     try {
                                         // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
                                         System.out.print("Enter new available number of HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
-                                        availableOfficerSlots = sc.nextInt();
+                                        totalOfficerSlots = sc.nextInt();
                                         sc.nextLine(); // Consume newline
                             
                                         // Ensure available slots do not exceed maximum slots
-                                        if (availableOfficerSlots > Project.getmaxOfficerSlots() || availableOfficerSlots <= 0) {
+                                        if (totalOfficerSlots > Project.getmaxOfficerSlots() || totalOfficerSlots <= 0) {
                                             System.out.println("Error: Available officer slots must be between 1 and " + Project.getmaxOfficerSlots() + ".");
                                             continue;
                                         }
                                         
                                         // Check if the new maximum is less than the current number of assigned officers
-                                        if (availableOfficerSlots < p.getAssignedOfficerList().size()) {
-                                            System.out.println("Error: Cannot set slots below current assigned officers (" + p.getAssignedOfficerList().size() + ").");
+                                        if (totalOfficerSlots < p.assignedOfficers.size()) {
+                                            System.out.println("Error: Cannot set slots below current assigned officers (" + p.assignedOfficers.size() + ").");
                                             continue;
                                         }
                             
-                                        // If all conditions are valid, change available no. of officer slots
-                                        p.setAvailableOfficerSlots(availableOfficerSlots);
+                                        // If all conditions are valid, change total no. of officer slots
+                                        p.setTotalOfficerSlots(totalOfficerSlots);
                                         break;
                                         
                                     } catch (InputMismatchException e) {
@@ -788,9 +803,9 @@ if (!managerProjects.isEmpty())
         List<HDB_Officer> officersToRemove = new ArrayList<>(); // list to ollect officers to be removed
         for (HDB_Officer officer : officerList)
         {
-            if (officer.getAssignedProject() != null && officer.getAssignedProject().equals(project)) {
-                officer.setAssignedProject(null); // Remove the project reference
-                officer.setRegistrationStatus("Unregistered"); // Reset registration status
+            if (officer.officerProject != null && officer.officerProject.equals(project)) {
+                officer.officerProject = null; // Remove the project reference
+                officer.registrationStatus  = "Unregistered"; // Reset registration status
                 officersToRemove.add(officer); // Collect officers to remove
             }
         }
@@ -802,15 +817,15 @@ if (!managerProjects.isEmpty())
 
     // Approve or reject an officer's registration according to specific conditions
     public void handleOfficerRegistration(Project project, HDB_Officer officer) {
-        if (!project.equals(officer.getAssignedProject()))
+        if (!project.equals(officer.officerProject))
         {
-            System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " did not register for " + project.getProjectName() + ".");
+            System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " did not register for Project " + project.getProjectID() + ".");
             return;
         }
 
         // Check if the officer is already assigned to another project within the same application period
         if (officer.isApplicationPeriodOverlapping(project)) {
-            officer.setRegistrationStatus("Rejected");
+            officer.registrationStatus = "Rejected";
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer is already assigned to another project during this application period.");
             // System.out.println("Warning: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " is already assigned to another project during this application period.");
             return;
@@ -818,7 +833,7 @@ if (!managerProjects.isEmpty())
 
         // Check if officer has applied to be a Applicant (for this project or other projects)
         if (officer.hasAppliedAsApplicant()) {
-            officer.setRegistrationStatus("Rejected");
+            officer.registrationStatus = "Rejected";
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer has already applied as an applicant.");
             return;
         }
@@ -829,18 +844,15 @@ if (!managerProjects.isEmpty())
         // Registration Approved, assign officer into specified project
         // if (input.equals("yes")) 
         // {
-            if (project.addOfficer(officer)) {
-                officer.setRegistrationStatus("Approved");
-                officer.setAssignedProject(project);
-                System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to " + project.getProjectName() + ".");
-            } else
-            {
-                officer.setRegistrationStatus("Rejected");
-                System.out.println("Maximum number of officers already assigned to " + project.getProjectName() + ". Officer's registration rejected. ");
-            }
-        // }else{
-        //     officer.setRegistrationStatus("Rejected");
-        //     System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration has been rejected.");
+        if (project.addOfficer(officer)) {
+            officer.registrationStatus  = "Approved";
+            officer.officerProject = project;
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");            
+        } 
+        // else
+        // {
+        //     officer.registrationStatus = "Rejected";
+        //     System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected. ");
         // }
     }
     
@@ -854,17 +866,16 @@ if (!managerProjects.isEmpty())
         List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
         if (!officerList.isEmpty())
         {
-            System.out.printf("%-20s %-15s %-20s%n", "Name", "Status", "Project\n");
+            System.out.printf("%-20s %-15s %-25s%n", "Name", "Status", "Project ID");
             System.out.println("---------------------------------------------------");
             for (HDB_Officer officer : officerList)
             {   
                 // View all officer registration (including projects under other managers)
-                Project assignedProject = officer.getAssignedProject();
+                Project assignedProject = officer.officerProject;
                 if (assignedProject != null && assignedProject.getManager() == this) 
                 {
                     // Only display officers assigned to projects managed by the current manager
-                    String projectName = assignedProject.getProjectName();
-                    System.out.printf("%-20s %-15s %-20s%n", officer.get_firstname() + " " + officer.get_lastname(),officer.getRegistrationStatus(),projectName);
+                    System.out.printf("%-20s %-15s %-20s%n", officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
                 }
             }
         }
@@ -1017,6 +1028,7 @@ if (!managerProjects.isEmpty())
                 break;
         }
     }
+
     public void reply_enquiry(Enquiry enquiry, String response) {
         enquiry.setStaffReply(this);
         enquiry.setResponse(response);;
