@@ -10,11 +10,15 @@ public class BTOsystem {
     private static List<HDB_Manager> managers = new ArrayList<>();
     protected static List<Project> projects = new ArrayList<>();
     protected static List<Enquiry> enquiries = new ArrayList<>();
+    protected static List<Flat> flats = new ArrayList<>();
     public static List<Project> getProjects() {
         return projects;
     }
     public static List<Enquiry> getEnquiries() {
         return enquiries;
+    }
+    public static List<Flat> getFlats() {
+        return flats;
     }
     // list of applications submitted : submitted_app
     static Menu menu = new Menu(); 
@@ -216,6 +220,7 @@ public class BTOsystem {
             for (String[] row : rows) {
                 String dateStr1 = row[8];  // Application opening date
                 String dateStr2 = row[9];  // Application closing date
+                
 
                 // Define a formatter matching the input format
                 DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
@@ -274,9 +279,19 @@ public class BTOsystem {
                         }
                     }
                 }
-
+                // create flat objects for first type
+                for (int j=0;j<a.getAvailableUnits().get(0);j++){
+                    Flat f = new Flat(a, a.getFlatTypes().get(0), Double.parseDouble(row[4]));
+                    flats.add(f);
+                }
+                
+                // create flat objects for second type
+                for (int j=0;j<a.getAvailableUnits().get(1);j++){
+                    Flat f = new Flat(a, a.getFlatTypes().get(1), Double.parseDouble(row[7]));
+                    flats.add(f);
+                }
+            
                 projects.add(a);
-                // System.out.println(a);
             }
         }
     }
