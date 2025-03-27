@@ -16,59 +16,60 @@ public class Applicant extends User {
 
     public void start_menu(Scanner scanner) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
-        System.out.println("---Applicant menu---");
         int choice=0;
         do {
             try {
+                System.out.println("============================================");
+                System.out.println("         A P P L I C A N T   M E N U");
+                System.out.println("============================================");
                 menu.printApplicantMenu();
                 
                 choice = scanner.nextInt();
-                System.out.println("-----------------------------------------------------------------------------------------------");
+                // System.out.println();
                 switch (choice) {
                     case 1:
                         if (application != null) {
                             System.out.println("You already have an active application. You may not create a new one.");
-                            System.out.println("--------------------------------");
+                            System.out.println("============================================");
                         } else {
                             // view current application 
                             // application.getDetails;
-                            System.out.println("--------------------------------");
+                            System.out.println("============================================");
                         }
                         break;
                     case 2:
                         if (application == null) {
                             System.out.println("You have no active application. Please create a new application.");
-                            System.out.println("--------------------------------");
+                            System.out.println("============================================");
                         } else {
                             application.get_details();
-                            System.out.println("--------------------------------");
+                            System.out.println("============================================");
                         }
                         break;
                     case 3:
-                        // System.out.println(BTOsystem.getProjects());
                         view_listings();
                         scanner.nextLine();
                         break;
                     case 4:
                         System.out.println("Withdraw application");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 5:
                         manage_enquiry(scanner);
                         scanner.nextLine();
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 6:
                         System.out.println("Account details");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         to_string();
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         scanner.nextLine();
                         // scanner.next();
                         break;
                     case 7:
                         System.out.println("Change your password");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         scanner.nextLine();
                         System.out.print("Enter current password: ");
                         String oldpass = scanner.nextLine();
@@ -85,17 +86,17 @@ public class Applicant extends User {
                             change_password(new_pass2);
                             System.out.println("Password changed successfully.");
                         }
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 8: //apply to become officer
                         System.out.println("Application to become a HDB Officer");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         
                         break;
                     case 9:
                         // scanner.nextLine();
                         System.out.println("Logged out. Returning to main menu...");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
@@ -152,10 +153,19 @@ public class Applicant extends User {
                         break;
                     case 3:
                         System.out.println("Edit enquiry");
-                        
-                        view_all_enquiry_for_user();
+                        viewEditableEnquiry();
                         System.out.println("Enter ID of enquiry to edit: ");
                         int id = scanner.nextInt();
+                        // cannot edit enquiries that have been replied to 
+                        Enquiry result = enquiries.stream()
+                            .filter(en -> en.getEnId() == id)
+                            .findFirst()
+                            .orElse(null);
+                        if (result.getStaff()!=null) {
+                            System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
+                            System.out.println("--------------------------------");
+                            break;
+                        } 
                         scanner.nextLine();
                         System.out.print("Enquiry: ");
                         String userInput = scanner.nextLine();
@@ -190,7 +200,7 @@ public class Applicant extends User {
                 System.out.println("Invalid input. Please enter a number.");
                 scanner.next(); 
             }
-        } while (choice != 5);
+        } while (choice != 6);
     }
     // check eligibility of user to apply for flat
     public boolean getEligibility(String flatType) {
@@ -265,8 +275,8 @@ public class Applicant extends User {
     }
 
     public void view_enquiry(Enquiry en) {
-        System.out.println("Enquiry: "+en.getEnquiry());
-        System.out.println("Project: "+en.getProject().getProjectName());
+        System.out.println("Enquiry: "+ en.getEnquiry());
+        System.out.println("Project: "+ (en.getProject()!=null?en.getProject().getProjectName():null));
         System.out.println("Flat Type: "+en.getflatType());
         if (en.getStaff()==null) {
             System.out.println("No reply to your enquiry yet.");
@@ -276,22 +286,53 @@ public class Applicant extends User {
         }
     }
     public void view_all_enquiry_for_user() {
-        // System.out.println(BTOsystem.getEnquiries().get(0).getCreatedByUser());
         for (Enquiry en : enquiries) {
-            System.out.println("#"+enquiries.indexOf(en));
+            System.out.println("#"+en.getEnId());
             view_enquiry(en);
             System.out.println("--------------------------------");
         }
     }
-    public void editEnquiry(int id, String content) {
-        enquiries.get(id).setEnquiry(content);
-        enquiries.get(id).setResponse(""); // for edited enquiry, the response field should be cleared
-        enquiries.get(id).setStaffReply(null);
+    public void viewEditableEnquiry() {
+        for (Enquiry en : enquiries) {
+            if (en.getStaff()==null){
+                System.out.println("#"+en.getEnId());
+                view_enquiry(en);
+                System.out.println("--------------------------------");
+            }
+            
+        }
+    }
+    public void editEnquiry(int id, String content) { // can only edit when no response from staff yett
+        Iterator<Enquiry> iterator = enquiries.iterator();
+        Enquiry en = iterator.next();
+        while (iterator.hasNext()) {
+            if (en.getEnId() == id) {
+                en.setEnquiry(content);
+                break; 
+            }
+        }
     }
     public void deleteEnquiry(int id) {
-        Enquiry removedElement = enquiries.remove(id);
+        Enquiry removedElement = null;  
+        Iterator<Enquiry> iterator = enquiries.iterator();
+        Enquiry en = iterator.next();
+        while (iterator.hasNext()) {
+            en = iterator.next();
+            if (en.getEnId() == id) {
+                removedElement = en;
+                iterator.remove();  
+                break;
+            }
+        }
         System.out.println("Deleted enquiry: " + removedElement.getEnquiry());
         System.out.println("Deleted response: " + removedElement.getResponse());
         removedElement = null;
     }
 }
+
+// for filtering enquiries/projects/application
+// List<Enquiry> matching = enquiries.stream()
+//     .filter(en -> en.getStatus().equals("Pending"))
+//     .collect(Collectors.toList());
+
+// System.out.println("Matching Enquiries: " + matching);

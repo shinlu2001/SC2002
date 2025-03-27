@@ -1,20 +1,26 @@
 package SC2002.Project;
 public class Enquiry {
+    private static int nextId = -1;
     private String content;
     private String response="";
     private Project project=null;
     private User createdBy;
     private User repliedBy=null;
     private String flatType=null;
+    private int enId;
     public Enquiry(User user, String content) {
         createdBy = user;
         this.content = content;
+        enId = ++nextId;
     }
     public void setEnquiry(String r) {
         content = r;
     }
     public String getflatType() {
         return flatType;
+    }
+    public int getEnId() {
+        return enId;
     }
     public void setflatType(String r) {
         flatType = r;
