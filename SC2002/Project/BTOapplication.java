@@ -13,6 +13,7 @@ public class BTOapplication {
     
     // References to the applicant and project
     private Applicant applicant;
+    private HDB_Manager manager;
     private Project project;
     
     // The flat type the applicant is applying for (e.g., "2-Room", "3-Room")
@@ -31,6 +32,15 @@ public class BTOapplication {
     public BTOapplication(Applicant applicant, Project project, String flatType) {
         this.applicationId = nextId++;
         this.applicant = applicant;
+        this.project = project;
+        this.flatType = flatType;
+        this.status = "Pending"; // default status
+    }
+    // manager constructor version of btoapplication, for the sake of running tests
+    // implement the actual changes later
+    public BTOapplication(HDB_Manager manager, Project project, String flatType) {
+        this.applicationId = nextId++;
+        this.manager = manager;
         this.project = project;
         this.flatType = flatType;
         this.status = "Pending"; // default status
