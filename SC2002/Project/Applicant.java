@@ -25,7 +25,7 @@ public class Applicant extends User {
                 menu.printApplicantMenu();
                 
                 choice = scanner.nextInt();
-                // System.out.println();
+                System.out.println("============================================");
                 switch (choice) {
                     case 1:
                         if (application != null) {
@@ -60,15 +60,14 @@ public class Applicant extends User {
                         System.out.println("============================================");
                         break;
                     case 6:
-                        System.out.println("Account details");
+                        System.out.println("             Account details");
                         System.out.println("============================================");
                         to_string();
                         System.out.println("============================================");
                         scanner.nextLine();
-                        // scanner.next();
                         break;
                     case 7:
-                        System.out.println("Change your password");
+                        System.out.println("          Change your password");
                         System.out.println("============================================");
                         scanner.nextLine();
                         System.out.print("Enter current password: ");
@@ -94,7 +93,6 @@ public class Applicant extends User {
                         
                         break;
                     case 9:
-                        // scanner.nextLine();
                         System.out.println("Logged out. Returning to main menu...");
                         System.out.println("============================================");
                         break;
@@ -116,12 +114,15 @@ public class Applicant extends User {
 
     public void manage_enquiry(Scanner scanner) {
         int choice=0;
-        System.out.println("---Enquiry menu---");
+        // System.out.println("---Enquiry menu---");
         do {
             try {
+                System.out.println("============================================");
+                System.out.println("         E N Q U I R Y   M E N U");
+                System.out.println("============================================");
                 menu.printEnquiryMenu();
                 choice = scanner.nextInt();
-                System.out.println("--------------------------------");
+                System.out.println("============================================");
                 switch (choice) {
                     case 1:
                         scanner.nextLine();
@@ -129,7 +130,7 @@ public class Applicant extends User {
                         String content = scanner.nextLine();
                         makeEnquiry(content);
                         System.out.println("Enquiry sent!");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 2:
                         view_listings();
@@ -148,8 +149,7 @@ public class Applicant extends User {
                         String project_content = scanner.nextLine();
                         makeEnquiry(p, project_content, flatType);
                         System.out.println("Enquiry sent!");
-                        System.out.println("--------------------------------");
-                        // scanner.nextLine();
+                        System.out.println("============================================");
                         break;
                     case 3:
                         System.out.println("Edit enquiry");
@@ -163,7 +163,7 @@ public class Applicant extends User {
                             .orElse(null);
                         if (result.getStaff()!=null) {
                             System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
-                            System.out.println("--------------------------------");
+                            System.out.println("============================================");
                             break;
                         } 
                         scanner.nextLine();
@@ -172,23 +172,23 @@ public class Applicant extends User {
                         // maybe add confirmation?
                         editEnquiry(id, userInput);
                         System.out.println("Enquiry edited!");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 4:
                         System.out.println("All enquiries");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         view_all_enquiry_for_user();
                         break;
                     case 5:
                         System.out.println("Delete enquiry");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         view_all_enquiry_for_user();
                         System.out.print("Enter ID of enquiry to delete: ");
                         // add confirmation before deleting
                         int del_id = scanner.nextInt();
                         deleteEnquiry(del_id);
                         System.out.println("Enquiry deleted!");
-                        System.out.println("--------------------------------");
+                        System.out.println("============================================");
                         break;
                     case 6:
                         System.out.println("Returning to applicant menu...");
@@ -213,11 +213,11 @@ public class Applicant extends User {
     }
 
     public void view_listings() {
-        System.out.println("\n======================================================================================================");
-        System.out.println("                                          ALL PROJECTS");
-        System.out.println("======================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Eligibilty");
-        System.err.println("------------------------------------------------------------------------------------------------------");
+        System.out.println("\n================================================================================================================");
+        System.out.println("                                                  ALL PROJECTS");
+        System.out.println("================================================================================================================");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
+        System.err.println("----------------------------------------------------------------------------------------------------------------");
         List<Project> list = BTOsystem.getProjects();
         // System.out.println("DEBUG: Number of projects retrieved: " + list.size());
         for (Project p : list) {
@@ -228,17 +228,18 @@ public class Applicant extends User {
                 
             }
         }
-        System.err.println("------------------------------------------------------------------------------------------------------");
+        System.err.println("----------------------------------------------------------------------------------------------------------------");
     }
 
     public String viewProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n",
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
             p.getProjectID(),
             p.getProjectName(),
             p.getneighbourhood(),
             p.getFlatTypes().size() > 0 ? 
                 p.getFlatTypes().get(0) + ": " + (p.getTotalUnits().get(0) - p.getAvailableUnits().get(0)) + "/" + p.getTotalUnits().get(0) : "",
+            p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(0)) : 0,
             p.getOpenDate(), 
             p.getCloseDate(), 
             getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible" 
@@ -246,9 +247,10 @@ public class Applicant extends User {
 
     // Additional lines for remaining flat types
     for (int i = 1; i < p.getFlatTypes().size(); i++) {
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %n",
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
             "", "", "",  // Empty project name and neighbourhood
             p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
+            p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(i)) : 0,
             "", "", getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible"));  // Empty other fields
     }
 
@@ -306,6 +308,7 @@ public class Applicant extends User {
         Iterator<Enquiry> iterator = enquiries.iterator();
         Enquiry en = iterator.next();
         while (iterator.hasNext()) {
+            en = iterator.next();
             if (en.getEnId() == id) {
                 en.setEnquiry(content);
                 break; 
