@@ -1,14 +1,14 @@
 package SC2002.Project;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Project {
     private static int nextId = -1;
     private String ProjectName;
     private String neighbourhood;
     private List<String> flatTypes;
+    // private List<Double> flatPrice;
     private List<Integer> totalUnits;
     private List<Integer> availableUnits;
     private int projectId;
@@ -56,8 +56,7 @@ public class Project {
         this.openDate = openDate;
         this.closeDate = closeDate;
         this.visibility = visibility;
-        // this.manager = manager;
-        // this.officer = officer;
+        
         assignedOfficers = new ArrayList<>();  // Initialize the list to hold assignedOfficers
         maxOfficerSlots = 10;
         this.availableOfficerSlots = availableOfficerSlots;
@@ -256,7 +255,7 @@ public class Project {
     }
 
     public void setmaxOfficerSlots(int maxOfficerSlots) {
-        this.maxOfficerSlots = maxOfficerSlots;
+        Project.maxOfficerSlots = maxOfficerSlots;
     }
     
 
@@ -310,11 +309,13 @@ public class Project {
         // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
         
         // First line with first flat type and all other details
-        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15d%n",
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15d%n",
+        projectId,
         ProjectName,
         neighbourhood,
         flatTypes.size() > 0 ? 
             flatTypes.get(0) + ": " + (totalUnits.get(0) - availableUnits.get(0)) + "/" + totalUnits.get(0) : "",
+        flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(0)) : 0,
         openDate,
         closeDate,
         visibility,
@@ -323,9 +324,10 @@ public class Project {
 
     // Additional lines for remaining flat types
     for (int i = 1; i < flatTypes.size(); i++) {
-        sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n",
-            "", "",  // Empty project name and neighbourhood
+        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n",
+            "", "", "",  // Empty project name and neighbourhood
             flatTypes.get(i) + ": " + (totalUnits.get(i) - availableUnits.get(i)) + "/" + totalUnits.get(i),
+            flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(i)) : 0,
             "", "", "", "", ""));  // Empty other fields
     }
 
@@ -335,4 +337,17 @@ public class Project {
     return sb.toString();
     }
 
+    public double getFlatPrice(String flatType) {
+        Iterator<Flat> iterator = BTOsystem.getFlats().iterator();
+        Flat f = iterator.next();
+        while (iterator.hasNext()) {
+            f = iterator.next();
+            if (f.getProject().equals(this)) {
+                if (f.getFlatType().equals(flatType)) {
+                    return f.getPrice();
+                }
+            }
+        }
+        return 0;
+    }
 }
