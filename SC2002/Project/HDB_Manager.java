@@ -46,8 +46,9 @@ public class HDB_Manager extends User {
                 
                 System.out.println("============================================");
                 System.out.println("         M A N A G E R   M E N U");
-                menu.printManagerMenu();
                 System.out.println("============================================");
+                menu.printManagerMenu();
+                
                 
 
                 choice = sc.nextInt();
@@ -433,8 +434,8 @@ public class HDB_Manager extends User {
         
 if (!managerProjects.isEmpty())
         {
-            System.out.printf("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-            System.err.println("-----------------------------------------------------------------------------------------------------------------------------");
+            System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
+            System.err.println("----------------------------------------------------------------------------------------------------------------------------------------------------");
             for (Project p : managerProjects)
             {
                 if (p.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
@@ -456,8 +457,8 @@ if (!managerProjects.isEmpty())
         
         if (!allProjects.isEmpty())
                 {
-                    System.out.printf("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-                    System.err.println("-----------------------------------------------------------------------------------------------------------------------------");
+                    System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
+                    System.err.println("----------------------------------------------------------------------------------------------------------------------------------------------------");
                     for (Project p : allProjects) {
                         System.out.println(p);
                     }
