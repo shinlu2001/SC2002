@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class HDB_Officer extends Applicant {
-    private String type="Officer";
+    private String type = "Officer";
     protected static int nextId = -1;
     private int officer_id;
     protected String registrationStatus;
@@ -238,7 +238,6 @@ public class HDB_Officer extends Applicant {
         }
     }
 
-
     // From pdf: Not a HDB Officer (registration not approved) for another project
     // within an application period (from application opening date,
     // inclusive, to application closing date, inclusive)
@@ -268,5 +267,15 @@ public class HDB_Officer extends Applicant {
             return true;
         }
         return false;
+    }
+
+    // Add the helper method as requested
+    public void forceRegisterAndApprove(Project project) {
+        if (registrationStatus.equals("Unregistered")) {
+            // registerForProject(project); this causes double officer dk why
+            // Force approval for data-loading purposes
+            registrationStatus = "Approved";
+            project.addOfficer(this);
+        }
     }
 }

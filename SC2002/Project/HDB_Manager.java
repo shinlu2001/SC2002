@@ -881,7 +881,15 @@ if (!managerProjects.isEmpty())
         // List<HDB_Officer> officerList = BTOsystem.officers;
         // List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
         
-        if (!BTOsystem.officers.isEmpty())
+        boolean hasOfficers = false;
+        for (Project project : this.managerProjects) {
+            if (!project.assignedOfficers.isEmpty()) {
+                hasOfficers = true;
+                break;
+            }
+        }
+        
+        if (hasOfficers)
         {
             System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
             System.out.println("------------------------------------------------------------");

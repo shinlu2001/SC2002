@@ -229,7 +229,7 @@ public class BTOsystem {
             String line;
             line = br.readLine();
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(","); 
+                String[] values = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 rows.add(values);
             }
         } catch (IOException e) {
@@ -251,7 +251,7 @@ public class BTOsystem {
                 HDB_Manager a = new HDB_Manager(row[1], row[0], "", row[3], Integer.parseInt(row[2]));
                 managers.add(a);
             }
-// In BTOsystem.java, modify the load_data method for projects (type 'p')
+        // In BTOsystem.java, modify the load_data method for projects (type 'p')
         } else if (type=='p') { // for project
             for (String[] row : rows) {
                 String dateStr1 = row[8];  // Application opening date
@@ -305,59 +305,53 @@ public class BTOsystem {
                     }
                 }
 
-                // Assign officers
-                // String[] project_officer = row[12].split(",");
-                // System.out.println("I DONT");
-                // for (int i=0;i<project_officer.length;i++) {
-                //     System.out.println("WANNA FUCK");
-                //     for (HDB_Officer off: officers) {
-                //         System.out.println("WITH YOU");
-                //         System.out.println("BRUH" + off.get_firstname() + project_officer[i]);
-                //         if (off.get_firstname().equals(project_officer[i])) {
-                //             // a.assignOfficer(off);
-                //             System.out.println("HEYYYYYY");
-                //             off.registerForProject(a);
-                //             a.addOfficer(off);
-                //             break;
-                //         }
-                //     }
-                // }
-                
-                // HARD CODED ONLY WORKS FOR Daniel,Emily -> Name1,Name2
-
-                // System.out.println("Raw data: " + row[12] + row[13] + row[14]);
-                System.out.println("Raw data: " + row[12] + row[13]);
-
-                // First check if we need to reconstruct a quoted field
-                String officerField;
-                if (row.length > 13 && row[12].startsWith("\"") && !row[12].endsWith("\"")) {
-                    // Reconstruct quoted field that was split across columns
-                    officerField = row[12] + "," + row[13];
-                } else {
-                    officerField = row[12];
-                }
-
-                // Now properly parse the officer names
-                String[] project_officer = officerField.replace("\"", "").split(",");
-                System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
-
-                for (String officerName : project_officer) {
-                    officerName = officerName.trim();
-                    System.out.println("Processing officer: " + officerName);
+                // Assign officers using the helper method in HDB_Officer
+                String[] project_officer = row[12].replace("\"", "").split(",");
+                for (String name : project_officer) {
+                    name = name.trim();
                     for (HDB_Officer off : officers) {
-                        if (off.get_firstname().equalsIgnoreCase(officerName)) {
-
-                            // off.registerForProject(a);
-                            // HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
-                            // officers.add(off);
-                            a.addOfficer(off);
-                            // a.assignOfficer(off);
-                            // a.handleOfficerRegistration();
-                            System.out.println("Assigned officer: " + off.get_firstname());
+                        if (off.get_firstname().equalsIgnoreCase(name)) {
+                            off.forceRegisterAndApprove(a);
                             break;
                         }
                     }
                 }
+                
+                // HARD CODED ONLY WORKS FOR Daniel,Emily -> Name1,Name2
+
+                // System.out.println("Raw data: " + row[12] + row[13] + row[14]);
+                // System.out.println("Raw data: " + row[12] + row[13]);
+
+                // // First check if we need to reconstruct a quoted field
+                // String officerField;
+                // if (row.length > 13 && row[12].startsWith("\"") && !row[12].endsWith("\"")) {
+                //     // Reconstruct quoted field that was split across columns
+                //     officerField = row[12] + "," + row[13];
+                // } else {
+                //     officerField = row[12];
+                // }
+
+                // // Now properly parse the officer names
+                // String[] project_officer = officerField.replace("\"", "").split(",");
+                // System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
+
+                // for (String officerName : project_officer) {
+                //     officerName = officerName.trim();
+                //     System.out.println("Processing officer: " + officerName);
+                //     for (HDB_Officer off : officers) {
+                //         if (off.get_firstname().equalsIgnoreCase(officerName)) {
+
+                //             // off.registerForProject(a);
+                //             // HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
+                //             // officers.add(off);
+                //             a.addOfficer(off);
+                //             // a.assignOfficer(off);
+                //             // a.handleOfficerRegistration();
+                //             System.out.println("Assigned officer: " + off.get_firstname());
+                //             break;
+                //         }
+                //     }
+                // }
 
                 // create flat objects for first type
                 for (int j=0;j<a.getAvailableUnits().get(0);j++){
