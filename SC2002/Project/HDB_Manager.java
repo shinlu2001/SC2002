@@ -106,19 +106,23 @@ public class HDB_Manager extends User {
                             System.out.print("Enter the Project ID to manage: ");
                             // find if project exists in allProjects then check if the project is under the current manager                                                                       
                             Project projectForOfficer = findAndValidateProject(sc);
-                            
+                            if (projectForOfficer == null)
+                                break;
+
                             if (projectForOfficer.assignedOfficers.size() >= projectForOfficer.getTotalOfficerSlots()) {
                                 System.out.println("Error: Project " + projectForOfficer.getProjectID() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
                                 projectForOfficer.getTotalOfficerSlots() + " slots filled).");
 
                             } else {
-                                System.out.print("Enter Officer's First Name: ");
-                                String officerFirstName = sc.nextLine();
+                                System.out.print("Enter Officer's ID: ");
+                                int officerId = sc.nextInt();
+                                sc.nextLine();
+
                                 HDB_Officer officer = null;
                             
                                 // Find the officer by first name
                                 for (HDB_Officer o : HDB_Officer.getOfficerList()) {
-                                    if (o.get_firstname().equalsIgnoreCase(officerFirstName)) {
+                                    if (o.getOfficerId() == officerId) {
                                         officer = o;
                                         break;
                                     }
@@ -135,9 +139,16 @@ public class HDB_Manager extends User {
                             break;
                             
                         case 8:     // handle BTO registration - handleBTOapplication(projectToEdit, application, type)
-                            // System.out.print("Enter Project Name: ");
+                            // System.out.print("Enter the Project ID to manage: ");
                             // // find if project exists in allProjects then check if the project is under the current manager
                             // Project projectForBTO = findAndValidateProject(sc);
+
+                            // System.out.println("Enter Applicant's ID: ");
+                            // String applicationId = sc.nextLine();
+
+                            // for (BTOsystem a : BTOsystem.applicants){
+                            //     if (a.getFlatType().equalsIgnoreCase(applicationId))
+                            // }
                             // if (projectForBTO != null) {
                             //     // Rest of BTO handling logic
                             // } else {
@@ -207,7 +218,7 @@ public class HDB_Manager extends User {
     private Project findAndValidateProject(Scanner sc) {
         int projectID = sc.nextInt();
         sc.nextLine(); // consume newline
-
+        
         // Find project in allProjects
         Project project = null;
         for (Project p : allProjects) {
@@ -866,7 +877,7 @@ if (!managerProjects.isEmpty())
         List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
         if (!officerList.isEmpty())
         {
-            System.out.printf("%-20s %-15s %-25s%n", "Name", "Status", "Project ID");
+            System.out.printf("%-15s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
             System.out.println("---------------------------------------------------");
             for (HDB_Officer officer : officerList)
             {   
@@ -875,7 +886,7 @@ if (!managerProjects.isEmpty())
                 if (assignedProject != null && assignedProject.getManager() == this) 
                 {
                     // Only display officers assigned to projects managed by the current manager
-                    System.out.printf("%-20s %-15s %-20s%n", officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
+                    System.out.printf("%-15s %-20s %-15s %-20s%n", officer.getOfficerId(), officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
                 }
             }
         }

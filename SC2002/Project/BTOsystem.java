@@ -1,11 +1,11 @@
 package SC2002.Project;
 import java.io.*;
-import java.util.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class BTOsystem {
-    private static List<Applicant> applicants = new ArrayList<>();
+    protected static List<Applicant> applicants = new ArrayList<>();      //protected?
     protected static List<HDB_Officer> officers = new ArrayList<>();    //protected?
     protected static List<HDB_Manager> managers = new ArrayList<>();      //protected?
     protected static List<Project> projects = new ArrayList<>();    //protected?

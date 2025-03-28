@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.*;
 
 public class HDB_Officer extends Applicant {
     private String type="Officer";
@@ -19,6 +18,11 @@ public class HDB_Officer extends Applicant {
         this.registrationStatus = "Unregistered"; // Default status
         officer_id = ++hdb_off_id;
     }
+    
+    public int getOfficerId(){
+        return officer_id;
+    }
+    
     Scanner sc = new Scanner(System.in);
     public void start_menu(Scanner scanner) {
         int choice = 0;
