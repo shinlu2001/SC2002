@@ -131,7 +131,7 @@ public class BTOapplication {
 
         if (status.equals("Unregistered")) {
             applicationList.add(this);
-            project = project;
+            this.project = project;
             status = "Pending";
             System.out.println("Registration for " + project.getProjectName() + " successful. Registration request has been sent to the HDB Manager for approval.");
         } else {
