@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class HDB_Manager extends User {
-    private static int hdb_man_id = -1;
-    private int manager_id;
+    protected static int nextId = -1;
+    private final int manager_id;
     private String type="MANAGER";
 
     //protected static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
@@ -20,7 +20,7 @@ public class HDB_Manager extends User {
         super(nric, firstname, lastname, marital_status, age);
         this.managerProjects = new ArrayList<>();
         // this.projects = projects;  // Initialize the projects list
-        manager_id = ++hdb_man_id;
+        manager_id = ++nextId;
     }
     public void to_string() {
         super.to_string();
@@ -878,15 +878,16 @@ if (!managerProjects.isEmpty())
         System.out.println("\n============================================================");
         System.out.println("                    OFFICER REGISTRATION");
         System.out.println("============================================================");
-        List<HDB_Officer> officerList = BTOsystem.officers;
+        // List<HDB_Officer> officerList = BTOsystem.officers;
         // List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
         
-        if (!officerList.isEmpty())
+        if (!BTOsystem.officers.isEmpty())
         {
             System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
             System.out.println("------------------------------------------------------------");
-            for (HDB_Officer officer : officerList)
-            {   
+            // System.out.println(BTOsystem.officers.size());
+            for (HDB_Officer officer : BTOsystem.officers)
+            {// {   System.out.println("1");
                 // View all officer registration (including projects under other managers)
                 Project assignedProject = officer.officerProject;
                 if (assignedProject != null && assignedProject.getManager() == this) 

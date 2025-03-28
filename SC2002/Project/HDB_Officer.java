@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class HDB_Officer extends Applicant {
     private String type="Officer";
-    private static int hdb_off_id = -1;
+    protected static int nextId = -1;
     private int officer_id;
     protected String registrationStatus;
     protected Project officerProject;
@@ -15,7 +15,7 @@ public class HDB_Officer extends Applicant {
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
         this.registrationStatus = "Unregistered"; // Default status
-        officer_id = ++hdb_off_id;
+        officer_id = ++nextId;
     }
     
     public int getOfficerId(){

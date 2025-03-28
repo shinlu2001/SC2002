@@ -9,7 +9,7 @@ public class BTOapplication {
     private List<BTOapplication> approvedApplications = new ArrayList<>();
     private static List<BTOapplication> applicationList = new ArrayList<>();
     //--------------------------------------------------
-    private static int nextId = 1;   // auto-incrementing ID
+    protected static int nextId = -1;   // auto-incrementing ID
     private int applicationId;
     
     // References to the applicant and project

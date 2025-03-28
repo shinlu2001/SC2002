@@ -1,6 +1,6 @@
 package SC2002.Project;
 public class Enquiry {
-    private static int nextId = -1;
+    protected static int nextId = -1;
     private String content;
     private String response="";
     private Project project=null;

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class Project {
-    private static int nextId = -1;
+    protected static int nextId = -1;
     private String ProjectName;
     private String neighbourhood;
     private List<String> flatTypes;

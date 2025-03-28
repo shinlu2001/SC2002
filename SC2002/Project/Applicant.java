@@ -3,7 +3,7 @@ package SC2002.Project;
 import java.util.*;
 
 public class Applicant extends User {
-    private static int nextId = -1;
+    protected static int nextId = -1;
     private int applicantID;
     protected BTOapplication application=null;
     private String type="APPLICANT";

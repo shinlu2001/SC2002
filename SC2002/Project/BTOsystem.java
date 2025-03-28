@@ -12,7 +12,7 @@ public class BTOsystem {
     protected static List<Project> projects = new ArrayList<>();    //protected?
     protected static List<Enquiry> enquiries = new ArrayList<>();   //protected?
     protected static List<Flat> flats = new ArrayList<>();          //protected?
-
+    protected static List<BTOapplication> applications = new ArrayList<>(); 
     // public static List<Project> getProjects() {
     //     return projects;
     // }
@@ -46,6 +46,19 @@ public class BTOsystem {
                         register_user(scanner);
                         break;
                     case 3:
+                        applicants.clear();
+                        Applicant.nextId = -1;
+                        officers.clear();
+                        HDB_Officer.nextId = -1;
+                        managers.clear();
+                        HDB_Manager.nextId = -1;
+                        projects.clear();
+                        Project.nextId = -1;
+                        enquiries.clear();
+                        Enquiry.nextId = -1;
+                        applications.clear();
+                        BTOapplication.nextId =-1;
+                        flats.clear();
                         System.out.println("Loading data from excel sheets...");
                         //to test on your own system, change the file paths to match those of yours
                         load_data("SC2002/Project/files/ManagerList.csv", 'm');  // First
@@ -74,7 +87,7 @@ public class BTOsystem {
         } while (choice != 4);
     }
     public static void login(Scanner sc) {
-        if (applicants.size() == 0) {
+        if (applicants.size()+officers.size()+managers.size() == 0) {
             menu.printloginError();
         } else {
             sc.nextLine();
@@ -318,7 +331,7 @@ public class BTOsystem {
                 }
 
                 // Now properly parse the officer names
-                String[] project_officer = officerField.replace("\"", "").split("-");
+                String[] project_officer = officerField.replace("\"", "").split(",");
                 System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
 
                 for (String officerName : project_officer) {
@@ -329,7 +342,7 @@ public class BTOsystem {
 
                             // off.registerForProject(a);
                             // HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
-                            officers.add(off);
+                            // officers.add(off);
                             a.addOfficer(off);
                             // a.assignOfficer(off);
                             // a.handleOfficerRegistration();
