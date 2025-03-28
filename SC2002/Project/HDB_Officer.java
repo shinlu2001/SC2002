@@ -1,17 +1,16 @@
 package SC2002.Project;
 
-import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-// merge test
+
 public class HDB_Officer extends Applicant {
     private String type="Officer";
     private static int hdb_off_id = -1;
     private int officer_id;
     protected String registrationStatus;
     protected Project officerProject;
-    private static List<HDB_Officer> officerList = new ArrayList<>();
+    // private static List<HDB_Officer> officerList = new ArrayList<>();
 
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
@@ -22,7 +21,7 @@ public class HDB_Officer extends Applicant {
     public int getOfficerId(){
         return officer_id;
     }
-    
+
     Scanner sc = new Scanner(System.in);
     public void start_menu(Scanner scanner) {
         int choice = 0;
@@ -180,15 +179,15 @@ public class HDB_Officer extends Applicant {
         enquiry.setResponse(response);;
     }
 
-    public static List<HDB_Officer> getOfficerList()
-    {
-        return officerList;
-    }
+    // public static List<HDB_Officer> getBTOsystem.officers()
+    // {
+    //     return officerList;
+    // }
 
-    public static void setOfficerList(List<HDB_Officer> newList)
-    {
-        officerList = newList;
-    }
+    // public static void setOfficerList(List<HDB_Officer> newList)
+    // {
+    //     officerList = newList;
+    // }
 
     // public String getRegistrationStatus()
     // {
@@ -217,7 +216,8 @@ public class HDB_Officer extends Applicant {
         }
 
         if (registrationStatus.equals("Unregistered")) {
-            officerList.add(this);
+            BTOsystem.officers.add(this);
+            // officerList.add(this);
             officerProject = project;
             registrationStatus = "Pending";
             System.out.println("Registration for " + project.getProjectName() + " successful. Registration request has been sent to the HDB Manager for approval.");

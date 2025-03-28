@@ -1,5 +1,5 @@
 package SC2002.Project;
-//ellooooooooooooooo
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -12,9 +12,8 @@ public class HDB_Manager extends User {
     private int manager_id;
     private String type="MANAGER";
 
-    protected static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
+    //protected static List<Project> allProjects = new ArrayList<>();  // Static list to store all projects - for manager to view all projects
     protected List<Project> managerProjects = new ArrayList<>();  // List to store own projects - for manager to view own projects
-    // private List<Project> projects; //store the projects list //what is this list for? if want to access all projects in system use BTOsystem.getProjects(), this will return you the entire project list, dont need to make a new one -meyling
     
     // static Scanner scan = new Scanner(System.in);
     public HDB_Manager(String nric, String firstname, String lastname, String marital_status, int age) {
@@ -121,7 +120,7 @@ public class HDB_Manager extends User {
                                 HDB_Officer officer = null;
                             
                                 // Find the officer by first name
-                                for (HDB_Officer o : HDB_Officer.getOfficerList()) {
+                                for (HDB_Officer o : BTOsystem.officers) {
                                     if (o.getOfficerId() == officerId) {
                                         officer = o;
                                         break;
@@ -221,7 +220,8 @@ public class HDB_Manager extends User {
         
         // Find project in allProjects
         Project project = null;
-        for (Project p : allProjects) {
+        // for (Project p : allProjects) {
+        for (Project p : BTOsystem.projects) {
             if (p.getProjectID() == projectID) {
                 project = p;
                 break;
@@ -445,7 +445,8 @@ public class HDB_Manager extends User {
                                 openDate, closeDate, false, totalOfficerSlots);
         project.setManager(this);  // assign the current manager
         managerProjects.add(project);  // Add the project to the manager's list
-        allProjects.add(project);      // Add the project to the global list
+        // allProjects.add(project);      // Add the project to the global list
+        BTOsystem.projects.add(project);      // Add the project to the global list
         System.out.println("---------------------------------------------------");
         System.out.println(projectName + " successfully created with ID: " + project.getProjectID());
     
@@ -481,11 +482,13 @@ if (!managerProjects.isEmpty())
         System.out.println("               ALL PROJECTS");
         System.out.println("============================================");
         
-        if (!allProjects.isEmpty())
+        // if (!allProjects.isEmpty())
+        if (!BTOsystem.projects.isEmpty())
                 {
                     System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
                     System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
-                    for (Project p : allProjects) {
+                    // for (Project p : allProjects) {
+                    for (Project p : BTOsystem.projects) {
                         System.out.println(p);
                     }
                 }
@@ -499,7 +502,7 @@ if (!managerProjects.isEmpty())
     {
         int option = 0;
         // for (Project p: managerProjects)
-        for (Project p: allProjects)
+        for (Project p: BTOsystem.projects)
         {
             // if (p.getProjectName().equals(projectName))
             if (p.equals(project))
@@ -807,10 +810,12 @@ if (!managerProjects.isEmpty())
     public void deleteProject(Project project)
     {
         managerProjects.remove(project);
-        allProjects.remove(project);
+        // allProjects.remove(project);
+        BTOsystem.projects.remove(project);
 
         // Unregister officer who had their project deleted
-        List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
+        List<HDB_Officer> officerList = BTOsystem.officers;
+        //BTOsystem.officers.remove()
         List<HDB_Officer> officersToRemove = new ArrayList<>(); // list to ollect officers to be removed
         for (HDB_Officer officer : officerList)
         {
@@ -873,7 +878,9 @@ if (!managerProjects.isEmpty())
         System.out.println("\n============================================================");
         System.out.println("                    OFFICER REGISTRATION");
         System.out.println("============================================================");
-        List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
+        List<HDB_Officer> officerList = BTOsystem.officers;
+        // List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
+        
         if (!officerList.isEmpty())
         {
             System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");

@@ -36,9 +36,9 @@ public class Project {
             visibility=true;
         }
     }
-    public void assignOfficer(HDB_Officer off) {
-        assignedOfficers.add(off);
-    }
+    // public void assignOfficer(HDB_Officer off) {
+    //     assignedOfficers.add(off);
+    // }
     public void setManager(HDB_Manager man) {
         this.manager = man;
     }

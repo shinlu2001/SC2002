@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class BTOsystem {
+    public static final Project officerProject = null;
     protected static List<Applicant> applicants = new ArrayList<>();      //protected?
     protected static List<HDB_Officer> officers = new ArrayList<>();    //protected?
     protected static List<HDB_Manager> managers = new ArrayList<>();      //protected?
@@ -174,11 +175,24 @@ public class BTOsystem {
                 int choice = sc.nextInt();
                 System.out.println("--------------------------------");
                 switch (choice) {
-                    case 1:
+                    case 1 -> {
+                        //applicant
                         Applicant a = new Applicant(nric, firstname, lastname, mar_stat, age);
                         applicants.add(a);
-                        System.out.println("User created. Proceed to log in.");
-                        break;
+                        System.out.println("Applicant created. Proceed to log in.");
+                    }
+                    case 2 -> {
+                        // officer
+                        HDB_Officer o = new HDB_Officer(nric, firstname, lastname, mar_stat, age);
+                        officers.add(o);
+                        System.out.println("Officer created. Proceed to log in.");
+                    }
+                    case 3 -> {
+                        //manager
+                        HDB_Manager m = new HDB_Manager(nric, firstname, lastname, mar_stat, age);
+                        managers.add(m);
+                        System.out.println("Manager created. Proceed to log in.");
+                    }
                 }
                 break;
             } catch (InputMismatchException e) {
@@ -266,8 +280,7 @@ public class BTOsystem {
                     if (man.get_firstname().equals(row[10])) {
                         a.setManager(man);
                         man.managerProjects.add(a);
-                        // HDB_Manager.getAllProjects().add(a);
-                        HDB_Manager.allProjects.add(a);
+                        
                         break;
                     }
                 }
@@ -305,7 +318,7 @@ public class BTOsystem {
                 }
 
                 // Now properly parse the officer names
-                String[] project_officer = officerField.replace("\"", "").split(",");
+                String[] project_officer = officerField.replace("\"", "").split("-");
                 System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
 
                 for (String officerName : project_officer) {
@@ -315,8 +328,10 @@ public class BTOsystem {
                         if (off.get_firstname().equalsIgnoreCase(officerName)) {
 
                             // off.registerForProject(a);
-                            HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
+                            // HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
+                            officers.add(off);
                             a.addOfficer(off);
+                            // a.assignOfficer(off);
                             // a.handleOfficerRegistration();
                             System.out.println("Assigned officer: " + off.get_firstname());
                             break;
@@ -337,7 +352,8 @@ public class BTOsystem {
                 }
             
                 projects.add(a);
-                System.out.println(HDB_Manager.allProjects);
+                // System.out.println(HDB_Manager.allProjects);
+                System.out.println(projects);
             }
         }
     }
