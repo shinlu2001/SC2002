@@ -7,6 +7,7 @@ public class BTOapplication {
     // private String applicationStatus;
     private boolean withdrawalRequested;
     private List<BTOapplication> approvedApplications = new ArrayList<>();
+    private static List<BTOapplication> applicationList = new ArrayList<>();
     //--------------------------------------------------
     private static int nextId = 1;   // auto-incrementing ID
     private int applicationId;
@@ -14,13 +15,13 @@ public class BTOapplication {
     // References to the applicant and project
     private Applicant applicant;
     private HDB_Manager manager;
-    private Project project;
+    private Project project;    // protected or???
     
     // The flat type the applicant is applying for (e.g., "2-Room", "3-Room")
     private String flatType;
     
     // Application status (e.g., "Pending", "Successful", "Booked", "Withdrawn", etc.)
-    private String status;
+    private String status;  // protected??
 
     /**
      * Constructor to create a new BTOapplication.
@@ -34,7 +35,7 @@ public class BTOapplication {
         this.applicant = applicant;
         this.project = project;
         this.flatType = flatType;
-        this.status = "Pending"; // default status
+        this.status = "Unregistered"; // default status
     }
     // manager constructor version of btoapplication, for the sake of running tests
     // implement the actual changes later
@@ -43,7 +44,7 @@ public class BTOapplication {
         this.manager = manager;
         this.project = project;
         this.flatType = flatType;
-        this.status = "Pending"; // default status
+        this.status = "Unregistered"; // default status
     }
     //---------------------add--------------------------
     // public void setApplicationStatus(String applicationStatus)
@@ -55,6 +56,10 @@ public class BTOapplication {
     //     return this.applicationStatus;
     // }
 
+    public static  List<BTOapplication> getApplicationList(){
+        return applicationList;
+    }
+    
     public boolean getwithdrawalRequested()
     {
         return withdrawalRequested;
@@ -115,5 +120,34 @@ public class BTOapplication {
         System.out.println("Flat Type: " + flatType);
         System.out.println("Status: " + status);
         System.out.println("===========================");
+    }
+
+    public void registerForProject(Project project) {
+        if (project == null)
+        {
+            System.out.println("Project does not exit. Registration unsuccessful.");
+                return;
+        }
+
+        if (status.equals("Unregistered")) {
+            applicationList.add(this);
+            project = project;
+            status = "Pending";
+            System.out.println("Registration for " + project.getProjectName() + " successful. Registration request has been sent to the HDB Manager for approval.");
+        } else {
+            switch (status) {
+                case "Approved":
+                    System.out.println("You are already registered for a project.");
+                    break;
+                
+                case "Pending":
+                    System.out.println("You are already have a pending approval for a project.");
+                    break;
+            
+                default:
+                    break;
+            }
+            // System.out.println("You are already registered or have a pending approval for a project.");
+        }
     }
 }

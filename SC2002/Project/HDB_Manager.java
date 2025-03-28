@@ -135,16 +135,16 @@ public class HDB_Manager extends User {
                                     System.out.println("Error: Officer not found.");
                                 }
                             }
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                             
                         case 8:     // handle BTO registration - handleBTOapplication(projectToEdit, application, type)
-                            // System.out.print("Enter the Project ID to manage: ");
-                            // // find if project exists in allProjects then check if the project is under the current manager
-                            // Project projectForBTO = findAndValidateProject(sc);
+                            System.out.print("Enter the Project ID to manage: ");
+                            // find if project exists in allProjects then check if the project is under the current manager
+                            Project projectForBTO = findAndValidateProject(sc);
 
-                            // System.out.println("Enter Applicant's ID: ");
-                            // String applicationId = sc.nextLine();
+                            System.out.println("Enter Applicant's ID: ");
+                            String applicationId = sc.nextLine();
 
                             // for (BTOsystem a : BTOsystem.applicants){
                             //     if (a.getFlatType().equalsIgnoreCase(applicationId))
@@ -176,7 +176,7 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 10:     // generate appplicant report - generateReport(applicationList)
-
+                            generateReport(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         
@@ -870,15 +870,14 @@ if (!managerProjects.isEmpty())
     // View officer registration under them (manager)
     public void viewOfficerRegistration()
     {
-        System.out.println("\n============================================");
-        System.out.println("            OFFICER REGISTRATION");
-        System.out.println("============================================");
-
+        System.out.println("\n============================================================");
+        System.out.println("                    OFFICER REGISTRATION");
+        System.out.println("============================================================");
         List<HDB_Officer> officerList = HDB_Officer.getOfficerList();
         if (!officerList.isEmpty())
         {
-            System.out.printf("%-15s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
-            System.out.println("---------------------------------------------------");
+            System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
+            System.out.println("------------------------------------------------------------");
             for (HDB_Officer officer : officerList)
             {   
                 // View all officer registration (including projects under other managers)
@@ -886,7 +885,7 @@ if (!managerProjects.isEmpty())
                 if (assignedProject != null && assignedProject.getManager() == this) 
                 {
                     // Only display officers assigned to projects managed by the current manager
-                    System.out.printf("%-15s %-20s %-15s %-20s%n", officer.getOfficerId(), officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
+                    System.out.printf("%-10s %-20s %-15s %-20s%n", officer.getOfficerId(), officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
                 }
             }
         }
@@ -1004,18 +1003,45 @@ if (!managerProjects.isEmpty())
         }
     }
     
-    public void generateReport(List<BTOapplication> applicationList, Scanner sc)
+    public void generateReport(Scanner sc)
     {
-        if (applicationList.isEmpty()) {
-            System.out.println("No applications available.");
-            return;
-        }
+        // BTOapplication.get_details();   // helpz
+        // OR
+
+        // List<BTOapplication> applicationList = BTOapplication.getApplicationList();
+
+        // if (applicationList.isEmpty()) {
+        //     System.out.println("No applications available.");
+        //     return;
+        // }
+
+        // // View application list
+        // if (!applicationList.isEmpty())
+        // {
+        //     System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
+        //     System.out.println("------------------------------------------------------------");
+        //     for (BTOapplication application : applicationList)
+        //     {   
+        //         // View all officer registration (including projects under other managers)
+        //         Project assignedProject = application.getProject();
+        //         if (assignedProject != null && assignedProject.getManager() == this) 
+        //         {
+        //             // Only display officers assigned to projects managed by the current manager
+        //             System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getProjectID());
+        //         }
+        //     }
+        // }
+        // else{
+        //     System.out.println("No applications available.");
+        // }
+
 /*         System.out.println("\n---- Generate Report ----");
         System.out.println("1. View All Applicants");
         System.out.println("2. Filter by Marital Status");
         System.out.println("3. Filter by Flat Type");
         System.out.println("4. Filter by Both Marital Status & Flat Type");
         System.out.println("Enter your choice: "); */
+
         menu.printReportMenu();
         int choice = sc.nextInt();
         sc.nextLine(); // Consume newline

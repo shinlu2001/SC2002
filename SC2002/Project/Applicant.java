@@ -34,6 +34,7 @@ public class Applicant extends User {
                         } else {
                             // view current application 
                             // application.getDetails;
+                            // application.registerForProject(project); //helpz - yh
                             System.out.println("============================================");
                         }
                         break;
