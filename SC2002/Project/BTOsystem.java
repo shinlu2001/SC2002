@@ -188,23 +188,30 @@ public class BTOsystem {
                 int choice = sc.nextInt();
                 System.out.println("--------------------------------");
                 switch (choice) {
-                    case 1 -> {
+                    case 1: {
                         //applicant
                         Applicant a = new Applicant(nric, firstname, lastname, mar_stat, age);
                         applicants.add(a);
                         System.out.println("Applicant created. Proceed to log in.");
+                        break;
                     }
-                    case 2 -> {
+                    case 2: {
                         // officer
                         HDB_Officer o = new HDB_Officer(nric, firstname, lastname, mar_stat, age);
                         officers.add(o);
                         System.out.println("Officer created. Proceed to log in.");
+                        break;
                     }
-                    case 3 -> {
+                    case 3: {
                         //manager
                         HDB_Manager m = new HDB_Manager(nric, firstname, lastname, mar_stat, age);
                         managers.add(m);
                         System.out.println("Manager created. Proceed to log in.");
+                        break;
+                    }
+                    default: {
+                        System.out.println("Invalid choice!");
+                        break;
                     }
                 }
                 break;
