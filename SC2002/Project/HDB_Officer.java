@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-
+// merge test
 public class HDB_Officer extends Applicant {
     private String type="Officer";
     private static int hdb_off_id = -1;
