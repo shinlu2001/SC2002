@@ -44,8 +44,7 @@ public class Menu {
                 "6. Manage enquiries",
                 "7. View account details",
                 "8. Change account password",
-                "9. Apply to become an officer",
-                "10. Log out and return to main program",
+                "9. Log out and return to main program",
                 "Enter your choice: ");
         this.managerMenu = Arrays.asList(
                 "1. Create a Project",
