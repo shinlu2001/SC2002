@@ -66,17 +66,17 @@ public class BTOsystem {
                     case 3:
                         // clearScreen();
                         applicants.clear();
-                        // Applicant.nextId = -1;
+                        Applicant.nextId = -1;
                         officers.clear();
-                        // HDB_Officer.nextId = -1;
+                        HDB_Officer.nextId = -1;
                         managers.clear();
-                        // HDB_Manager.nextId = -1;
+                        HDB_Manager.nextId = -1;
                         projects.clear();
-                        // Project.nextId = -1;
+                        Project.nextId = -1;
                         enquiries.clear();
-                        // Enquiry.nextId = -1;
+                        Enquiry.nextId = -1;
                         applications.clear();
-                        // BTOapplication.nextId =-1;
+                        BTOapplication.nextId =-1;
                         flats.clear();
                         System.out.println("Loading data from excel sheets...");
                         //to test on your own system, change the file paths to match those of yours
