@@ -3,12 +3,21 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+// import java.security.SecureRandom;
+// import java.util.concurrent.atomic.AtomicInteger;
 
 public class BTOsystem {
-    public static void clearScreen() {
-        System.out.print("\033[H\033[2J");  
-        System.out.flush();
-    }
+    // private static final SecureRandom random = new SecureRandom();
+    // private static final AtomicInteger counter = new AtomicInteger(0);
+
+    // public static int generateUniqueId() {
+    //     int timePart = (int) (System.currentTimeMillis() % 10000); // Last 4 digits of time
+    //     int count = counter.getAndIncrement() % 10; // Rolling counter (0-9)
+    //     int randomPart = random.nextInt(10); // Single random digit (0-9)
+
+    //     return timePart * 10 + count + randomPart; // 5-digit unique ID
+    // }
+
     public static final Project officerProject = null;
     protected static List<Applicant> applicants = new ArrayList<>();      //protected?
     protected static List<HDB_Officer> officers = new ArrayList<>();    //protected?
@@ -57,17 +66,17 @@ public class BTOsystem {
                     case 3:
                         // clearScreen();
                         applicants.clear();
-                        Applicant.nextId = -1;
+                        // Applicant.nextId = -1;
                         officers.clear();
-                        HDB_Officer.nextId = -1;
+                        // HDB_Officer.nextId = -1;
                         managers.clear();
-                        HDB_Manager.nextId = -1;
+                        // HDB_Manager.nextId = -1;
                         projects.clear();
-                        Project.nextId = -1;
+                        // Project.nextId = -1;
                         enquiries.clear();
-                        Enquiry.nextId = -1;
+                        // Enquiry.nextId = -1;
                         applications.clear();
-                        BTOapplication.nextId =-1;
+                        // BTOapplication.nextId =-1;
                         flats.clear();
                         System.out.println("Loading data from excel sheets...");
                         //to test on your own system, change the file paths to match those of yours
