@@ -31,21 +31,21 @@ public class BTOapplication {
      * @param flatType  the flat type chosen (e.g., "2-Room" or "3-Room")
      */
     public BTOapplication(Applicant applicant, Project project, String flatType) {
-        this.applicationId = nextId++;
+        this.applicationId = ++nextId;
         this.applicant = applicant;
         this.project = project;
         this.flatType = flatType;
-        this.status = "Unregistered"; // default status
+        this.status = "Pending"; // default status
     }
     // manager constructor version of btoapplication, for the sake of running tests
     // implement the actual changes later
-    public BTOapplication(HDB_Manager manager, Project project, String flatType) {
-        this.applicationId = nextId++;
-        this.manager = manager;
-        this.project = project;
-        this.flatType = flatType;
-        this.status = "Unregistered"; // default status
-    }
+    // public BTOapplication(HDB_Manager manager, Project project, String flatType) {
+    //     this.applicationId = ++nextId;
+    //     this.manager = manager;
+    //     this.project = project;
+    //     this.flatType = flatType;
+    //     this.status = "Unregistered"; // default status
+    // }
     //---------------------add--------------------------
     // public void setApplicationStatus(String applicationStatus)
     // {
@@ -63,6 +63,11 @@ public class BTOapplication {
     public boolean getwithdrawalRequested()
     {
         return withdrawalRequested;
+    }
+
+    public void withdraw()
+    {
+        withdrawalRequested = true;
     }
 
     public List<BTOapplication> getapprovedApplications()
@@ -113,13 +118,13 @@ public class BTOapplication {
         System.out.println("Application ID: " + applicationId);
         if (applicant != null) {
             System.out.println("Applicant: " 
-                + applicant.get_firstname() + " " + applicant.get_lastname()
-                + " (NRIC: " + applicant.get_nric() + ")");
+                + applicant.get_firstname() + " " + applicant.get_lastname());
+            System.out.println("NRIC: " + applicant.get_nric());
+            System.out.println("Project: " + getProjectName());
+            System.out.println("Flat Type: " + flatType);
+            System.out.println("Status: " + status);
         }
-        System.out.println("Project: " + getProjectName());
-        System.out.println("Flat Type: " + flatType);
-        System.out.println("Status: " + status);
-        System.out.println("===========================");
+        
     }
 
     public void registerForProject(Project project) {

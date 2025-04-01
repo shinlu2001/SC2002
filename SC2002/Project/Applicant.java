@@ -13,8 +13,10 @@ public class Applicant extends User {
         super(nric, firstname, lastname, marital_status, age);
         applicantID = ++nextId;
     }
-
-    public void start_menu(Scanner scanner) {
+    enum ApplicantOption {
+        APPLY, VIEW_APPLICATION, VIEW_ELIGIBLE, VIEW_LISTINGS, WITHDRAW, ENQUIRY, ACCOUNT, CHANGE_PASSWORD, APPLY_OFFICER, EXIT;
+    }
+    public void start_menu(Scanner sc) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
         int choice=0;
         do {
@@ -24,93 +26,133 @@ public class Applicant extends User {
                 System.out.println("============================================");
                 menu.printApplicantMenu();
                 
-                choice = scanner.nextInt();
+                choice = sc.nextInt();
                 System.out.println("============================================");
-                switch (choice) {
-                    case 1:
-                        if (application != null) {
-                            System.out.println("You already have an active application. You may not create a new one.");
-                            System.out.println("============================================");
-                        } else {
-                            // view current application 
-                            // application.getDetails;
-                            // application.registerForProject(project); //helpz - yh
-                            System.out.println("============================================");
-                        }
-                        break;
-                    case 2:
-                        if (application == null) {
-                            System.out.println("You have no active application. Please create a new application.");
-                            System.out.println("============================================");
-                        } else {
+                if (choice >= 1 && choice <= ApplicantOption.values().length) {
+                    ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
+                    switch (selectedOption) {
+                        case APPLY:
+                            if (application != null) {
+                                System.out.println("You already have an active application. You may not create a new one.");
+                                System.out.println("============================================");
+                                sc.nextLine();
+                            } else {
+                                System.out.println("Apply for a project");
+                                int count = view_eligible_listings();
+                                if (count==0) {
+                                    System.out.println("You are not eligible to apply for any project.");
+                                    break;
+                                }
+                                System.out.println("Enter ProjectID: ");
+                                int id = sc.nextInt();
+                                sc.nextLine();
+                                Project p = BTOsystem.searchProjectById(id);
+                                if (p==null) {
+                                    System.out.println("No such project.");
+                                } else {
+                                    System.out.println("Enter room type (2-Room, 3-Room, etc): ");
+                                    String roomtype = sc.nextLine();
+                                    if (!getEligibility(roomtype)) {
+                                        System.out.println("Not eligible for this project and room type.");
+                                    } else {
+                                        BTOapplication b = new BTOapplication(this, p, roomtype);
+                                        BTOsystem.applications.add(b);
+                                        System.out.println("Application submitted!");
+                                        application = b;
+                                    }
+                                }
+                            }
+                            break;
+                        case VIEW_APPLICATION:
+                            if (application == null) {
+                                System.out.println("You have no active application. Please create a new application.");
+                                System.out.println("============================================");
+                            } else {
+                                application.get_details();
+                            }
+                            break;
+                        case VIEW_ELIGIBLE:
+                            int count = view_eligible_listings();
+                            if (count==0) {
+                                System.out.println("You are not eligible to apply for any project.");
+                                break;
+                            }
+                        case VIEW_LISTINGS:
+                            view_listings();
+                            
+                            break;
+                        case WITHDRAW:
+                            System.out.println("Withdraw application");
                             application.get_details();
+                            System.out.println("Enter NRIC to confirm withdrawal: ");
+                            String confirm = sc.nextLine();
+                            if (confirm.equals(get_nric())) {
+                                application.withdraw();
+                            } else {
+                                System.out.println("Wrong NRIC, Withdrawal Unsuccessful");
+                            }
                             System.out.println("============================================");
-                        }
-                        break;
-                    case 3:
-                        view_listings();
-                        scanner.nextLine();
-                        break;
-                    case 4:
-                        System.out.println("Withdraw application");
-                        System.out.println("============================================");
-                        break;
-                    case 5:
-                        manage_enquiry(scanner);
-                        scanner.nextLine();
-                        System.out.println("============================================");
-                        break;
-                    case 6:
-                        System.out.println("             Account details");
-                        System.out.println("============================================");
-                        to_string();
-                        System.out.println("============================================");
-                        scanner.nextLine();
-                        break;
-                    case 7:
-                        System.out.println("          Change your password");
-                        System.out.println("============================================");
-                        scanner.nextLine();
-                        System.out.print("Enter current password: ");
-                        String oldpass = scanner.nextLine();
-                        System.out.print("Enter new password: ");
-                        String new_pass1 = scanner.nextLine();
-                        System.out.print("Enter new password again to confirm: ");
-                        String new_pass2 = scanner.nextLine();
-                        // scanner.nextLine();
-                        if (verify_password(oldpass)!=true) {
-                            System.out.println("Current password is wrong. Password change unsuccessful.");
-                        } else if (new_pass1.equals(new_pass2)!=true) {
-                            System.out.println("New passwords do not match.");
-                        } else {
-                            change_password(new_pass2);
-                            System.out.println("Password changed successfully.");
-                        }
-                        System.out.println("============================================");
-                        break;
-                    case 8: //apply to become officer
-                        System.out.println("Application to become a HDB Officer");
-                        System.out.println("============================================");
-                        
-                        break;
-                    case 9:
-                        System.out.println("Logged out. Returning to main menu...");
-                        System.out.println("============================================");
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
+                            break;
+                        case ENQUIRY:
+                            manage_enquiry(sc);
+                            System.out.println("============================================");
+                            break;
+                        case ACCOUNT:
+                            System.out.println("             Account details");
+                            System.out.println("============================================");
+                            to_string();
+                            System.out.println("============================================");
+                            break;
+                        case CHANGE_PASSWORD:
+                            System.out.println("          Change your password");
+                            System.out.println("============================================");
+                            sc.nextLine();
+                            System.out.print("Enter current password: ");
+                            String oldpass = sc.nextLine();
+                            System.out.print("Enter new password: ");
+                            String new_pass1 = sc.nextLine();
+                            System.out.print("Enter new password again to confirm: ");
+                            String new_pass2 = sc.nextLine();
+                            
+                            if (verify_password(oldpass)!=true) {
+                                System.out.println("Current password is wrong. Password change unsuccessful.");
+                            } else if (new_pass1.equals(new_pass2)!=true) {
+                                System.out.println("New passwords do not match.");
+                            } else {
+                                change_password(new_pass2);
+                                System.out.println("Password changed successfully.");
+                            }
+                            System.out.println("============================================");
+                            break;
+                        case APPLY_OFFICER: 
+                            System.out.println("Application to become a HDB Officer");
+                            System.out.println("============================================");
+                            break;
+                        case EXIT:
+                            System.out.println("Logged out. Returning to main menu...");
+                            System.out.println("============================================");
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.");
+                    }
+                sc.nextLine();
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.next(); 
+                sc.nextLine(); 
             }
-        } while (choice != 9);
+        } while (choice != 10);
+    
     }
 
     public void to_string() {
         super.to_string();
         System.out.println("Account type: " + type);
         System.out.println("ApplicantID: " + applicantID);
+    }
+
+    enum EnquiryOption {
+        GENERAL, PROJECT_RELATED, EDIT, VIEW_ALL, DELETE, RETURN;
     }
 
     public void manage_enquiry(Scanner scanner) {
@@ -124,80 +166,81 @@ public class Applicant extends User {
                 menu.printEnquiryMenu();
                 choice = scanner.nextInt();
                 System.out.println("============================================");
-                switch (choice) {
-                    case 1:
-                        scanner.nextLine();
-                        System.out.println("Enquiry: ");
-                        String content = scanner.nextLine();
-                        makeEnquiry(content);
-                        System.out.println("Enquiry sent!");
-                        System.out.println("============================================");
-                        break;
-                    case 2:
-                        view_listings();
-                        System.out.println("Enter ID of project to enquire about: ");
-                        int projectId = scanner.nextInt();
-                        // Project p = BTOsystem.getProjects().get(projectId);
-                        Project p = BTOsystem.projects.get(projectId);
-                        while (p==null) {
-                            System.out.println("Invalid ID, try again: ");
-                            projectId = scanner.nextInt();
-                            // p = BTOsystem.getProjects().get(projectId);
-                            p = BTOsystem.projects.get(projectId);
-                        } 
-                        scanner.nextLine();
-                        System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
-                        String flatType = scanner.nextLine();
-                        System.out.println("Enquiry: ");
-                        String project_content = scanner.nextLine();
-                        makeEnquiry(p, project_content, flatType);
-                        System.out.println("Enquiry sent!");
-                        System.out.println("============================================");
-                        break;
-                    case 3:
-                        System.out.println("Edit enquiry");
-                        viewEditableEnquiry();
-                        System.out.println("Enter ID of enquiry to edit: ");
-                        int id = scanner.nextInt();
-                        // cannot edit enquiries that have been replied to 
-                        Enquiry result = enquiries.stream()
-                            .filter(en -> en.getEnId() == id)
-                            .findFirst()
-                            .orElse(null);
-                        if (result.getStaff()!=null) {
-                            System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
+                if (choice >= 1 && choice <= EnquiryOption.values().length) {
+                    EnquiryOption selectedOption = EnquiryOption.values()[choice - 1];
+                    switch (selectedOption) {
+                        case GENERAL:
+                            scanner.nextLine();
+                            System.out.println("Enquiry: ");
+                            String content = scanner.nextLine();
+                            makeEnquiry(content);
+                            System.out.println("Enquiry sent!");
                             System.out.println("============================================");
                             break;
-                        } 
-                        scanner.nextLine();
-                        System.out.print("Enquiry: ");
-                        String userInput = scanner.nextLine();
-                        // maybe add confirmation?
-                        editEnquiry(id, userInput);
-                        System.out.println("Enquiry edited!");
-                        System.out.println("============================================");
-                        break;
-                    case 4:
-                        System.out.println("All enquiries");
-                        System.out.println("============================================");
-                        view_all_enquiry_for_user();
-                        break;
-                    case 5:
-                        System.out.println("Delete enquiry");
-                        System.out.println("============================================");
-                        view_all_enquiry_for_user();
-                        System.out.print("Enter ID of enquiry to delete: ");
-                        // add confirmation before deleting
-                        int del_id = scanner.nextInt();
-                        deleteEnquiry(del_id);
-                        System.out.println("Enquiry deleted!");
-                        System.out.println("============================================");
-                        break;
-                    case 6:
-                        System.out.println("Returning to applicant menu...");
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please try again.");
+                        case PROJECT_RELATED:
+                            view_listings();
+                            System.out.println("Enter ID of project to enquire about: ");
+                            int projectId = scanner.nextInt();
+                            Project p = BTOsystem.projects.get(projectId);
+                            while (p==null) {
+                                System.out.println("Invalid ID, try again: ");
+                                projectId = scanner.nextInt();
+                                p = BTOsystem.projects.get(projectId);
+                            } 
+                            scanner.nextLine();
+                            System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
+                            String flatType = scanner.nextLine();
+                            System.out.println("Enquiry: ");
+                            String project_content = scanner.nextLine();
+                            makeEnquiry(p, project_content, flatType);
+                            System.out.println("Enquiry sent!");
+                            System.out.println("============================================");
+                            break;
+                        case EDIT:
+                            System.out.println("Edit enquiry");
+                            viewEditableEnquiry();
+                            System.out.println("Enter ID of enquiry to edit: ");
+                            int id = scanner.nextInt();
+                            // cannot edit enquiries that have been replied to 
+                            Enquiry result = enquiries.stream()
+                                .filter(en -> en.getEnId() == id)
+                                .findFirst()
+                                .orElse(null);
+                            if (result.getStaff()!=null) {
+                                System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
+                                System.out.println("============================================");
+                                break;
+                            } 
+                            scanner.nextLine();
+                            System.out.print("Enquiry: ");
+                            String userInput = scanner.nextLine();
+                            // maybe add confirmation?
+                            editEnquiry(id, userInput);
+                            System.out.println("Enquiry edited!");
+                            System.out.println("============================================");
+                            break;
+                        case VIEW_ALL:
+                            System.out.println("All enquiries");
+                            System.out.println("============================================");
+                            view_all_enquiry_for_user();
+                            break;
+                        case DELETE:
+                            System.out.println("Delete enquiry");
+                            System.out.println("============================================");
+                            view_all_enquiry_for_user();
+                            System.out.print("Enter ID of enquiry to delete: ");
+                            // add confirmation before deleting
+                            int del_id = scanner.nextInt();
+                            deleteEnquiry(del_id);
+                            System.out.println("Enquiry deleted!");
+                            System.out.println("============================================");
+                            break;
+                        case RETURN:
+                            System.out.println("Returning to applicant menu...");
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.");
+                    }
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
@@ -216,23 +259,84 @@ public class Applicant extends User {
     }
 
     public void view_listings() {
-        System.out.println("\n================================================================================================================");
+        System.out.println("\n===================================================================================================================");
         System.out.println("                                                  ALL PROJECTS");
-        System.out.println("================================================================================================================");
+        System.out.println("===================================================================================================================");
         System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
-        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        System.err.println("-------------------------------------------------------------------------------------------------------------------");
         // List<Project> list = BTOsystem.getProjects();
         List<Project> list = BTOsystem.projects;
         // System.out.println("DEBUG: Number of projects retrieved: " + list.size());
         for (Project p : list) {
-            p.toggle_visibility(); //default is false, so second toggle will become false again (to test only)
+            // p.toggle_visibility(); //default is false, so second toggle will become false again (to test only)
             if (p.isVisible()) {
                 // there are details we want to keep hidden from an applicant e.g. manager name, visibility, etc. so cannot just use toString()
                 System.out.print(viewProjectsApplicant(p));
                 
             }
         }
+        System.err.println("-------------------------------------------------------------------------------------------------------------------");
+    }
+
+    public int view_eligible_listings() {
+        System.out.println("\n================================================================================================================");
+        System.out.println("                                                  ELIGIBLE PROJECTS");
+        System.out.println("================================================================================================================");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
         System.err.println("----------------------------------------------------------------------------------------------------------------");
+        List<Project> list = BTOsystem.projects;
+        int count = 0;
+        for (Project p : list) {
+            if (p.isVisible()) {
+                String str = viewEligibleProjectsApplicant(p);
+                if (!str.isBlank()){
+                    count++;
+                }
+                System.out.print(str);
+            }
+        }
+        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        return count;
+    }
+
+    public String viewEligibleProjectsApplicant(Project p) {
+        StringBuilder sb = new StringBuilder();
+        // get all the flat-types applicants are eligible for
+        List<String[]> eflatType = new ArrayList<>(); // max 10 flat-types per project
+
+        for (String ft:p.getFlatTypes()) {
+            if (getEligibility(ft)) {
+                eflatType.add(new String[]{ft, String.valueOf(p.getFlatTypes().indexOf(ft))});
+            }
+        }
+        
+        if (!eflatType.isEmpty()) {
+            sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+                p.getProjectID(),
+                p.getProjectName(),
+                p.getneighbourhood(),
+                (eflatType.size() > 0 && getEligibility(p.getFlatTypes().get(0))) ? 
+                    eflatType.get(0)[0] + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1])) - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(0)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1])) : "",
+                p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(0)[0]) : 0,
+                p.getOpenDate(), 
+                p.getCloseDate(), 
+                "Eligible"
+            ));
+        }
+
+    // additional lines for remaining flat types
+    for (int i = 1; i < eflatType.size(); i++) {
+    sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+        "", "", "",  // empty project name and neighbourhood
+        eflatType.get(i) + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1])) - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(i)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1])),
+        p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(i)[0]) : 0,
+        "", "", "Eligible"));  // empty other fields  
+    }
+
+    // add blank line between projects
+    sb.append("\n");
+
+    return sb.toString();
     }
 
     public String viewProjectsApplicant(Project p) {
@@ -241,7 +345,7 @@ public class Applicant extends User {
             p.getProjectID(),
             p.getProjectName(),
             p.getneighbourhood(),
-            p.getFlatTypes().size() > 0 ? 
+            (p.getFlatTypes().size() > 0) ? 
                 p.getFlatTypes().get(0) + ": " + (p.getTotalUnits().get(0) - p.getAvailableUnits().get(0)) + "/" + p.getTotalUnits().get(0) : "",
             p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(0)) : 0,
             p.getOpenDate(), 
@@ -255,7 +359,7 @@ public class Applicant extends User {
             "", "", "",  // Empty project name and neighbourhood
             p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
             p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(i)) : 0,
-            "", "", getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible"));  // Empty other fields
+            "", "", getEligibility(p.getFlatTypes().get(i)) ? "Eligible" : "Not Eligible"));  // Empty other fields
     }
 
     // Add blank line between projects

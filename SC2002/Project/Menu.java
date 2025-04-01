@@ -20,7 +20,7 @@ public class Menu {
                 "Please choose an option:",
                 "1. Log in",
                 "2. Register user",
-                "3. Fetch data from excel sheets",
+                "3. Fetch data from excel sheets (CAUTION: Entire database will be wiped)",
                 "4. Exit program",
                 "Enter your choice: ");
         this.loginError = Arrays.asList(
@@ -38,13 +38,14 @@ public class Menu {
                 "Please choose an option:",
                 "1. Apply for a project",
                 "2. View active application",
-                "3. View all listings",
-                "4. Withdraw application",
-                "5. Manage enquiries",
-                "6. View account details",
-                "7. Change account password",
-                "8. Apply to become an officer",
-                "9. Log out and return to main program",
+                "3. View only eligible listings",
+                "4. View all listings",
+                "5. Withdraw application",
+                "6. Manage enquiries",
+                "7. View account details",
+                "8. Change account password",
+                "9. Apply to become an officer",
+                "10. Log out and return to main program",
                 "Enter your choice: ");
         this.managerMenu = Arrays.asList(
                 "1. Create a Project",
@@ -78,7 +79,7 @@ public class Menu {
                 "Enter your choice: ");
         this.enquiryMenu = Arrays.asList(
                 "Please choose an option:",
-                "1. Make enquiry (select if not regarding a specific project)",
+                "1. Make General enquiry (select if not regarding a specific project)",
                 "2. Make Project-related enquiry",
                 "3. Edit enquiry",
                 "4. View all enquiry",

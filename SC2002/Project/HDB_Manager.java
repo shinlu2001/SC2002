@@ -24,6 +24,7 @@ public class HDB_Manager extends User {
     }
     public void to_string() {
         super.to_string();
+        System.out.println("Account type: " + type);
         System.out.println("ManagerID: " + manager_id);
     }
     // public List<Project> getManagerProjects() {
@@ -190,7 +191,6 @@ public class HDB_Manager extends User {
                             System.out.println("---------------------------------------------------");
                             to_string();
                             System.out.println("---------------------------------------------------");
-                            sc.nextLine();
                             break;
                         case 14:
                             System.out.println("---------------------------------------------------");
@@ -198,12 +198,13 @@ public class HDB_Manager extends User {
                             System.out.println("---------------------------------------------------");
                             loop = false;  // Exit the loop
                             break;
-                        
                     default:    // executed when input entered is some int that is not btw 1-13
                         System.out.println("---------------------------------------------------");
                         System.out.println("Error: Invalid choice. Please try again.");
                         System.out.println("---------------------------------------------------");
+                
                 }
+                // sc.nextLine();
             } catch (InputMismatchException e) {    // executed when input entered is any type of input (str,char, etc)
                 System.out.println("---------------------------------------------------");
                 System.out.println("Error: Invalid input. Please try again.");

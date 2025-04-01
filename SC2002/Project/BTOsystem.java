@@ -5,6 +5,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class BTOsystem {
+    public static void clearScreen() {
+        System.out.print("\033[H\033[2J");  
+        System.out.flush();
+    }
     public static final Project officerProject = null;
     protected static List<Applicant> applicants = new ArrayList<>();      //protected?
     protected static List<HDB_Officer> officers = new ArrayList<>();    //protected?
@@ -32,20 +36,26 @@ public class BTOsystem {
             
             System.out.println("Welcome to the BTO management system!");
             int choice=0;
-            Scanner scanner = new Scanner(System.in);
+            Scanner sc = new Scanner(System.in);
             do {
                 try {
-                    menu.printWelcomeMenu();
-                choice = scanner.nextInt();
+                menu.printWelcomeMenu();
+                choice = sc.nextInt();
+
+                // clearScreen();
                 System.out.println("--------------------------------");
+                
                 switch (choice) {
                     case 1:
-                        login(scanner);
+                        // clearScreen();
+                        login(sc);
                         break;
                     case 2:
-                        register_user(scanner);
+                        // clearScreen();
+                        register_user(sc);
                         break;
                     case 3:
+                        // clearScreen();
                         applicants.clear();
                         Applicant.nextId = -1;
                         officers.clear();
@@ -70,19 +80,21 @@ public class BTOsystem {
                         System.out.println("--------------------------------");
                         break;
                     case 4:
+                        // clearScreen();
                         System.out.println("Exiting program...");
                         System.out.println("--------------------------------");
-                        scanner.close();
+                        sc.close();
                         break;
                     default:
                         System.out.println("Error: Invalid choice. Please try again.");
                         System.out.println("--------------------------------");
                 }
+                sc.nextLine();
             } catch (InputMismatchException e) {
                 System.out.println("--------------------------------");
                 System.out.println("Error: Invalid input. Please enter a number.");
                 System.out.println("--------------------------------");
-                scanner.next(); 
+                sc.next(); 
             }
         } while (choice != 4);
     }
@@ -129,7 +141,15 @@ public class BTOsystem {
         }
         return null;
     }
-    
+    public static Project searchProjectById(int id) {
+        for (Project p : projects) {
+            if (p.getProjectID()== id) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     public static void register_user(Scanner sc) {
         System.out.println("Register new user");
         sc.nextLine();

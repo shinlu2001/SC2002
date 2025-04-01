@@ -160,55 +160,6 @@ public class Project {
             System.out.println("Error: Flat type not found.");
         }
     }
-    // public int getTotal2Room()
-    // {
-    //     return total2Room;
-    // }
-
-    // public int getTotal3Room()
-    // {
-    //     return total3Room;
-    // }
-
-    // public int getavailable2Room() {
-    //     return available2Room;
-    // }
-
-    // public int getavailable3Room() {
-    //     return available3Room;
-    // }
-
-    // public void setTotal2Room(int total2Room) {
-    //     // Calculate the difference and update available rooms
-    //     int difference = total2Room - this.total2Room;
-    //     this.total2Room = total2Room;
-    //     this.available2Room += difference;
-    //     // System.out.println("Updated number of 2-Room units is " + this.total2Room + ".");
-    // }
-
-    // public void setTotal3Room(int total3Room) {
-    //     // Calculate the difference and update available rooms
-    //     int difference = total3Room - this.total3Room;
-    //     this.total3Room = total3Room;
-    //     this.available3Room += difference;
-    //     // System.out.println("Updated number of 3-Room units is " + this.total3Room + ".");
-    // }
-
-    // public void setavailable2Room(int available2Room) {
-    //     if (available2Room < 0) {
-    //         System.out.println("Error: Invalid input. Number of 2-Room units cannot be negative.");
-    //         return;
-    //     }
-    //     this.available2Room = available2Room;
-    // }
-    
-    // public void setavailable3Room(int available3Room) {
-    //     if (available3Room < 0) {
-    //         System.out.println("Error: Invalid input. Number of 3-Room units cannot be negative.");
-    //         return;
-    //     }
-    //     this.available3Room = available3Room;
-    // }
 
     public LocalDate getOpenDate() {
         return openDate;
