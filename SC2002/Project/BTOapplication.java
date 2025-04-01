@@ -8,21 +8,22 @@ public class BTOapplication {
     private boolean withdrawalRequested;
     private List<BTOapplication> approvedApplications = new ArrayList<>();
     private static List<BTOapplication> applicationList = new ArrayList<>();
+    private boolean requestBooking=false;
+    private Flat bookedFlat=null;
     //--------------------------------------------------
     protected static int nextId = -1;   // auto-incrementing ID
-    private int applicationId;
-    
+    private int applicationId;    
     // References to the applicant and project
     private Applicant applicant;
-    private HDB_Manager manager;
     private Project project;    // protected or???
-    
+    private HDB_Manager manager;
+
     // The flat type the applicant is applying for (e.g., "2-Room", "3-Room")
     private String flatType;
     
     // Application status (e.g., "Pending", "Successful", "Booked", "Withdrawn", etc.)
-    private String status;  // protected??
-
+    private String status = "PENDING";  // protected??
+    
     /**
      * Constructor to create a new BTOapplication.
      * 
@@ -31,11 +32,12 @@ public class BTOapplication {
      * @param flatType  the flat type chosen (e.g., "2-Room" or "3-Room")
      */
     public BTOapplication(Applicant applicant, Project project, String flatType) {
-        this.applicationId = ++nextId;
+        applicationId = ++nextId;
         this.applicant = applicant;
         this.project = project;
         this.flatType = flatType;
         this.status = "Pending"; // default status
+        manager=project.getManager();
     }
     // manager constructor version of btoapplication, for the sake of running tests
     // implement the actual changes later
@@ -47,15 +49,19 @@ public class BTOapplication {
     //     this.status = "Unregistered"; // default status
     // }
     //---------------------add--------------------------
-    // public void setApplicationStatus(String applicationStatus)
-    // {
-    //     this.applicationStatus = applicationStatus;
-    // }
+    public void setApplicationStatus(String applicationStatus)
+    {
+        this.status = applicationStatus;
+    }
 
-    // public String getApplicationStatus(){
-    //     return this.applicationStatus;
-    // }
+   public void bookFlat(Flat flat) {
+        bookedFlat = flat;
+   }
 
+    public void requestBooking() {
+        requestBooking=true;
+    }
+    
     public static  List<BTOapplication> getApplicationList(){
         return applicationList;
     }
@@ -97,7 +103,6 @@ public class BTOapplication {
     public String getStatus() {
         return status;
     }
-
     /**
      * Returns the name of the project, or "N/A" if no project is set.
      */
@@ -115,14 +120,25 @@ public class BTOapplication {
      */
     public void get_details() {
         System.out.println("=== Application Details ===");
+        if (withdrawalRequested) {
+            System.out.println("|WITHDRAWAL Requested|");
+        }
         System.out.println("Application ID: " + applicationId);
         if (applicant != null) {
+            
             System.out.println("Applicant: " 
                 + applicant.get_firstname() + " " + applicant.get_lastname());
             System.out.println("NRIC: " + applicant.get_nric());
+            System.out.println("Manager In Charge: " + manager.get_firstname());
             System.out.println("Project: " + getProjectName());
-            System.out.println("Flat Type: " + flatType);
             System.out.println("Status: " + status);
+            System.out.println("Flat Type: " + flatType);
+            
+            if (bookedFlat!=null) {
+                System.out.println("Flat Price: " + bookedFlat.getPrice());
+                System.out.println("Booked FlatID" + bookedFlat.getFlatID());
+            }
+
         }
         
     }
