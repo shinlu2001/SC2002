@@ -199,10 +199,12 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 11:     // view all enquiries (across all projects)
+                            viewAllEnquiries();
                             System.out.println("---------------------------------------------------");
                             break;
                         
                         case 12:     // handle project enquires (view and reply to enquiries for your projects)
+                            handleProjectEnquiries(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         case 13:     //view manager account details
@@ -1144,9 +1146,9 @@ public void viewAllEnquiries() {
     // Ask user if they want to filter
     System.out.println("Filter options:");
     System.out.println("1. View all enquiries");
-    System.out.println("2. View only project-related enquiries");
-    System.out.println("3. View only general (non-project) enquiries");
-    System.out.println("4. View only enquiries for my projects");
+    // System.out.println("2. View only project-related enquiries");
+    System.out.println("2. View only general (non-project) enquiries");
+    System.out.println("3. View only enquiries for my projects");
     
     Scanner sc = new Scanner(System.in);
     int choice = 0;
@@ -1168,15 +1170,15 @@ public void viewAllEnquiries() {
             filteredEnquiries = new ArrayList<>(BTOsystem.enquiries);
             System.out.println("Showing all enquiries in the system");
             break;
-        case 2: // Only project-related
-            for (Enquiry e : BTOsystem.enquiries) {
-                if (e.getProject() != null) {
-                    filteredEnquiries.add(e);
-                }
-            }
-            System.out.println("Showing project-related enquiries only");
-            break;
-        case 3: // Only general (non-project)
+        // case 2: // Only project-related
+        //     for (Enquiry e : BTOsystem.enquiries) {
+        //         if (e.getProject() != null) {
+        //             filteredEnquiries.add(e);
+        //         }
+        //     }
+        //     System.out.println("Showing project-related enquiries only");
+        //     break;
+        case 2: // Only general (non-project)
             for (Enquiry e : BTOsystem.enquiries) {
                 if (e.getProject() == null) {
                     filteredEnquiries.add(e);
@@ -1184,7 +1186,7 @@ public void viewAllEnquiries() {
             }
             System.out.println("Showing general (non-project) enquiries only");
             break;
-        case 4: // Only for my projects
+        case 3: // Only for my projects
             for (Enquiry e : BTOsystem.enquiries) {
                 if (e.getProject() != null && managerProjects.contains(e.getProject())) {
                     filteredEnquiries.add(e);
