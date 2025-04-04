@@ -145,13 +145,13 @@ public class HDB_Manager extends User {
                             if(projectForBTO == null)
                                 break;
 
-                            System.out.println("Enter Applicant's ID: ");
+                            System.out.print("Enter Applicant's ID: ");
                             int applicationId = sc.nextInt();
                             sc.nextLine(); // consume newline
 
-                            String flatType;
+                            String flatType = null;
                             BTOapplication application = null;
-                            for (BTOapplication a : BTOapplication.getApplicationList())
+                            for (BTOapplication a : BTOsystem.applications)
                             {
                                 if (a.getApplicationId() == applicationId){
                                     application = a;
@@ -160,7 +160,11 @@ public class HDB_Manager extends User {
                                 }
                             }
 
-                            if (application != null)
+                            if (application != null){
+                                handleBTOapplication(projectForBTO, application, flatType);
+                            }else {
+                                System.out.println("Error: Application not found.");
+                            }
                             
 
 
@@ -175,7 +179,7 @@ public class HDB_Manager extends User {
                             //     System.out.println("BTO application handling functionality would go here");
                             // }
                         
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
                         case 9:     // handle withdrawel requests - handleWithdrawalRequest(project, application)
