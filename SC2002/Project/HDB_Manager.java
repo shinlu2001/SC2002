@@ -1083,8 +1083,253 @@ if (!managerProjects.isEmpty())
         }
     }
 
-    public void reply_enquiry(Enquiry enquiry, String response) {
-        enquiry.setStaffReply(this);
-        enquiry.setResponse(response);;
+//     public void reply_enquiry(Enquiry enquiry, String response) {
+//         enquiry.setStaffReply(this);
+//         enquiry.setResponse(response);;
+//     }
+// }
+
+public void reply_enquiry(Enquiry enquiry, String response) {
+    if (enquiry == null) {
+        System.out.println("Error: Enquiry not found.");
+        return;
     }
+    
+    if (response == null || response.trim().isEmpty()) {
+        System.out.println("Error: Response cannot be empty.");
+        return;
+    }
+    
+    enquiry.setResponse(response);
+    enquiry.setStaffReply(BTOsystem.currentUser);
+    
+    System.out.println("Successfully replied to enquiry ID: " + enquiry.getEnId());
+}
+
+public void viewAllEnquiries() {
+    System.out.println("\n============================================");
+    System.out.println("              ALL ENQUIRIES");
+    System.out.println("============================================");
+    
+    // First check if there are any enquiries
+    boolean hasEnquiries = false;
+    for (Enquiry enquiry : BTOsystem.enquiries) {
+        hasEnquiries = true;
+        break;
+    }
+    
+    if (!hasEnquiries) {
+        System.out.println("No enquiries found in the system.");
+        return;
+    }
+    
+    // Ask user if they want to filter
+    System.out.println("Filter options:");
+    System.out.println("1. View all enquiries");
+    System.out.println("2. View only project-related enquiries");
+    System.out.println("3. View only general (non-project) enquiries");
+    System.out.println("4. View only enquiries for my projects");
+    
+    Scanner sc = new Scanner(System.in);
+    int choice = 0;
+    try {
+        System.out.print("Enter your choice: ");
+        choice = sc.nextInt();
+        sc.nextLine(); // Consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Showing all enquiries.");
+        choice = 1;
+    }
+    sc.close();
+    
+    List<Enquiry> filteredEnquiries = new ArrayList<>();
+    
+    // Filter based on choice
+    switch (choice) {
+        case 1: // All enquiries
+            filteredEnquiries = new ArrayList<>(BTOsystem.enquiries);
+            System.out.println("Showing all enquiries in the system");
+            break;
+        case 2: // Only project-related
+            for (Enquiry e : BTOsystem.enquiries) {
+                if (e.getProject() != null) {
+                    filteredEnquiries.add(e);
+                }
+            }
+            System.out.println("Showing project-related enquiries only");
+            break;
+        case 3: // Only general (non-project)
+            for (Enquiry e : BTOsystem.enquiries) {
+                if (e.getProject() == null) {
+                    filteredEnquiries.add(e);
+                }
+            }
+            System.out.println("Showing general (non-project) enquiries only");
+            break;
+        case 4: // Only for my projects
+            for (Enquiry e : BTOsystem.enquiries) {
+                if (e.getProject() != null && managerProjects.contains(e.getProject())) {
+                    filteredEnquiries.add(e);
+                }
+            }
+            System.out.println("Showing enquiries for your projects only");
+            break;
+        default:
+            filteredEnquiries = new ArrayList<>(BTOsystem.enquiries);
+            System.out.println("Invalid choice. Showing all enquiries.");
+    }
+    
+    if (filteredEnquiries.isEmpty()) {
+        System.out.println("No enquiries match your filter criteria.");
+        return;
+    }
+    
+    // Display the filtered enquiries
+    System.out.printf("%-5s %-20s %-20s %-30s %-15s%n", 
+            "ID", "Project", "Created By", "Enquiry", "Status");
+    System.out.println("------------------------------------------------------------------------------------");
+    
+    for (Enquiry enquiry : filteredEnquiries) {
+        User creator = enquiry.getCreatedByUser();
+        String creatorName = creator.get_firstname() + " " + creator.get_lastname();
+        
+        System.out.printf("%-5d %-20s %-20s %-30s %-15s%n",
+                enquiry.getEnId(),
+                enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
+                creatorName,
+                truncateText(enquiry.getEnquiry(), 30),
+                enquiry.getResponse().isEmpty() ? "Pending" : "Answered");
+        
+        // If there's a flat type specified
+        if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
+            System.out.println("   Flat Type: " + enquiry.getflatType());
+        }
+        
+        // If there's a response, show it
+        if (!enquiry.getResponse().isEmpty()) {
+            System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
+            if (enquiry.getStaff() != null) {
+                System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + 
+                        enquiry.getStaff().get_lastname());
+            }
+        }
+    }
+}
+
+private String truncateText(String text, int maxLength) {
+    if (text == null) return "N/A";
+    if (text.length() <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength - 3) + "...";
+}
+
+
+public void handleProjectEnquiries(Scanner sc) {
+    System.out.println("\n============================================");
+    System.out.println("            HANDLE ENQUIRIES");
+    System.out.println("============================================");
+    
+    // First ask if the manager wants to handle project-specific or general enquiries
+    System.out.println("1. Handle project-specific enquiries");
+    System.out.println("2. Handle general (non-project) enquiries");
+    
+    int typeChoice;
+    try {
+        System.out.print("Enter your choice: ");
+        typeChoice = sc.nextInt();
+        sc.nextLine(); // Consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Defaulting to project-specific enquiries.");
+        typeChoice = 1;
+        sc.nextLine(); // Clear invalid input
+    }
+    
+    if (typeChoice == 1) {
+        // Handle project-specific enquiries
+        handleProjectSpecificEnquiries(sc);
+    } else if (typeChoice == 2) {
+        // Handle general enquiries
+        handleGeneralEnquiries(sc);
+    } else {
+        System.out.println("Invalid choice. Returning to main menu.");
+    }
+}
+
+private void handleProjectSpecificEnquiries(Scanner sc) {
+    // List projects with pending enquiries
+    List<Project> projectsWithEnquiries = new ArrayList<>();
+    for (Project p : managerProjects) {
+        boolean hasPendingEnquiries = false;
+        for (Enquiry e : BTOsystem.enquiries) {
+            if (e.getProject() != null && e.getProject().equals(p) && e.getResponse().isEmpty()) {
+                hasPendingEnquiries = true;
+                break;
+            }
+        }
+        if (hasPendingEnquiries) {
+            projectsWithEnquiries.add(p);
+        }
+    }
+    
+    if (projectsWithEnquiries.isEmpty()) {
+        System.out.println("No pending enquiries for your projects.");
+        return;
+    }
+    
+    // Rest of the method remains the same as original handleProjectEnquiries()
+    // ...
+}
+
+private void handleGeneralEnquiries(Scanner sc) {
+    // Find general enquiries (those without project)
+    List<Enquiry> generalEnquiries = new ArrayList<>();
+    for (Enquiry e : BTOsystem.enquiries) {
+        if (e.getProject() == null && e.getResponse().isEmpty()) {
+            generalEnquiries.add(e);
+        }
+    }
+    
+    if (generalEnquiries.isEmpty()) {
+        System.out.println("No pending general enquiries.");
+        return;
+    }
+    
+    System.out.println("\nPending general enquiries:");
+    for (int i = 0; i < generalEnquiries.size(); i++) {
+        Enquiry e = generalEnquiries.get(i);
+        User creator = e.getCreatedByUser();
+        System.out.println((i + 1) + ". From: " + creator.get_firstname() + " " + 
+                creator.get_lastname() + " | ID: " + e.getEnId());
+        System.out.println("   Enquiry: " + e.getEnquiry());
+    }
+    
+    // Select an enquiry to respond to
+    int enquiryChoice;
+    while (true) {
+        try {
+            System.out.print("\nSelect an enquiry to respond to (1-" + generalEnquiries.size() + "): ");
+            enquiryChoice = sc.nextInt();
+            sc.nextLine(); // Consume newline
+            
+            if (enquiryChoice > 0 && enquiryChoice <= generalEnquiries.size()) {
+                break;
+            }
+            System.out.println("Error: Please enter a number between 1 and " + generalEnquiries.size());
+        } catch (InputMismatchException e) {
+            System.out.println("Error: Please enter a valid number.");
+            sc.nextLine();
+        }
+    }
+    
+    Enquiry selectedEnquiry = generalEnquiries.get(enquiryChoice - 1);
+    
+    // Respond to the enquiry
+    System.out.println("\nEnquiry: " + selectedEnquiry.getEnquiry());
+    System.out.print("Your response: ");
+    String response = sc.nextLine();
+    
+    reply_enquiry(selectedEnquiry, response);
+    System.out.println("Response submitted successfully.");
+}
 }

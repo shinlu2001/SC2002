@@ -26,6 +26,8 @@ public class BTOsystem {
     protected static List<Enquiry> enquiries = new ArrayList<>();   //protected?
     protected static List<Flat> flats = new ArrayList<>();          //protected?
     protected static List<BTOapplication> applications = new ArrayList<>(); 
+    protected static User currentUser = null;  // Holds the currently logged-in user
+
     // public static List<Project> getProjects() {
     //     return projects;
     // }
