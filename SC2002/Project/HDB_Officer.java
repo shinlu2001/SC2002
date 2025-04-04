@@ -35,7 +35,7 @@ public class HDB_Officer extends Applicant {
                         if (application != null) {
                             System.out.println("You already have an active application. You may not create a new one.");
                         } else {
-                            view_listings();
+                            HDB_Manager.viewAllProjects();
                         }
                         System.out.println("--------------------------------");
                         break;
@@ -48,7 +48,7 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 3:
-                        view_listings();
+                    HDB_Manager.viewAllProjects();
                         scanner.nextLine(); // consume newline
                         break;
                     case 4:
