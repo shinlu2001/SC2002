@@ -181,10 +181,12 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 11:     // view all enquiries (across all projects)
+                            viewAllEnquiries();
                             System.out.println("---------------------------------------------------");
                             break;
                         
                         case 12:     // handle project enquires (view and reply to enquiries for your projects)
+                            handleProjectEnquiries(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         case 13:     //view manager account details
