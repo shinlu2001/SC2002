@@ -1,11 +1,9 @@
 package SC2002.Project;
 
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class HDB_Officer extends Applicant {
-    private String type = "Officer";
+    private String type = "OFFICER";
     protected static int nextId = -1;
     private int officer_id;
     protected String registrationStatus;

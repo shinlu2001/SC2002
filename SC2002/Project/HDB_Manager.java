@@ -1125,7 +1125,7 @@ public void reply_enquiry(Enquiry enquiry, String response) {
     }
     
     enquiry.setResponse(response);
-    enquiry.setStaffReply(BTOsystem.currentUser);
+    enquiry.setStaffReply(this);
     
     System.out.println("Successfully replied to enquiry ID: " + enquiry.getEnId());
 }
