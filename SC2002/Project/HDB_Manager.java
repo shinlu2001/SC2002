@@ -142,6 +142,8 @@ public class HDB_Manager extends User {
                             System.out.print("Enter the Project ID to manage: ");
                             // find if project exists in allProjects then check if the project is under the current manager
                             Project projectForBTO = findAndValidateProject(sc);
+                            if(projectForBTO == null)
+                                break;
 
                             System.out.println("Enter Applicant's ID: ");
                             int applicationId = sc.nextInt();
@@ -153,9 +155,13 @@ public class HDB_Manager extends User {
                             {
                                 if (a.getApplicationId() == applicationId){
                                     application = a;
+                                    flatType = a.getFlatType();
                                     break;
                                 }
                             }
+
+                            if (application != null)
+                            
 
 
                             // for (BTOsystem a : BTOsystem.applicants){
