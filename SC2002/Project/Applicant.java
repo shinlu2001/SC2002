@@ -2,12 +2,11 @@ package SC2002.Project;
 
 import java.util.*;
 
-public class Applicant extends User {
+public class Applicant extends User implements Input {
     protected static int nextId = -1;
     private int applicantID;
     protected BTOapplication application=null;
     private String type="APPLICANT";
-    // protected boolean applyOfficer=false;
     protected List<Enquiry> enquiries = new ArrayList<>();
 
     public Applicant(String nric, String firstname, String lastname, String marital_status, int age) {
@@ -27,8 +26,7 @@ public class Applicant extends User {
                 System.out.println("============================================");
                 menu.printApplicantMenu();
                 
-                choice = sc.nextInt();
-                sc.nextLine();
+                choice = Input.getIntInput(sc);
                 System.out.println("============================================");
                 if (choice >= 1 && choice <= ApplicantOption.values().length) {
                     ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
@@ -37,7 +35,7 @@ public class Applicant extends User {
                             if (application != null) {
                                 System.out.println("You already have an active application. You may not create a new one.");
                                 System.out.println("============================================");
-                                sc.nextLine();
+                                // sc.nextLine();
                             } else {
                                 System.out.println("Apply for a project");
                                 int count = view_eligible_listings();
@@ -46,14 +44,14 @@ public class Applicant extends User {
                                     break;
                                 }
                                 System.out.println("Enter ProjectID: ");
-                                int id = sc.nextInt();
-                                sc.nextLine();
+                                int id = Input.getIntInput(sc);
+                                // sc.nextLine();
                                 Project p = BTOsystem.searchProjectById(id);
                                 if (p==null || !p.isVisible()) {
                                     System.out.println("No such project.");
                                 } else {
                                     System.out.println("Enter room type (2-Room, 3-Room, etc): ");
-                                    String roomtype = sc.nextLine();
+                                    String roomtype = Input.getStringInput(sc);
                                     
                                     if (!getEligibility(roomtype)) {
                                         System.out.println("Not eligible for this project and room type.");
@@ -75,8 +73,8 @@ public class Applicant extends User {
                                 if (application.getStatus() == "SUCCESSFUL") {
                                     System.out.println("Congrats! Your application is successful!");
                                     System.out.println("Enter 1 to book a flat (any other key to exit): ");
-                                    int book = sc.nextInt();
-                                    sc.nextLine();
+                                    int book = Input.getIntInput(sc);
+                                    // sc.nextLine();
                                     if (book==1) {
                                         System.out.println("Your request to book a flat has been submitted.");
                                         System.out.println("Our friendly HDB officer will assist you in the booking of a flat");
@@ -102,7 +100,7 @@ public class Applicant extends User {
                                 System.out.println("(Enter to continue) ");
                                 sc.nextLine();
                                 System.out.println("Enter NRIC to confirm withdrawal: ");
-                                String confirm = sc.nextLine();
+                                String confirm = Input.getStringInput(sc);
                                 if (confirm.equals(get_nric())) {
                                     application.withdraw();
                                     System.out.println("Withdrawal request has been submitted.");
@@ -127,13 +125,13 @@ public class Applicant extends User {
                         case CHANGE_PASSWORD:
                             System.out.println("          Change your password");
                             System.out.println("============================================");
-                            sc.nextLine();
+                            // sc.nextLine();
                             System.out.print("Enter current password: ");
-                            String oldpass = sc.nextLine();
+                            String oldpass = Input.getStringInput(sc);
                             System.out.print("Enter new password: ");
-                            String new_pass1 = sc.nextLine();
+                            String new_pass1 = Input.getStringInput(sc);
                             System.out.print("Enter new password again to confirm: ");
-                            String new_pass2 = sc.nextLine();
+                            String new_pass2 = Input.getStringInput(sc);
                             
                             if (verify_password(oldpass)!=true) {
                                 System.out.println("Current password is wrong. Password change unsuccessful.");
@@ -153,7 +151,7 @@ public class Applicant extends User {
                         default:
                             System.out.println("Invalid choice. Please try again.");
                     }
-                sc.nextLine();
+                // sc.nextLine();
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
@@ -172,7 +170,7 @@ public class Applicant extends User {
         GENERAL, PROJECT_RELATED, EDIT, VIEW_ALL, DELETE, RETURN;
     }
 
-    private void manage_enquiry(Scanner scanner) {
+    private void manage_enquiry(Scanner sc) {
         int choice=0;
         do {
             try {
@@ -180,16 +178,15 @@ public class Applicant extends User {
                 System.out.println("         E N Q U I R Y   M E N U");
                 System.out.println("============================================");
                 menu.printEnquiryMenu();
-                choice = scanner.nextInt();
-                scanner.nextLine();
+                choice = Input.getIntInput(sc);
+                // scanner.nextLine();
                 System.out.println("============================================");
                 if (choice >= 1 && choice <= EnquiryOption.values().length) {
                     EnquiryOption selectedOption = EnquiryOption.values()[choice - 1];
                     switch (selectedOption) {
                         case GENERAL:
-                            scanner.nextLine();
                             System.out.println("Enquiry: ");
-                            String content = scanner.nextLine();
+                            String content = Input.getStringInput(sc);
                             makeEnquiry(content);
                             System.out.println("Enquiry sent!");
                             System.out.println("============================================");
@@ -197,20 +194,19 @@ public class Applicant extends User {
                         case PROJECT_RELATED:
                             view_listings();
                             System.out.println("Enter ID of project to enquire about: ");
-                            int projectId = scanner.nextInt();
-                            scanner.nextLine();
+                            int projectId = Input.getIntInput(sc);
                             Project p = BTOsystem.projects.get(projectId);
                             while (p==null) {
                                 System.out.println("Invalid ID, try again: ");
-                                projectId = scanner.nextInt();
-                                scanner.nextLine();
+                                projectId = Input.getIntInput(sc);
+                                // scanner.nextLine();
                                 p = BTOsystem.projects.get(projectId);
                             } 
-                            scanner.nextLine();
+                            sc.nextLine();
                             System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
-                            String flatType = scanner.nextLine();
+                            String flatType = Input.getStringInput(sc);
                             System.out.println("Enquiry: ");
-                            String project_content = scanner.nextLine();
+                            String project_content = Input.getStringInput(sc);
                             makeEnquiry(p, project_content, flatType);
                             System.out.println("Enquiry sent!");
                             System.out.println("============================================");
@@ -219,8 +215,7 @@ public class Applicant extends User {
                             System.out.println("Edit enquiry");
                             viewEditableEnquiry();
                             System.out.println("Enter ID of enquiry to edit: ");
-                            int id = scanner.nextInt();
-                            scanner.nextLine();
+                            int id = Input.getIntInput(sc);
                             // cannot edit enquiries that have been replied to 
                             Enquiry result = enquiries.stream()
                                 .filter(en -> en.getEnId() == id)
@@ -231,9 +226,9 @@ public class Applicant extends User {
                                 System.out.println("============================================");
                                 break;
                             } 
-                            scanner.nextLine();
+                            // scanner.nextLine();
                             System.out.print("Enquiry: ");
-                            String userInput = scanner.nextLine();
+                            String userInput = Input.getStringInput(sc);
                             // maybe add confirmation?
                             editEnquiry(id, userInput);
                             System.out.println("Enquiry edited!");
@@ -250,8 +245,8 @@ public class Applicant extends User {
                             view_all_enquiry_for_user();
                             System.out.print("Enter ID of enquiry to delete: ");
                             // add confirmation before deleting
-                            int del_id = scanner.nextInt();
-                            scanner.nextLine();
+                            int del_id = Input.getIntInput(sc);
+                            // scanner.nextLine();
                             deleteEnquiry(del_id);
                             System.out.println("Enquiry deleted!");
                             System.out.println("============================================");
@@ -263,10 +258,10 @@ public class Applicant extends User {
                             System.out.println("Invalid choice. Please try again.");
                     }
                 }
-            scanner.nextLine();
+            sc.nextLine();
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); 
+                sc.nextLine(); 
             }
         } while (choice != 6);
     }
