@@ -56,7 +56,8 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 5:
-                        manage_enquiry(scanner);
+                        //manage_enquiry(scanner);
+                        System.out.println("havent do enquiry yet");
                         System.out.println("--------------------------------");
                         break;
                     case 6:
@@ -158,6 +159,20 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 11:
+                        System.out.println("Processing flat booking...");
+                        // Officer flat booking process:
+                        scanner.nextLine(); // consume newline
+                        System.out.print("Enter applicant NRIC for booking: ");
+                        String applicantNRIC = scanner.nextLine();
+                        System.out.print("Enter desired flat type (e.g., 2-Room, 3-Room): ");
+                        String chosenFlatType = scanner.nextLine();
+                        processFlatBooking(applicantNRIC, chosenFlatType);
+                        break;
+                    case 12:
+                        System.out.println("Viewing all applications for your assigned project:");
+                        viewApplicationsForAssignedProject();
+                        break;
+                    case 13:
                         System.out.println("Logged out. Returning to main menu...");
                         System.out.println("--------------------------------");
                         break;
@@ -278,4 +293,88 @@ public class HDB_Officer extends Applicant {
             project.addOfficer(this);
         }
     }
+    public void processFlatBooking(String applicantNRIC, String chosenFlatType) {
+        BTOapplication targetApp = null;
+        // Search for the application in the global list
+        for (BTOapplication app : BTOsystem.applications) {
+            if (app.getApplicant().get_nric().equalsIgnoreCase(applicantNRIC)) {
+                targetApp = app;
+                break;
+            }
+        }
+        if (targetApp == null) {
+            System.out.println("No application found for NRIC: " + applicantNRIC);
+            return;
+        }
+        if (!targetApp.getStatus().equalsIgnoreCase("Successful")) {
+            System.out.println("Application is not in a successful state for booking.");
+            return;
+        }
+        Project proj = targetApp.getProject();
+        // Check available units for the chosen flat type
+        int index = proj.getFlatTypes().indexOf(chosenFlatType);
+        if (index == -1) {
+            System.out.println("Flat type " + chosenFlatType + " is not available in this project.");
+            return;
+        }
+        List<Integer> availableUnits = proj.getAvailableUnits();
+        int currentAvailable = availableUnits.get(index);
+        if (currentAvailable <= 0) {
+            System.out.println("No available units for " + chosenFlatType + " in this project.");
+            return;
+        }
+        // Decrement available units by 1
+        proj.updateAvailableUnits(chosenFlatType, currentAvailable - 1);
+        // Update the application status to "Booked"
+        targetApp.setStatus("Booked");
+        // Search for an available flat that matches the project and flat type
+        Flat bookedFlat = null;
+        for (Flat flat : BTOsystem.flats) {
+            if (flat.getProject().equals(proj) && flat.getFlatType().equalsIgnoreCase(chosenFlatType) && !flat.isBooked()) {
+                bookedFlat = flat;
+                break;
+            }
+        }
+        if (bookedFlat == null) {
+            System.out.println("Error: No available flat unit found despite availability count.");
+            return;
+        }
+        bookedFlat.setBooked(true);
+        targetApp.bookFlat(bookedFlat);
+        // Generate a receipt
+        Receipt receipt = generateBookingReceipt(targetApp, bookedFlat);
+        System.out.println("Flat booking successful! Here is your receipt:");
+        receipt.printReceipt();
+    }
+    public Receipt generateBookingReceipt(BTOapplication application, Flat flat) {
+        String details = "Flat Booking Receipt\n" +
+                         "---------------------\n" +
+                         "Applicant: " + application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname() + "\n" +
+                         "NRIC: " + application.getApplicant().get_nric() + "\n" +
+                         "Age: " + application.getApplicant().get_age() + "\n" +
+                         "Marital Status: " + application.getApplicant().get_maritalstatus() + "\n" +
+                         "Project: " + application.getProjectName() + "\n" +
+                         "Flat Type: " + application.getFlatType() + "\n" +
+                         "Flat Price: " + flat.getPrice() + "\n";
+        return new Receipt(details);
+    }
+    public void viewApplicationsForAssignedProject() {
+        if (officerProject == null) {
+            System.out.println("You are not assigned to any project.");
+            return;
+        }
+        System.out.println("Applications for project " + officerProject.getProjectName() + ":");
+        boolean found = false;
+        for (BTOapplication app : BTOsystem.applications) {
+            if (app.getProject().equals(officerProject)) {
+                found = true;
+                app.get_details();
+                System.out.println("--------------------------------");
+            }
+        }
+        if (!found) {
+            System.out.println("No applications found for this project.");
+        }
+    }
+            
 }

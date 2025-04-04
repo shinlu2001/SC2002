@@ -74,7 +74,9 @@ public class Menu {
                 "8. Register to be a HDB officer of a project",
                 "9. Check status of registration to be an officer for a project",
                 "10. View project details",
-                "11. Log out and return to main program",
+                "11. Process flat booking",
+                "12. View applications for assigned project",
+                "13. Log out and return to main program",
                 "Enter your choice: ");
         this.enquiryMenu = Arrays.asList(
                 "Please choose an option:",
