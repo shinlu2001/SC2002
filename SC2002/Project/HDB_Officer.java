@@ -9,6 +9,7 @@ public class HDB_Officer extends Applicant {
     protected String registrationStatus;
     protected Project officerProject;
     // private static List<HDB_Officer> officerList = new ArrayList<>();
+    private boolean withdrawalRequested;
 
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
@@ -373,6 +374,11 @@ public class HDB_Officer extends Applicant {
         if (!found) {
             System.out.println("No applications found for this project.");
         }
+    }
+
+    public boolean getwithdrawalRequested()
+    {
+        return withdrawalRequested;
     }
             
 }
