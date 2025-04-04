@@ -144,7 +144,19 @@ public class HDB_Manager extends User {
                             Project projectForBTO = findAndValidateProject(sc);
 
                             System.out.println("Enter Applicant's ID: ");
-                            String applicationId = sc.nextLine();
+                            int applicationId = sc.nextInt();
+                            sc.nextLine(); // consume newline
+
+                            String flatType;
+                            BTOapplication application = null;
+                            for (BTOapplication a : BTOapplication.getApplicationList())
+                            {
+                                if (a.getApplicationId() == applicationId){
+                                    application = a;
+                                    break;
+                                }
+                            }
+
 
                             // for (BTOsystem a : BTOsystem.applicants){
                             //     if (a.getFlatType().equalsIgnoreCase(applicationId))

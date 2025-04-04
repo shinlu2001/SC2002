@@ -320,7 +320,7 @@ public class BTOsystem {
                     // availableUnits,      // list of available units
                     formattedDate1,      // open date
                     formattedDate2,      // close date
-                    false,               // visibility
+                    true,               // visibility
                     Integer.parseInt(row[11]) // available officer slots
                 );
 
