@@ -6,7 +6,7 @@ import java.util.*;
 // import java.security.SecureRandom;
 // import java.util.concurrent.atomic.AtomicInteger;
 
-public class BTOsystem {
+public class BTOsystem implements Input{
     // private static final SecureRandom random = new SecureRandom();
     // private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -26,7 +26,7 @@ public class BTOsystem {
     protected static List<Enquiry> enquiries = new ArrayList<>();   //protected?
     protected static List<Flat> flats = new ArrayList<>();          //protected?
     protected static List<BTOapplication> applications = new ArrayList<>(); 
-    protected static User currentUser = null;  // Holds the currently logged-in user
+    // protected static User currentUser = null;  // Holds the currently logged-in user
 
     // public static List<Project> getProjects() {
     //     return projects;
@@ -51,14 +51,11 @@ public class BTOsystem {
             do {
                 try {
                 menu.printWelcomeMenu();
-                choice = sc.nextInt();
-
-                // clearScreen();
+                choice = Input.getIntInput(sc);
                 System.out.println("--------------------------------");
                 
                 switch (choice) {
                     case 1:
-                        // clearScreen();
                         login(sc);
                         break;
                     case 2:
@@ -101,7 +98,6 @@ public class BTOsystem {
                         System.out.println("Error: Invalid choice. Please try again.");
                         System.out.println("--------------------------------");
                 }
-                sc.nextLine();
             } catch (InputMismatchException e) {
                 System.out.println("--------------------------------");
                 System.out.println("Error: Invalid input. Please enter a number.");
@@ -114,13 +110,11 @@ public class BTOsystem {
         if (applicants.size()+officers.size()+managers.size() == 0) {
             menu.printloginError();
         } else {
-            sc.nextLine();
             System.out.println("Welcome, login to your account to continue");
             System.out.print("UserID (NRIC): ");
-            String nric = sc.nextLine();
+            String nric = Input.getStringInput(sc);
             User user = search_user(applicants, nric);
             if (user==null) {
-                // user = search_user(officers, nric);
                 user = search_user(officers, nric);
             }
             if (user==null) {
@@ -131,7 +125,7 @@ public class BTOsystem {
                 System.out.println("--------------------------------");
             } else {
                 System.out.print("Password: ");
-                String password = sc.nextLine();
+                String password = Input.getStringInput(sc);
                 if (user.verify_password(password)) {
                     System.out.println("--------------------------------");
                     // user.login();
@@ -169,7 +163,7 @@ public class BTOsystem {
         do {
             try {
                 System.out.print("NRIC: ");
-                nric = sc.nextLine();
+                nric = Input.getStringInput(sc);
                 if (nric.length()==9 && (nric.charAt(0)=='S' || nric.charAt(0)=='T') && Character.isLetter(nric.charAt(nric.length() - 1))) {
                     break;
                 } else {
@@ -182,9 +176,9 @@ public class BTOsystem {
         } while (true);
         
         System.out.print("First name: ");
-        String firstname = sc.nextLine();
+        String firstname = Input.getStringInput(sc);
         System.out.print("Last name: ");
-        String lastname = sc.nextLine();
+        String lastname = Input.getStringInput(sc);
         System.out.print("Marital status (s: single, m: married): ");
         char marital_status='a';
         do {
@@ -206,7 +200,7 @@ public class BTOsystem {
         int age;
         do {
             try {
-                age = sc.nextInt();
+                age = Input.getIntInput(sc);
                 break;
             } catch (InputMismatchException e) {
                 System.out.println("Error: Invalid input. Please enter a number.");
@@ -217,7 +211,7 @@ public class BTOsystem {
         do {
             try {
                 menu.printSelectRole();
-                int choice = sc.nextInt();
+                int choice = Input.getIntInput(sc);
                 System.out.println("--------------------------------");
                 switch (choice) {
                     case 1: {

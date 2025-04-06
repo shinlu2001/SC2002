@@ -1,16 +1,15 @@
 package SC2002.Project;
 
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class HDB_Officer extends Applicant {
-    private String type = "Officer";
+    private String type = "OFFICER";
     protected static int nextId = -1;
     private int officer_id;
     protected String registrationStatus;
     protected Project officerProject;
     // private static List<HDB_Officer> officerList = new ArrayList<>();
+    private boolean withdrawalRequested;
 
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
@@ -413,6 +412,11 @@ public class HDB_Officer extends Applicant {
         if (!found) {
             System.out.println("No applications found for this project.");
         }
+    }
+
+    public boolean getwithdrawalRequested()
+    {
+        return withdrawalRequested;
     }
             
 }
