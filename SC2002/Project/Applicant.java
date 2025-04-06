@@ -267,7 +267,7 @@ public class Applicant extends User implements Input {
     }
 
     // check eligibility of user to apply for flat
-    private boolean getEligibility(String flatType) {
+    protected boolean getEligibility(String flatType) {
         if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equals("2-Room")) {
             return true;
         } else if (get_maritalstatus().equals("MARRIED") && get_age()>=21) {
@@ -295,7 +295,7 @@ public class Applicant extends User implements Input {
         System.err.println("-------------------------------------------------------------------------------------------------------------------");
     }
 
-    private int view_eligible_listings() {
+    protected int view_eligible_listings() {
         System.out.println("\n================================================================================================================");
         System.out.println("                                                  ELIGIBLE PROJECTS");
         System.out.println("================================================================================================================");
