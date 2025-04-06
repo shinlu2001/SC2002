@@ -218,7 +218,7 @@ public class Applicant extends User implements Input {
                             int id = Input.getIntInput(sc);
                             // cannot edit enquiries that have been replied to 
                             Enquiry result = enquiries.stream()
-                                .filter(en -> en.getEnId() == id)
+                                .filter(en -> en.getId() == id)
                                 .findFirst()
                                 .orElse(null);
                             if (result.getStaff()!=null) {
@@ -329,7 +329,7 @@ public class Applicant extends User implements Input {
         
         if (!eflatType.isEmpty()) {
             sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-                p.getProjectID(),
+                p.getId(),
                 p.getProjectName(),
                 p.getneighbourhood(),
                 (eflatType.size() > 0 && getEligibility(p.getFlatTypes().get(0))) ? 
@@ -359,7 +359,7 @@ public class Applicant extends User implements Input {
     private String viewProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-            p.getProjectID(),
+            p.getId(),
             p.getProjectName(),
             p.getneighbourhood(),
             (p.getFlatTypes().size() > 0) ? 
@@ -416,7 +416,7 @@ public class Applicant extends User implements Input {
     }
     private void view_all_enquiry_for_user() {
         for (Enquiry en : enquiries) {
-            System.out.println("#"+en.getEnId());
+            System.out.println("#"+en.getId());
             view_enquiry(en);
             System.out.println("--------------------------------");
         }
@@ -424,7 +424,7 @@ public class Applicant extends User implements Input {
     private void viewEditableEnquiry() {
         for (Enquiry en : enquiries) {
             if (en.getStaff()==null){
-                System.out.println("#"+en.getEnId());
+                System.out.println("#"+en.getId());
                 view_enquiry(en);
                 System.out.println("--------------------------------");
             }
@@ -436,7 +436,7 @@ public class Applicant extends User implements Input {
         Enquiry en = iterator.next();
         while (iterator.hasNext()) {
             en = iterator.next();
-            if (en.getEnId() == id) {
+            if (en.getId() == id) {
                 en.setEnquiry(content);
                 break; 
             }
@@ -448,7 +448,7 @@ public class Applicant extends User implements Input {
         Enquiry en = iterator.next();
         while (iterator.hasNext()) {
             en = iterator.next();
-            if (en.getEnId() == id) {
+            if (en.getId() == id) {
                 removedElement = en;
                 iterator.remove();  
                 break;

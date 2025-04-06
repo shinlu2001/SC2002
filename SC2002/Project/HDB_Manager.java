@@ -7,7 +7,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-public class HDB_Manager extends User {
+public class HDB_Manager extends User implements Input {
     protected static int nextId = -1;
     private final int manager_id;
     private String type="MANAGER";
@@ -110,7 +110,7 @@ public class HDB_Manager extends User {
                                 break;
 
                             if (projectForOfficer.assignedOfficers.size() >= projectForOfficer.getTotalOfficerSlots()) {
-                                System.out.println("Error: Project " + projectForOfficer.getProjectID() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
+                                System.out.println("Error: Project " + projectForOfficer.getId() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
                                 projectForOfficer.getTotalOfficerSlots() + " slots filled).");
 
                             } else {
@@ -199,7 +199,7 @@ public class HDB_Manager extends User {
                             break;
                         
                         case 11:     // view all enquiries (across all projects)
-                            viewAllEnquiries();
+                            viewAllEnquiries(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         
@@ -243,7 +243,7 @@ public class HDB_Manager extends User {
         Project project = null;
         // for (Project p : allProjects) {
         for (Project p : BTOsystem.projects) {
-            if (p.getProjectID() == projectID) {
+            if (p.getId() == projectID) {
                 project = p;
                 break;
             }
@@ -269,7 +269,7 @@ public class HDB_Manager extends User {
         // check if current manager is in charge of the project
         if (!managerProjects.contains(project)) {
             System.out.println("---------------------------------------------------");
-            System.out.println("Error: You are not the manager of Project " + project.getProjectID() + ".");
+            System.out.println("Error: You are not the manager of Project " + project.getId() + ".");
             return null;
         }
         
@@ -469,7 +469,7 @@ public class HDB_Manager extends User {
         // allProjects.add(project);      // Add the project to the global list
         BTOsystem.projects.add(project);      // Add the project to the global list
         System.out.println("---------------------------------------------------");
-        System.out.println(projectName + " successfully created with ID: " + project.getProjectID());
+        System.out.println(projectName + " successfully created with ID: " + project.getId());
     
         return project;
     }
@@ -783,7 +783,7 @@ if (!managerProjects.isEmpty())
                                     try {
                                         // System.out.println("Current available number of HDB Officer Slots is " + p.getAvailableOfficerSlots() + ".");
                                         System.out.print("Enter new available number of HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
-                                        totalOfficerSlots = sc.nextInt();
+                                        totalOfficerSlots = Input.getIntInput(sc);
                                         sc.nextLine(); // Consume newline
                             
                                         // Ensure available slots do not exceed maximum slots
@@ -856,7 +856,7 @@ if (!managerProjects.isEmpty())
     public void handleOfficerRegistration(Project project, HDB_Officer officer) {
         if (!project.equals(officer.officerProject))
         {
-            System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " did not register for Project " + project.getProjectID() + ".");
+            System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " did not register for Project " + project.getId() + ".");
             return;
         }
 
@@ -884,12 +884,12 @@ if (!managerProjects.isEmpty())
         if (project.addOfficer(officer)) {
             officer.registrationStatus  = "Approved";
             officer.officerProject = project;
-            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");            
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getId() + ".");            
         } 
         // else
         // {
         //     officer.registrationStatus = "Rejected";
-        //     System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected. ");
+        //     System.out.println("Maximum number of officers already assigned to Project " + project.getId() + ". Officer's registration rejected. ");
         // }
     }
     
@@ -922,7 +922,7 @@ if (!managerProjects.isEmpty())
                 if (assignedProject != null && assignedProject.getManager() == this) 
                 {
                     // Only display officers assigned to projects managed by the current manager
-                    System.out.printf("%-10s %-20s %-15s %-20s%n", officer.getOfficerId(), officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getProjectID());
+                    System.out.printf("%-10s %-20s %-15s %-20s%n", officer.getOfficerId(), officer.get_firstname() + " " + officer.get_lastname(),officer.registrationStatus ,assignedProject.getId());
                 }
             }
         }
@@ -982,7 +982,7 @@ if (!managerProjects.isEmpty())
     //     // }
     // }
 
-        public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
+    public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
         // Check if the flat type exists in the project
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
@@ -1064,7 +1064,7 @@ if (!managerProjects.isEmpty())
         //         if (assignedProject != null && assignedProject.getManager() == this) 
         //         {
         //             // Only display officers assigned to projects managed by the current manager
-        //             System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getProjectID());
+        //             System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getId());
         //         }
         //     }
         // }
@@ -1123,22 +1123,22 @@ public void reply_enquiry(Enquiry enquiry, String response) {
     enquiry.setResponse(response);
     enquiry.setStaffReply(this);
     
-    System.out.println("Successfully replied to enquiry ID: " + enquiry.getEnId());
+    System.out.println("Successfully replied to enquiry ID: " + enquiry.getId());
 }
 
-public void viewAllEnquiries() {
+public void viewAllEnquiries(Scanner sc) {
     System.out.println("\n============================================");
     System.out.println("              ALL ENQUIRIES");
     System.out.println("============================================");
     
     // First check if there are any enquiries
-    boolean hasEnquiries = false;
-    for (Enquiry enquiry : BTOsystem.enquiries) {
-        hasEnquiries = true;
-        break;
-    }
+    // boolean hasEnquiries = false;
+    // for (Enquiry enquiry : BTOsystem.enquiries) {
+    //     hasEnquiries = true;
+    //     break;
+    // }
     
-    if (!hasEnquiries) {
+    if (BTOsystem.enquiries.size()==0) {
         System.out.println("No enquiries found in the system.");
         return;
     }
@@ -1146,11 +1146,8 @@ public void viewAllEnquiries() {
     // Ask user if they want to filter
     System.out.println("Filter options:");
     System.out.println("1. View all enquiries");
-    // System.out.println("2. View only project-related enquiries");
     System.out.println("2. View only general (non-project) enquiries");
     System.out.println("3. View only enquiries for my projects");
-    
-    Scanner sc = new Scanner(System.in);
     int choice = 0;
     try {
         System.out.print("Enter your choice: ");
@@ -1160,7 +1157,6 @@ public void viewAllEnquiries() {
         System.out.println("Invalid input. Showing all enquiries.");
         choice = 1;
     }
-    sc.close();
     
     List<Enquiry> filteredEnquiries = new ArrayList<>();
     
@@ -1170,14 +1166,6 @@ public void viewAllEnquiries() {
             filteredEnquiries = new ArrayList<>(BTOsystem.enquiries);
             System.out.println("Showing all enquiries in the system");
             break;
-        // case 2: // Only project-related
-        //     for (Enquiry e : BTOsystem.enquiries) {
-        //         if (e.getProject() != null) {
-        //             filteredEnquiries.add(e);
-        //         }
-        //     }
-        //     System.out.println("Showing project-related enquiries only");
-        //     break;
         case 2: // Only general (non-project)
             for (Enquiry e : BTOsystem.enquiries) {
                 if (e.getProject() == null) {
@@ -1214,7 +1202,7 @@ public void viewAllEnquiries() {
         String creatorName = creator.get_firstname() + " " + creator.get_lastname();
         
         System.out.printf("%-5d %-20s %-20s %-30s %-15s%n",
-                enquiry.getEnId(),
+                enquiry.getId(),
                 enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
                 creatorName,
                 truncateText(enquiry.getEnquiry(), 30),
@@ -1257,8 +1245,7 @@ public void handleProjectEnquiries(Scanner sc) {
     int typeChoice;
     try {
         System.out.print("Enter your choice: ");
-        typeChoice = sc.nextInt();
-        sc.nextLine(); // Consume newline
+        typeChoice = Input.getIntInput(sc);
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Defaulting to project-specific enquiries.");
         typeChoice = 1;
@@ -1320,7 +1307,7 @@ private void handleGeneralEnquiries(Scanner sc) {
         Enquiry e = generalEnquiries.get(i);
         User creator = e.getCreatedByUser();
         System.out.println((i + 1) + ". From: " + creator.get_firstname() + " " + 
-                creator.get_lastname() + " | ID: " + e.getEnId());
+                creator.get_lastname() + " | ID: " + e.getId());
         System.out.println("   Enquiry: " + e.getEnquiry());
     }
     
@@ -1328,28 +1315,27 @@ private void handleGeneralEnquiries(Scanner sc) {
     int enquiryChoice;
     while (true) {
         try {
-            System.out.print("\nSelect an enquiry to respond to (1-" + generalEnquiries.size() + "): ");
-            enquiryChoice = sc.nextInt();
-            sc.nextLine(); // Consume newline
-            
-            if (enquiryChoice > 0 && enquiryChoice <= generalEnquiries.size()) {
-                break;
-            }
-            System.out.println("Error: Please enter a number between 1 and " + generalEnquiries.size());
+            System.out.print("Enter EnquiryID: ");
+            enquiryChoice = Input.getIntInput(sc);
+            break;
         } catch (InputMismatchException e) {
             System.out.println("Error: Please enter a valid number.");
             sc.nextLine();
         }
     }
     
-    Enquiry selectedEnquiry = generalEnquiries.get(enquiryChoice - 1);
+    Enquiry selectedEnquiry = BTOsystem.searchEnquiryById(enquiryChoice);
+    if (selectedEnquiry!=null) {
+        // Respond to the enquiry
+        System.out.println("\nEnquiry: " + selectedEnquiry.getEnquiry());
+        System.out.print("Your response: ");
+        String response = Input.getStringInput(sc);
+        
+        reply_enquiry(selectedEnquiry, response);
+        System.out.println("Response submitted successfully.");
+    } else {
+        System.out.println("No enquiry of ID "+enquiryChoice);
+    }
     
-    // Respond to the enquiry
-    System.out.println("\nEnquiry: " + selectedEnquiry.getEnquiry());
-    System.out.print("Your response: ");
-    String response = sc.nextLine();
-    
-    reply_enquiry(selectedEnquiry, response);
-    System.out.println("Response submitted successfully.");
 }
 }

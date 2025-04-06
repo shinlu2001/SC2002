@@ -19,7 +19,7 @@ public class Enquiry {
     public String getflatType() {
         return flatType;
     }
-    public int getEnId() {
+    public int getId() {
         return enId;
     }
     public void setflatType(String r) {

@@ -70,9 +70,10 @@ public class Project {
     }
     
     // Getter and Setter methods
-    public int getProjectID() {
+    public int getId() {
         return projectId;
     }
+
     public String getProjectName() {
         return ProjectName;
     }

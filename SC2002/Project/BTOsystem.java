@@ -148,7 +148,15 @@ public class BTOsystem implements Input{
     }
     public static Project searchProjectById(int id) {
         for (Project p : projects) {
-            if (p.getProjectID()== id) {
+            if (p.getId()== id) {
+                return p;
+            }
+        }
+        return null;
+    }
+    public static Enquiry searchEnquiryById(int id) {
+        for (Enquiry p : enquiries) {
+            if (p.getId()== id) {
                 return p;
             }
         }
