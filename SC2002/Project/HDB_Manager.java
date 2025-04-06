@@ -1121,7 +1121,7 @@ public void reply_enquiry(Enquiry enquiry, String response) {
     }
     
     enquiry.setResponse(response);
-    enquiry.setStaffReply(BTOsystem.currentUser);
+    enquiry.setStaffReply(this); // Changed from BTOsystem.currentUser to this
     
     System.out.println("Successfully replied to enquiry ID: " + enquiry.getEnId());
 }
@@ -1159,8 +1159,9 @@ public void viewAllEnquiries() {
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Showing all enquiries.");
         choice = 1;
+        sc.nextLine(); // Clear invalid input
     }
-    sc.close();
+    // Removed sc.close() to keep the Scanner open
     
     List<Enquiry> filteredEnquiries = new ArrayList<>();
     
@@ -1244,7 +1245,6 @@ private String truncateText(String text, int maxLength) {
     return text.substring(0, maxLength - 3) + "...";
 }
 
-
 public void handleProjectEnquiries(Scanner sc) {
     System.out.println("\n============================================");
     System.out.println("            HANDLE ENQUIRIES");
@@ -1297,8 +1297,68 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
         return;
     }
     
-    // Rest of the method remains the same as original handleProjectEnquiries()
-    // ...
+    System.out.println("Select a project to view its pending enquiries:");
+    for (int i = 0; i < projectsWithEnquiries.size(); i++) {
+        System.out.printf("[%d] %s%n", i, projectsWithEnquiries.get(i).getProjectName());
+    }
+    int projChoice = -1;
+    try {
+        System.out.print("Enter project index: ");
+        projChoice = sc.nextInt();
+        sc.nextLine(); // consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Returning to menu.");
+        sc.nextLine();
+        return;
+    }
+    if (projChoice < 0 || projChoice >= projectsWithEnquiries.size()) {
+        System.out.println("Invalid project index. Returning to menu.");
+        return;
+    }
+    
+    Project selectedProject = projectsWithEnquiries.get(projChoice);
+    List<Enquiry> pendingEnquiries = new ArrayList<>();
+    for (Enquiry e : selectedProject.getEnquiries()) {
+        if (e.getResponse().isEmpty()) {
+            pendingEnquiries.add(e);
+        }
+    }
+    
+    if (pendingEnquiries.isEmpty()) {
+        System.out.println("No pending enquiries for the selected project.");
+        return;
+    }
+    
+    System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
+    for (int i = 0; i < pendingEnquiries.size(); i++) {
+        Enquiry e = pendingEnquiries.get(i);
+        System.out.printf("[%d] ID: %d, Question: %s%n", i, e.getEnId(), truncateText(e.getEnquiry(), 30));
+    }
+    
+    int enquiryChoice;
+    try {
+        System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
+        enquiryChoice = sc.nextInt();
+        sc.nextLine(); // consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Returning to menu.");
+        sc.nextLine();
+        return;
+    }
+    if (enquiryChoice == -1) {
+        System.out.println("Operation cancelled.");
+        return;
+    }
+    if (enquiryChoice < 0 || enquiryChoice >= pendingEnquiries.size()) {
+        System.out.println("Invalid enquiry selection.");
+        return;
+    }
+    
+    Enquiry selectedEnquiry = pendingEnquiries.get(enquiryChoice);
+    System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
+    System.out.print("Enter your reply: ");
+    String reply = sc.nextLine();
+    reply_enquiry(selectedEnquiry, reply);
 }
 
 private void handleGeneralEnquiries(Scanner sc) {
@@ -1324,7 +1384,6 @@ private void handleGeneralEnquiries(Scanner sc) {
         System.out.println("   Enquiry: " + e.getEnquiry());
     }
     
-    // Select an enquiry to respond to
     int enquiryChoice;
     while (true) {
         try {
@@ -1351,5 +1410,5 @@ private void handleGeneralEnquiries(Scanner sc) {
     
     reply_enquiry(selectedEnquiry, response);
     System.out.println("Response submitted successfully.");
-}
+    }
 }

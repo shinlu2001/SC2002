@@ -23,6 +23,7 @@ public class HDB_Officer extends Applicant {
     }
 
     Scanner sc = new Scanner(System.in);
+    
     public void start_menu(Scanner scanner) {
         int choice = 0;
         do {
@@ -48,7 +49,7 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 3:
-                    HDB_Manager.viewAllProjects();
+                        HDB_Manager.viewAllProjects();
                         scanner.nextLine(); // consume newline
                         break;
                     case 4:
@@ -56,8 +57,9 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 5:
-                        //manage_enquiry(scanner);
-                        System.out.println("havent do enquiry yet");
+                        // For enquiry management, officers do not create or edit enquiries;
+                        // they only reply. So we let them select an enquiry from their assigned project's list.
+                        manage_enquiry(scanner);
                         System.out.println("--------------------------------");
                         break;
                     case 6:
@@ -86,7 +88,6 @@ public class HDB_Officer extends Applicant {
                         System.out.println("--------------------------------");
                         break;
                     case 8:
-                        // List<Project> allProjects = BTOsystem.getProjects();
                         List<Project> allProjects = BTOsystem.projects;
                         System.out.println("=== Choose a project to register as Officer ===");
                         for (int i = 0; i < allProjects.size(); i++) {
@@ -117,7 +118,7 @@ public class HDB_Officer extends Applicant {
                             System.out.println("You are already assigned or pending another project overlapping these dates!");
                             break;
                         }
-                        // Registration call and break to avoid fall-through
+                        // Registration call
                         registerForProject(target);
                         break;
                     case 9:
@@ -134,7 +135,6 @@ public class HDB_Officer extends Applicant {
                             System.out.println(officerProject.toString());
                         } else {
                             System.out.println("You have no assigned project. You may view any visible projects:");
-                            // allProjects = BTOsystem.getProjects();
                             allProjects = BTOsystem.projects;
                             for (int i = 0; i < allProjects.size(); i++) {
                                 Project p = allProjects.get(i);
@@ -160,7 +160,6 @@ public class HDB_Officer extends Applicant {
                         break;
                     case 11:
                         System.out.println("Processing flat booking...");
-                        // Officer flat booking process:
                         scanner.nextLine(); // consume newline
                         System.out.print("Enter applicant NRIC for booking: ");
                         String applicantNRIC = scanner.nextLine();
@@ -185,15 +184,54 @@ public class HDB_Officer extends Applicant {
                 System.out.println("Invalid input. Please enter a number.");
                 scanner.next();
             }
-        } while (choice != 11);
+        } while (choice != 13);
     }
     
-    
+    // Public reply method accessible to officers (and managers) for replying to enquiries.
     public void reply_enquiry(Enquiry enquiry, String response) {
         enquiry.setStaffReply(this);
-        enquiry.setResponse(response);;
+        enquiry.setResponse(response);
     }
-
+    
+    // Officer uses the static enquiry creation methods from Applicant if needed.
+    // However, officers typically reply rather than create/edit enquiries.
+    
+    // New implementation: manage enquiries for assigned project.
+    private void manage_enquiry(Scanner scanner) {
+        if (officerProject == null) {
+            System.out.println("You are not assigned to any project; no enquiries available.");
+            return;
+        }
+        List<Enquiry> projectEnquiries = officerProject.getEnquiries();
+        if (projectEnquiries == null || projectEnquiries.isEmpty()) {
+            System.out.println("No enquiries available for your project.");
+            return;
+        }
+        System.out.println("Enquiries for project " + officerProject.getProjectName() + ":");
+        for (int i = 0; i < projectEnquiries.size(); i++) {
+            Enquiry en = projectEnquiries.get(i);
+            System.out.printf("[%d] ID: %d, Question: %s%s%n", 
+                i, en.getEnId(), en.getEnquiry(), (en.getStaff() != null ? " (Replied)" : ""));
+        }
+        System.out.print("Enter enquiry index to reply (or -1 to cancel): ");
+        int idx = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+        if (idx == -1) {
+            System.out.println("Operation cancelled.");
+            return;
+        }
+        if (idx < 0 || idx >= projectEnquiries.size()) {
+            System.out.println("Invalid index.");
+            return;
+        }
+        Enquiry selected = projectEnquiries.get(idx);
+        System.out.println("Selected enquiry: " + selected.getEnquiry());
+        System.out.print("Enter your reply: ");
+        String reply = scanner.nextLine();
+        reply_enquiry(selected, reply);
+        System.out.println("Reply submitted successfully.");
+    }
+    
     // public static List<HDB_Officer> getBTOsystem.officers()
     // {
     //     return officerList;

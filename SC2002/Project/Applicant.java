@@ -72,7 +72,7 @@ public class Applicant extends User {
                                 System.out.println("============================================");
                             } else {
                                 application.get_details();
-                                if (application.getStatus() == "SUCCESSFUL") {
+                                if (application.getStatus().equalsIgnoreCase("Successful")) {
                                     System.out.println("Congrats! Your application is successful!");
                                     System.out.println("Enter 1 to book a flat (any other key to exit): ");
                                     int book = sc.nextInt();
@@ -398,15 +398,14 @@ public class Applicant extends User {
     }
     //to be revised, enquiries tagged to a project
     private void makeEnquiry(Project project, String content, String flatType) {
-        // System.out.println("Enquiry: ");
         Enquiry en = new Enquiry(this, content);
         en.setProject(project);
         en.setflatType(flatType);
         enquiries.add(en);
-        // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
-        BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
-        // System.out.println("Enquiry sent!");
+        BTOsystem.enquiries.add(en);
+        project.addEnquiry(en);  // Ensure enquiry is tied to the project
     }
+    
 
     private void view_enquiry(Enquiry en) {
         System.out.println("Enquiry: "+ en.getEnquiry());
