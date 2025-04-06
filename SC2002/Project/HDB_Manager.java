@@ -101,41 +101,38 @@ public class HDB_Manager extends User {
                             System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 7:     // handle Officer Registration - handleOfficerRegistration(project, officer)
-                            System.out.print("Enter the Project ID to manage: ");
-                            // find if project exists in allProjects then check if the project is under the current manager                                                                       
+                        case 7:     // handle Officer Registration
+                            System.out.print("Enter the Project ID to manage officer registrations: ");
                             Project projectForOfficer = findAndValidateProject(sc);
                             if (projectForOfficer == null)
                                 break;
-
-                            if (projectForOfficer.assignedOfficers.size() >= projectForOfficer.getTotalOfficerSlots()) {
-                                System.out.println("Error: Project " + projectForOfficer.getProjectID() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
-                                projectForOfficer.getTotalOfficerSlots() + " slots filled).");
-
-                            } else {
-                                System.out.print("Enter Officer's ID: ");
-                                int officerId = sc.nextInt();
-                                sc.nextLine();
-
-                                HDB_Officer officer = null;
-                            
-                                // Find the officer by their ID
-                                for (HDB_Officer o : BTOsystem.officers) {
-                                    if (o.getOfficerId() == officerId) {
-                                        officer = o;
-                                        break;
-                                    }
-                                }
-                            
-                                if (officer != null) {
-                                    handleOfficerRegistration(projectForOfficer, officer);
-
-                                } else {
-                                    System.out.println("Error: Officer not found.");
+                            // Display pending officer registrations for the selected project
+                            List<HDB_Officer> pendingOfficers = new ArrayList<>();
+                            for (HDB_Officer o : BTOsystem.officers) {
+                                if (o.officerProject != null &&
+                                    o.officerProject.equals(projectForOfficer) &&
+                                    o.registrationStatus.equalsIgnoreCase("Pending")) {
+                                    pendingOfficers.add(o);
                                 }
                             }
-                            // System.out.println("---------------------------------------------------");
-                            break;
+                            if (pendingOfficers.isEmpty()) {
+                                System.out.println("No pending officer registrations for this project.");
+                                break;
+                            }
+                            System.out.println("Pending officer registrations:");
+                            for (int i = 0; i < pendingOfficers.size(); i++) {
+                                System.out.println("[" + i + "] Officer ID: " + pendingOfficers.get(i).getOfficerId() + 
+                                                   ", Name: " + pendingOfficers.get(i).get_firstname());
+                            }
+                            System.out.print("Enter index of officer to review: ");
+                            int idx = Input.getIntInput(sc);
+                            if (idx < 0 || idx >= pendingOfficers.size()) {
+                                System.out.println("Invalid index.");
+                                break;
+                            }
+                            HDB_Officer officerToHandle = pendingOfficers.get(idx);
+                            handleOfficerRegistration(projectForOfficer, officerToHandle);
+                            break;                        
                         case 8:     // handle withdrawel requests - handleWithdrawalRequest_officer(project, officer, sc)
                             System.out.print("Enter the Project ID to manage: ");
                             // find if project exists in allProjects then check if the project is under the current manager
@@ -918,13 +915,11 @@ if (!managerProjects.isEmpty())
         if (project.addOfficer(officer)) {
             officer.registrationStatus  = "Approved";
             officer.officerProject = project;
-            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");            
-        } 
-        // else
-        // {
-        //     officer.registrationStatus = "Rejected";
-        //     System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected. ");
-        // }
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");
+        } else {
+            officer.registrationStatus = "Rejected";
+            System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected.");
+        }    
     }
     
     // View officer registration under them (manager)

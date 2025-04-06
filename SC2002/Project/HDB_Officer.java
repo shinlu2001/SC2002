@@ -261,34 +261,34 @@ public class HDB_Officer extends Applicant {
     // }
 
     public void registerForProject(Project project) {
-        if (project == null)
-        {
-            System.out.println("Project does not exit. Registration unsuccessful.");
-                return;
+        if (project == null) {
+            System.out.println("Project does not exist. Registration unsuccessful.");
+            return;
         }
-
+    
         if (registrationStatus.equals("Unregistered")) {
-            BTOsystem.officers.add(this);
-            // officerList.add(this);
+            // Set status to Pending and assign the project
             officerProject = project;
             registrationStatus = "Pending";
-            System.out.println("Registration for " + project.getProjectName() + " successful. Registration request has been sent to the HDB Manager for approval.");
+            // Optionally add this officer to a global list if not already added
+            if (!BTOsystem.officers.contains(this)) {
+                BTOsystem.officers.add(this);
+            }
+            System.out.println("Registration for " + project.getProjectName() + " submitted. Awaiting manager approval.");
         } else {
             switch (registrationStatus) {
                 case "Approved":
                     System.out.println("You are already registered for a project.");
                     break;
-                
                 case "Pending":
-                    System.out.println("You are already have a pending approval for a project.");
+                    System.out.println("Your registration is already pending approval.");
                     break;
-            
                 default:
                     break;
             }
-            // System.out.println("You are already registered or have a pending approval for a project.");
         }
     }
+    
 
     // From pdf: Not a HDB Officer (registration not approved) for another project
     // within an application period (from application opening date,
