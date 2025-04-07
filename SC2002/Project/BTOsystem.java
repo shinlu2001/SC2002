@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 // import java.security.SecureRandom;
 // import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 public class BTOsystem implements Input{
     // private static final SecureRandom random = new SecureRandom();
@@ -147,18 +148,26 @@ public class BTOsystem implements Input{
         }
         return null;
     }
-    public static Project searchProjectById(int id) {
-        for (Project p : projects) {
-            if (p.getId()== id) {
-                return p;
-            }
-        }
-        return null;
-    }
-    public static Enquiry searchEnquiryById(int id) {
-        for (Enquiry p : enquiries) {
-            if (p.getId()== id) {
-                return p;
+    // public static Project searchProjectById(int id) {
+    //     for (Project p : projects) {
+    //         if (p.getId()== id) {
+    //             return p;
+    //         }
+    //     }
+    //     return null;
+    // }
+    // public static Enquiry searchEnquiryById(List<Enquiry> list,int id) {
+    //     for (Enquiry p : list) {
+    //         if (p.getId()== id) {
+    //             return p;
+    //         }
+    //     }
+    //     return null;
+    // }
+    public static <T> T searchById(List<T> list, int id, Function<T, Integer> getId) {
+        for (T item : list) {
+            if (getId.apply(item) == id) {
+                return item;
             }
         }
         return null;
@@ -305,13 +314,13 @@ public class BTOsystem implements Input{
                 // List<Integer> availableUnits = new ArrayList<>();
 
                 // Add first flat type (2-Room)
-                flatTypes.add(row[2]);
+                flatTypes.add(row[2].toUpperCase());
                 totalUnits.add(Integer.parseInt(row[3]));
                 // availableUnits.add(Integer.parseInt(row[3]));
 
                 // Add second flat type (3-Room) if exists
                 if (row.length > 5 && !row[5].isEmpty()) {
-                    flatTypes.add(row[5]);
+                    flatTypes.add(row[5].toUpperCase());
                     totalUnits.add(Integer.parseInt(row[6]));
                     // availableUnits.add(Integer.parseInt(row[6]));
                 }

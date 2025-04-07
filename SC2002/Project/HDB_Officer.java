@@ -42,7 +42,7 @@ public class HDB_Officer extends Applicant {
                         }
                         System.out.println("Enter ProjectID: ");
                         int id = Input.getIntInput(scanner);
-                        Project p = BTOsystem.searchProjectById(id);
+                        Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
                         if (p == null || !p.isVisible()) {
                             System.out.println("No such project.");
                         } else {
@@ -240,20 +240,20 @@ public class HDB_Officer extends Applicant {
             return;
         }
         
-        if (registrationStatus.equals("Unregistered")) {
+        if (registrationStatus.equals("UNREGISTERED")) {
             // Set status to Pending and assign the project
             officerProject = project;
-            registrationStatus = "Pending";
+            registrationStatus = "PENDING";
             if (!BTOsystem.officers.contains(this)) {
                 BTOsystem.officers.add(this);
             }
             System.out.println("Registration for " + project.getProjectName() + " submitted. Awaiting manager approval.");
         } else {
             switch (registrationStatus) {
-                case "Approved":
+                case "APRROVED":
                     System.out.println("You are already registered for a project.");
                     break;
-                case "Pending":
+                case "PENDING":
                     System.out.println("Your registration is already pending approval.");
                     break;
                 default:
@@ -275,16 +275,16 @@ public class HDB_Officer extends Applicant {
     
     public boolean hasAppliedAsApplicant() {
         if (this.application != null &&
-            !this.application.getStatus().equalsIgnoreCase("Withdrawn") &&
-            !this.application.getStatus().contains("Rejected")) {
+            !this.application.getStatus().equals("WITHDRAWN") &&
+            !this.application.getStatus().contains("REJECTED")) {
             return true;
         }
         return false;
     }
     
     public void forceRegisterAndApprove(Project project) {
-        if (registrationStatus.equals("Unregistered")) {
-            registrationStatus = "Approved";
+        if (registrationStatus.equals("UNREGISTERED")) {
+            registrationStatus = "APPROVED";
             project.addOfficer(this);
         }
     }
@@ -301,7 +301,7 @@ public class HDB_Officer extends Applicant {
             System.out.println("No application found for NRIC: " + applicantNRIC);
             return;
         }
-        if (!targetApp.getStatus().equalsIgnoreCase("Successful")) {
+        if (!targetApp.getStatus().equals("SUCCESSFUL")) {
             System.out.println("Application is not in a successful state for booking.");
             return;
         }

@@ -33,15 +33,7 @@ public class Applicant extends User implements Input {
                     ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
                     switch (selectedOption) {
                         case APPLY:
-                            if (application != null && !application.getStatus().equals("WITHDRAWN")) {
-                                System.out.println("You already have an active application. You may not create a new one.");
-                                System.out.println("============================================");
-                                
-                            }
-                            else {
-                                if (application.getStatus().equals("WITHDRAWN")) {
-                                    applicationHistory.add(application);
-                                }
+                            if (application == null || application.getStatus().equals("WITHDRAWN")) {
                                 System.out.println("Apply for a project");
                                 int count = view_eligible_listings();
                                 if (count==0) {
@@ -51,7 +43,7 @@ public class Applicant extends User implements Input {
                                 System.out.println("Enter ProjectID: ");
                                 int id = Input.getIntInput(sc);
                                 // sc.nextLine();
-                                Project p = BTOsystem.searchProjectById(id);
+                                Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
                                 if (p==null || !p.isVisible()) {
                                     System.out.println("No such project.");
                                 } else {
@@ -67,6 +59,10 @@ public class Applicant extends User implements Input {
                                         application = b;
                                     }
                                 }
+                            } else if (application != null || !application.getStatus().equals("WITHDRAWN")) {
+                                System.out.println("You already have an active application. You may not create a new one.");
+                                System.out.println("============================================");
+                                
                             }
                             break;
                         case VIEW_APPLICATION:
@@ -201,7 +197,7 @@ public class Applicant extends User implements Input {
                             view_listings();
                             System.out.println("Enter ID of project to enquire about: ");
                             int projectId = Input.getIntInput(sc);
-                            Project p = BTOsystem.searchProjectById(projectId);
+                            Project p = BTOsystem.searchById(BTOsystem.projects, projectId, Project::getId);
                             while (p==null) {
                                 System.out.println("Invalid ID, try again: ");
                                 projectId = Input.getIntInput(sc);
@@ -209,7 +205,7 @@ public class Applicant extends User implements Input {
                                 p = BTOsystem.projects.get(projectId);
                             } 
                             System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
-                            String flatType = Input.getStringInput(sc);
+                            String flatType = Input.getStringInput(sc).toUpperCase();
                             System.out.println("Enquiry: ");
                             String project_content = Input.getStringInput(sc);
                             makeEnquiry(p, project_content, flatType);
@@ -243,6 +239,13 @@ public class Applicant extends User implements Input {
                             System.out.println("All enquiries");
                             System.out.println("============================================");
                             view_all_enquiry_for_user();
+                            System.out.println("Select enquiry to view (-1 to cancel)");
+                            int en_id = Input.getIntInput(sc);
+                            if (en_id==-1) {
+                                break;
+                            }
+                            Enquiry en = BTOsystem.searchById(enquiries, en_id, Enquiry::getId);
+                            view_enquiry(en);
                             break;
                         case DELETE:
                             System.out.println("Delete enquiry");
@@ -273,7 +276,7 @@ public class Applicant extends User implements Input {
 
     // check eligibility of user to apply for flat
     protected boolean getEligibility(String flatType) {
-        if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equals("2-Room")) {
+        if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equalsIgnoreCase("2-Room")) {
             return true;
         } else if (get_maritalstatus().equals("MARRIED") && get_age()>=21) {
             return true;
@@ -408,33 +411,35 @@ public class Applicant extends User implements Input {
     
 
     private void view_all_enquiry_for_user() {
-        System.out.printf("%-5s %-20s %-30s %-15s%n", 
-            "ID", "Project", "Enquiry", "Status");
+        System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n", 
+            "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
         System.out.println("------------------------------------------------------------------------------------");
     
     for (Enquiry enquiry : enquiries) {
         // User creator = enquiry.getCreatedByUser();
         // String creatorName = creator.get_firstname() + " " + creator.get_lastname();
         
-        System.out.printf("%-5d %-20s %-30s %-15s%n",
+        System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
                 enquiry.getId(),
                 enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
                 truncateText(enquiry.getEnquiry(), 30),
-                enquiry.getResponse().isEmpty() ? "Pending" : "Answered");
+                truncateText(enquiry.getResponse(), 30),
+                enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
+                enquiry.getStaff()!=null? enquiry.getStaff().get_firstname():"");
         
         // If there's a flat type specified
         if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
-            System.out.println("%-5s Flat Type: " + enquiry.getflatType());
+            System.out.printf("%-5s %-20s %-30s%n", "","","Flat type: "+ enquiry.getflatType());
         }
         
-        // If there's a response, show it
-        if (!enquiry.getResponse().isEmpty()) {
-            System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
-            if (enquiry.getStaff() != null) {
-                System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + 
-                        enquiry.getStaff().get_lastname());
-            }
-        }
+        // // If there's a response, show it
+        // if (!enquiry.getResponse().isEmpty()) {
+        //     System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
+        //     if (enquiry.getStaff() != null) {
+        //         System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + 
+        //                 enquiry.getStaff().get_lastname());
+        //     }
+        // }
     }
     }
     private void view_enquiry(Enquiry en) {
@@ -445,18 +450,10 @@ public class Applicant extends User implements Input {
             System.out.println("No reply to your enquiry yet.");
         } else {
             System.out.println("Response: "+en.getResponse());
-
+            System.out.println("Replied by: " + en.getStaff().get_firstname());
         }
     }
     private void viewEditableEnquiry() {
-        // for (Enquiry en : enquiries) {
-        //     if (en.getStaff()==null){
-        //         System.out.println("#"+en.getId());
-        //         view_enquiry(en);
-        //         System.out.println("--------------------------------");
-        //     }
-            
-        // }
         System.out.printf("%-5s %-20s %-30s %-15s%n", 
             "ID", "Project", "Enquiry", "Status");
         System.out.println("------------------------------------------------------------------------------------");
@@ -474,7 +471,7 @@ public class Applicant extends User implements Input {
         
         // If there's a flat type specified
         if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
-            System.out.println("   Flat Type: " + enquiry.getflatType());
+            System.out.printf("%-5s %-20s %-30s%n", "","","Flat type: "+ enquiry.getflatType());
         }
     }
     }

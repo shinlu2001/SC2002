@@ -111,7 +111,7 @@ public class HDB_Manager extends User implements Input {
                             for (HDB_Officer o : BTOsystem.officers) {
                                 if (o.officerProject != null &&
                                     o.officerProject.equals(projectForOfficer) &&
-                                    o.registrationStatus.equalsIgnoreCase("Pending")) {
+                                    o.registrationStatus.equals("PENDING")) {
                                     pendingOfficers.add(o);
                                 }
                             }
@@ -178,7 +178,7 @@ public class HDB_Manager extends User implements Input {
                             BTOapplication application = null;
                             for (BTOapplication a : BTOsystem.applications)
                             {
-                                if (a.getApplicationId() == applicationId){
+                                if (a.getId() == applicationId){
                                     application = a;
                                     flatType = a.getFlatType();
                                     break;
@@ -186,7 +186,11 @@ public class HDB_Manager extends User implements Input {
                             }
 
                             if (application != null){
+                                System.out.println("Do you want to approve this application? Enter 'y/n': ");
+                                String confirm = Input.getStringInput(sc);
+                                if (confirm.equals('y')) {
                                 handleBTOapplication(projectForBTO, application, flatType);
+                                }
                             }else {
                                 System.out.println("Error: Application not found.");
                             }
@@ -201,14 +205,14 @@ public class HDB_Manager extends User implements Input {
                             if(projectForWithdrawal_a == null)
                                 break;
 
-                            System.out.print("Enter Applicant's ID: "); 
+                            System.out.print("Enter application ID: "); 
                             int withdrawalApplicationId = Input.getIntInput(sc);
                             
 
                             BTOapplication  withdrawalApplication = null;
                             for (BTOapplication a : BTOsystem.applications)
                             {
-                                if (a.getApplicationId() == withdrawalApplicationId){
+                                if (a.getId() == withdrawalApplicationId){
                                     withdrawalApplication = a;
                                     break;
                                 }
@@ -365,8 +369,6 @@ public class HDB_Manager extends User implements Input {
                 try {
                     System.out.print("Enter number of " + flatType + " units (none = 0): ");
                     units = Input.getIntInput(sc);
-                    
-
                     if (units >= 0) {
                         break;
                     }
@@ -873,7 +875,7 @@ if (!managerProjects.isEmpty())
         {
             if (officer.officerProject != null && officer.officerProject.equals(project)) {
                 officer.officerProject = null; // Remove the project reference
-                officer.registrationStatus  = "Unregistered"; // Reset registration status
+                officer.registrationStatus  = "UNREGISTERED"; // Reset registration status
                 officersToRemove.add(officer); // Collect officers to remove
             }
         }
@@ -893,7 +895,7 @@ if (!managerProjects.isEmpty())
 
         // Check if the officer is already assigned to another project within the same application period
         if (officer.isApplicationPeriodOverlapping(project)) {
-            officer.registrationStatus = "Rejected";
+            officer.registrationStatus = "REJECTED";
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer is already assigned to another project during this application period.");
             // System.out.println("Warning: Officer " + officer.get_firstname() + " " + officer.get_lastname() + " is already assigned to another project during this application period.");
             return;
@@ -901,7 +903,7 @@ if (!managerProjects.isEmpty())
 
         // Check if officer has applied to be a Applicant (for this project or other projects)
         if (officer.hasAppliedAsApplicant()) {
-            officer.registrationStatus = "Rejected";
+            officer.registrationStatus = "REJECTED";
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration rejected. Officer has already applied as an applicant.");
             return;
         }
@@ -913,11 +915,11 @@ if (!managerProjects.isEmpty())
         // if (input.equals("yes")) 
         // {
         if (project.addOfficer(officer)) {
-            officer.registrationStatus  = "Approved";
+            officer.registrationStatus  = "APPROVED";
             officer.officerProject = project;
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getId() + ".");
         } else {
-            officer.registrationStatus = "Rejected";
+            officer.registrationStatus = "REJECTED";
             System.out.println("Maximum number of officers already assigned to Project " + project.getId() + ". Officer's registration rejected.");
         }    
     }
@@ -965,7 +967,7 @@ if (!managerProjects.isEmpty())
     // Check if the flat type exists in the project
     if (!project.getFlatTypes().contains(flatType)) {
         System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
-        application.setStatus("Rejected");
+        application.setStatus("REJECTED");
         return;
     }
     
@@ -974,13 +976,14 @@ if (!managerProjects.isEmpty())
     
     // Check if there are available units for the requested flat type
     if (project.getAvailableUnits().get(index) <= 0) {
-        application.setStatus("Rejected");
+        application.setStatus("REJECTED");
         System.out.println("No available " + flatType + " units. Application rejected.");
         return;
     }
+
     
     // Application Approved, decrement the available units
-    application.setStatus("Approved");
+    application.setStatus("APPROVED");
     
     // Update available units using the Project class method
     int currentAvailable = project.getAvailableUnits().get(index);
@@ -988,17 +991,17 @@ if (!managerProjects.isEmpty())
     
     System.out.println("Application for " + flatType + " flat approved. Remaining units: " + 
                         project.getAvailableUnits().get(index));
-    }
-
+    
+}
     public void handleWithdrawalRequest_application(Project project, BTOapplication application, Scanner sc) {
 
-        if (!application.getwithdrawalRequested())
+        if (!application.getWithdrawalRequested())
         {
             System.out.println("Error: Withdrawal was not requested.");
             return;
         }
 
-        if (application.getStatus().equals("Withdrawn")) {
+        if (application.getStatus().equals("WITHDRAWN")) {
             System.out.println("Application has already been withdrawn.");
             return;
         }
@@ -1013,7 +1016,7 @@ if (!managerProjects.isEmpty())
                     int currentAvailable = project.getAvailableUnits().get(index);
                     project.updateAvailableUnits(application.getFlatType(), currentAvailable + 1);
 
-                    application.setStatus("Withdrawn");
+                    application.setStatus("WITHDRAWN");
                     System.out.println("Withdrawal request approved.");   
                 }else{
                     System.out.println("Withdrawal request rejected.");
@@ -1032,7 +1035,7 @@ if (!managerProjects.isEmpty())
             return;
         }
 
-        if (officer.registrationStatus.equals("Withdrawn")) {
+        if (officer.registrationStatus.equals("WITHDRAWN")) {
             System.out.println("Officer's registration has already been withdrawn.");
             return;
         }
@@ -1041,7 +1044,7 @@ if (!managerProjects.isEmpty())
             String input = sc.next().toLowerCase();
             if (input.equals("yes") || input.equals("no")) {
                 if (input.equals("yes")) {
-                    officer.registrationStatus = "Withdrawn";
+                    officer.registrationStatus = "WITHDRAWN";
                     System.out.println("Withdrawal request approved.");   
                 }else{
                     System.out.println("Withdrawal request rejected.");

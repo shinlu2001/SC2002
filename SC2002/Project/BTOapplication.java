@@ -51,7 +51,7 @@ public class BTOapplication {
     //---------------------add--------------------------
     public void setApplicationStatus(String applicationStatus)
     {
-        this.status = applicationStatus;
+        this.status = applicationStatus.toUpperCase();
     }
 
    public void bookFlat(Flat flat) {
@@ -66,7 +66,7 @@ public class BTOapplication {
         return applicationList;
     }
     
-    public boolean getwithdrawalRequested()
+    public boolean getWithdrawalRequested()
     {
         return withdrawalRequested;
     }
@@ -84,7 +84,7 @@ public class BTOapplication {
     //--------------------------------------------------
 
     // Getters
-    public int getApplicationId() {
+    public int getId() {
         return applicationId;
     }
 
