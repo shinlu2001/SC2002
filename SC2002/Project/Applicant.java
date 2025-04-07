@@ -70,7 +70,7 @@ public class Applicant extends User implements Input {
                                 System.out.println("============================================");
                             } else {
                                 application.get_details();
-                                if (application.getStatus() == "SUCCESSFUL") {
+                                if (application.getStatus().equalsIgnoreCase("Successful")) {
                                     System.out.println("Congrats! Your application is successful!");
                                     System.out.println("Enter 1 to book a flat (any other key to exit): ");
                                     int book = Input.getIntInput(sc);
@@ -267,7 +267,7 @@ public class Applicant extends User implements Input {
     }
 
     // check eligibility of user to apply for flat
-    private boolean getEligibility(String flatType) {
+    protected boolean getEligibility(String flatType) {
         if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equals("2-Room")) {
             return true;
         } else if (get_maritalstatus().equals("MARRIED") && get_age()>=21) {
@@ -295,7 +295,7 @@ public class Applicant extends User implements Input {
         System.err.println("-------------------------------------------------------------------------------------------------------------------");
     }
 
-    private int view_eligible_listings() {
+    protected int view_eligible_listings() {
         System.out.println("\n================================================================================================================");
         System.out.println("                                                  ELIGIBLE PROJECTS");
         System.out.println("================================================================================================================");
@@ -393,15 +393,14 @@ public class Applicant extends User implements Input {
     }
     //to be revised, enquiries tagged to a project
     private void makeEnquiry(Project project, String content, String flatType) {
-        // System.out.println("Enquiry: ");
         Enquiry en = new Enquiry(this, content);
         en.setProject(project);
         en.setflatType(flatType);
         enquiries.add(en);
-        // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
-        BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
-        // System.out.println("Enquiry sent!");
+        BTOsystem.enquiries.add(en);
+        project.addEnquiry(en);  // Ensure enquiry is tied to the project
     }
+    
 
     private void view_enquiry(Enquiry en) {
         System.out.println("Enquiry: "+ en.getEnquiry());

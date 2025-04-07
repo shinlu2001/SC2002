@@ -101,57 +101,82 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 7:     // handle Officer Registration - handleOfficerRegistration(project, officer)
-                            // WHEN CHECK IF PROJECT EXIST OR JUST NOT OWNER OF PROJ REFER TO DELETE SIMILAR^ (see below too)
-                            System.out.print("Enter the Project ID to manage: ");
-                            // find if project exists in allProjects then check if the project is under the current manager                                                                       
+                        case 7:     // handle Officer Registration
+                            System.out.print("Enter the Project ID to manage officer registrations: ");
                             Project projectForOfficer = findAndValidateProject(sc);
                             if (projectForOfficer == null)
                                 break;
-
-                            if (projectForOfficer.assignedOfficers.size() >= projectForOfficer.getTotalOfficerSlots()) {
-                                System.out.println("Error: Project " + projectForOfficer.getId() + " has no available officer slots (" + projectForOfficer.assignedOfficers.size() + "/" + 
-                                projectForOfficer.getTotalOfficerSlots() + " slots filled).");
-
-                            } else {
-                                System.out.print("Enter Officer's ID: ");
-                                int officerId = sc.nextInt();
-                                sc.nextLine();
-
-                                HDB_Officer officer = null;
-                            
-                                // Find the officer by first name
-                                for (HDB_Officer o : BTOsystem.officers) {
-                                    if (o.getOfficerId() == officerId) {
-                                        officer = o;
-                                        break;
-                                    }
-                                }
-                            
-                                if (officer != null) {
-                                    handleOfficerRegistration(projectForOfficer, officer);
-
-                                } else {
-                                    System.out.println("Error: Officer not found.");
+                            // Display pending officer registrations for the selected project
+                            List<HDB_Officer> pendingOfficers = new ArrayList<>();
+                            for (HDB_Officer o : BTOsystem.officers) {
+                                if (o.officerProject != null &&
+                                    o.officerProject.equals(projectForOfficer) &&
+                                    o.registrationStatus.equalsIgnoreCase("Pending")) {
+                                    pendingOfficers.add(o);
                                 }
                             }
+                            if (pendingOfficers.isEmpty()) {
+                                System.out.println("No pending officer registrations for this project.");
+                                break;
+                            }
+                            System.out.println("Pending officer registrations:");
+                            for (int i = 0; i < pendingOfficers.size(); i++) {
+                                System.out.println("[" + i + "] Officer ID: " + pendingOfficers.get(i).getOfficerId() + 
+                                                   ", Name: " + pendingOfficers.get(i).get_firstname());
+                            }
+                            System.out.print("Enter index of officer to review: ");
+                            int idx = Input.getIntInput(sc);
+                            if (idx < 0 || idx >= pendingOfficers.size()) {
+                                System.out.println("Invalid index.");
+                                break;
+                            }
+                            HDB_Officer officerToHandle = pendingOfficers.get(idx);
+                            handleOfficerRegistration(projectForOfficer, officerToHandle);
+                            break;                        
+                        case 8:     // handle withdrawel requests - handleWithdrawalRequest_officer(project, officer, sc)
+                            System.out.print("Enter the Project ID to manage: ");
+                            // find if project exists in allProjects then check if the project is under the current manager
+                            Project projectForWithdrawal_o = findAndValidateProject(sc);
+                            if(projectForWithdrawal_o == null)
+                                break;
+
+                            System.out.print("Enter Officer's ID: ");
+                            int withdrawalofficerId = sc.nextInt();
+                            sc.nextLine(); // consume newline
+
+                            HDB_Officer officer_withdrawal = null;
+                            // Find the officer by their ID
+                            for (HDB_Officer o : BTOsystem.officers) {
+                                if (o.getOfficerId() == withdrawalofficerId) {
+                                    officer_withdrawal = o;
+                                    break;
+                                }
+                            }
+                        
+                            if (officer_withdrawal != null) {
+                                handleWithdrawalRequest_officer(projectForWithdrawal_o, officer_withdrawal, sc);
+
+                            } else {
+                                System.out.println("Error: Officer not found.");
+                            }
+
+                    
                             // System.out.println("---------------------------------------------------");
-                            break;
-                            
-                        case 8:     // handle BTO registration - handleBTOapplication(projectToEdit, application, type)
+                            break;  
+                        case 9:     // handle BTO registration - handleBTOapplication(projectToEdit, application, type)
                             System.out.print("Enter the Project ID to manage: ");
                             // find if project exists in allProjects then check if the project is under the current manager
                             Project projectForBTO = findAndValidateProject(sc);
                             if(projectForBTO == null)
                                 break;
 
-                            System.out.println("Enter Applicant's ID: ");
+                            System.out.print("Enter Applicant's ID: ");
                             int applicationId = sc.nextInt();
                             sc.nextLine(); // consume newline
 
-                            String flatType;
+                            String flatType = null;
                             BTOapplication application = null;
-                            for (BTOapplication a : BTOapplication.getApplicationList())
+                            for (BTOapplication a : BTOsystem.applications)
                             {
                                 if (a.getApplicationId() == applicationId){
                                     application = a;
@@ -160,59 +185,65 @@ public class HDB_Manager extends User implements Input {
                                 }
                             }
 
-                            if (application != null)
+                            if (application != null){
+                                handleBTOapplication(projectForBTO, application, flatType);
+                            }else {
+                                System.out.println("Error: Application not found.");
+                            }
                             
-
-
-                            // for (BTOsystem a : BTOsystem.applicants){
-                            //     if (a.getFlatType().equalsIgnoreCase(applicationId))
-                            // }
-                            // if (projectForBTO != null) {
-                            //     // Rest of BTO handling logic
-                            // } else {
-                            //     // Here you would need to add code to select an application
-                            //     // This is just a placeholder - you'll need to implement the actual application selection logic
-                            //     System.out.println("BTO application handling functionality would go here");
-                            // }
-                        
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 9:     // handle withdrawel requests - handleWithdrawalRequest(project, application)
-                            // System.out.print("Enter Project Name: ");
-                            // // find if project exists in allProjects then check if the project is under the current manager
-                            // Project projectForWithdrawal = findAndValidateProject(sc);
-                            // if (projectForWithdrawal != null) {
-                            //     // Rest of withdrawal handling logic
-                            // } else {
-                            //     // Here you would need to add code to select an application with a withdrawal request
-                            //     // This is just a placeholder - you'll need to implement the actual application selection logic
-                            //     System.out.println("Withdrawal request handling functionality would go here");
-                            // }
+                        case 10:     // handle withdrawel requests - handleWithdrawalRequest_application(project, application, sc)
+                            System.out.print("Enter the Project ID to manage: ");
+                            // find if project exists in allProjects then check if the project is under the current manager
+                            Project projectForWithdrawal_a = findAndValidateProject(sc);
+                            if(projectForWithdrawal_a == null)
+                                break;
+
+                            System.out.print("Enter Applicant's ID: "); 
+                            int withdrawalApplicationId = sc.nextInt();
+                            sc.nextLine(); // consume newline
+
+                            BTOapplication  withdrawalApplication = null;
+                            for (BTOapplication a : BTOsystem.applications)
+                            {
+                                if (a.getApplicationId() == withdrawalApplicationId){
+                                    withdrawalApplication = a;
+                                    break;
+                                }
+                            }
+
+                            if (withdrawalApplication != null){
+                                handleWithdrawalRequest_application(projectForWithdrawal_a, withdrawalApplication, sc);
+                            }else {
+                                System.out.println("Error: Application not found.");
+                            }
+
                     
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 10:     // generate appplicant report - generateReport(applicationList)
+                        case 11:     // generate appplicant report - generateReport(applicationList)
                             generateReport(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 11:     // view all enquiries (across all projects)
-                            viewAllEnquiries(sc);
+                        case 12:     // view all enquiries (across all projects)
+                            viewAllEnquiries();
                             System.out.println("---------------------------------------------------");
                             break;
                         
-                        case 12:     // handle project enquires (view and reply to enquiries for your projects)
+                        case 13:     // handle project enquires (view and reply to enquiries for your projects)
                             handleProjectEnquiries(sc);
                             System.out.println("---------------------------------------------------");
                             break;
-                        case 13:     //view manager account details
+                        case 14:     //view manager account details
                             System.out.println("---------------------------------------------------");
                             to_string();
                             System.out.println("---------------------------------------------------");
                             break;
-                        case 14:
+                        case 15:
                             System.out.println("---------------------------------------------------");
                             System.out.println("Logged out. Returning to main menu...");
                             System.out.println("---------------------------------------------------");
@@ -884,13 +915,11 @@ if (!managerProjects.isEmpty())
         if (project.addOfficer(officer)) {
             officer.registrationStatus  = "Approved";
             officer.officerProject = project;
-            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getId() + ".");            
-        } 
-        // else
-        // {
-        //     officer.registrationStatus = "Rejected";
-        //     System.out.println("Maximum number of officers already assigned to Project " + project.getId() + ". Officer's registration rejected. ");
-        // }
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");
+        } else {
+            officer.registrationStatus = "Rejected";
+            System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected.");
+        }    
     }
     
     // View officer registration under them (manager)
@@ -931,87 +960,37 @@ if (!managerProjects.isEmpty())
         }
         // System.out.println("---------------------------------------------------");
     }
-    
-    // // Automatically approve or reject application according to specific conditions
-    // public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
-  
-    //     // Check if the flat type is valid
-    //     if (!flatType.equals("2-Room") && !flatType.equals("3-Room")) 
-    //     {
-    //         System.out.println("Error: Invalid flat type. Please specify either '2-Room' or '3-Room'.");
-    //         return;
-    //     }
-    
-    //     // Check if there are available units for the requested flat type
-    //     if (flatType.equals("2-Room") && project.getavailable2Room() <= 0) 
-    //     {
-    //         application.setApplicationStatus("Rejected");
-    //         System.out.println("No available 2-Room units. Application rejected.");
-    //         // System.out.println("Warning: No available 2-Room units. Application rejected.");
-    //         return;
-
-    //     } else if (flatType.equals("3-Room") && project.getavailable3Room() <= 0) 
-    //     {
-    //         application.setApplicationStatus("Rejected");
-    //         System.out.println("No available 3-Room units. Application rejected.");
-    //         // System.out.println("Warning: No available 3-Room units. Application rejected.");
-    //         return;
-    //     }
-        
-    //     // System.out.print("Do you want to approve the BTO application? (yes/no): ");
-    //     // String input = scan.next().toLowerCase();
-
-    //     // Application Approved, decrement the available units
-    //     // if (input.equals("yes"))
-    //     // {
-    //         if (flatType.equals("2-Room")) 
-    //         {
-    //             application.setApplicationStatus("Approved");
-    //             project.setavailable2Room(project.getavailable2Room() - 1);
-    //             System.out.println("Application for 2-Room flat approved. Remaining 2-Room units: " + project.getavailable2Room());
-
-    //         } else if (flatType.equals("3-Room")) 
-    //         {
-    //             application.setApplicationStatus("Approved");
-    //             project.setavailable3Room(project.getavailable3Room() - 1);
-    //             System.out.println("Application for 3-Room flat approved. Remaining 3-Room units: " + project.getavailable3Room());
-    //         }
-    //     // } else{
-    //     //     application.setApplicationStatus("Rejected");
-    //     //     System.out.println("BTO application rejected.");
-    //     // }
-    // }
 
     public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
-        // Check if the flat type exists in the project
-        if (!project.getFlatTypes().contains(flatType)) {
-            System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
-            application.setStatus("Rejected");
-            return;
-        }
-        
-        // Get the index of the flat type
-        int index = project.getFlatTypes().indexOf(flatType);
-        
-        // Check if there are available units for the requested flat type
-        if (project.getAvailableUnits().get(index) <= 0) {
-            application.setStatus("Rejected");
-            System.out.println("No available " + flatType + " units. Application rejected.");
-            return;
-        }
-        
-        // Application Approved, decrement the available units
-        application.setStatus("Approved");
-        
-        // Update available units using the Project class method
-        int currentAvailable = project.getAvailableUnits().get(index);
-        project.updateAvailableUnits(flatType, currentAvailable - 1);
-        
-        System.out.println("Application for " + flatType + " flat approved. Remaining units: " + 
-                          project.getAvailableUnits().get(index));
+    // Check if the flat type exists in the project
+    if (!project.getFlatTypes().contains(flatType)) {
+        System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
+        application.setStatus("Rejected");
+        return;
+    }
+    
+    // Get the index of the flat type
+    int index = project.getFlatTypes().indexOf(flatType);
+    
+    // Check if there are available units for the requested flat type
+    if (project.getAvailableUnits().get(index) <= 0) {
+        application.setStatus("Rejected");
+        System.out.println("No available " + flatType + " units. Application rejected.");
+        return;
+    }
+    
+    // Application Approved, decrement the available units
+    application.setStatus("Approved");
+    
+    // Update available units using the Project class method
+    int currentAvailable = project.getAvailableUnits().get(index);
+    project.updateAvailableUnits(flatType, currentAvailable - 1);
+    
+    System.out.println("Application for " + flatType + " flat approved. Remaining units: " + 
+                        project.getAvailableUnits().get(index));
     }
 
-    public void handleWithdrawalRequest(Project project, BTOapplication application, Scanner sc) {
+    public void handleWithdrawalRequest_application(Project project, BTOapplication application, Scanner sc) {
 
         if (!application.getwithdrawalRequested())
         {
@@ -1028,7 +1007,41 @@ if (!managerProjects.isEmpty())
             String input = sc.next().toLowerCase();
             if (input.equals("yes") || input.equals("no")) {
                 if (input.equals("yes")) {
+                    // Get the index of the flat type
+                    int index = project.getFlatTypes().indexOf(application.getFlatType());
+                    // Update available units using the Project class method
+                    int currentAvailable = project.getAvailableUnits().get(index);
+                    project.updateAvailableUnits(application.getFlatType(), currentAvailable + 1);
+
                     application.setStatus("Withdrawn");
+                    System.out.println("Withdrawal request approved.");   
+                }else{
+                    System.out.println("Withdrawal request rejected.");
+                }
+                break;
+            } else {
+                System.out.println("Error: Please enter either 'yes' or 'no'.");
+            }
+        }
+    }
+    public void handleWithdrawalRequest_officer(Project project, HDB_Officer officer, Scanner sc) {
+
+        if (!officer.getwithdrawalRequested())
+        {
+            System.out.println("Error: Withdrawal was not requested.");
+            return;
+        }
+
+        if (officer.registrationStatus.equals("Withdrawn")) {
+            System.out.println("Officer's registration has already been withdrawn.");
+            return;
+        }
+        while(true){
+            System.out.println("Do you want to approve the withdrawal request? (yes/no): ");
+            String input = sc.next().toLowerCase();
+            if (input.equals("yes") || input.equals("no")) {
+                if (input.equals("yes")) {
+                    officer.registrationStatus = "Withdrawn";
                     System.out.println("Withdrawal request approved.");   
                 }else{
                     System.out.println("Withdrawal request rejected.");
@@ -1121,7 +1134,7 @@ public void reply_enquiry(Enquiry enquiry, String response) {
     }
     
     enquiry.setResponse(response);
-    enquiry.setStaffReply(this);
+    enquiry.setStaffReply(this); // Changed from BTOsystem.currentUser to this
     
     System.out.println("Successfully replied to enquiry ID: " + enquiry.getId());
 }
@@ -1156,6 +1169,7 @@ public void viewAllEnquiries(Scanner sc) {
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Showing all enquiries.");
         choice = 1;
+        sc.nextLine(); // Clear invalid input
     }
     
     List<Enquiry> filteredEnquiries = new ArrayList<>();
@@ -1232,7 +1246,6 @@ private String truncateText(String text, int maxLength) {
     return text.substring(0, maxLength - 3) + "...";
 }
 
-
 public void handleProjectEnquiries(Scanner sc) {
     System.out.println("\n============================================");
     System.out.println("            HANDLE ENQUIRIES");
@@ -1284,8 +1297,68 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
         return;
     }
     
-    // Rest of the method remains the same as original handleProjectEnquiries()
-    // ...
+    System.out.println("Select a project to view its pending enquiries:");
+    for (int i = 0; i < projectsWithEnquiries.size(); i++) {
+        System.out.printf("[%d] %s%n", i, projectsWithEnquiries.get(i).getProjectName());
+    }
+    int projChoice = -1;
+    try {
+        System.out.print("Enter project index: ");
+        projChoice = sc.nextInt();
+        sc.nextLine(); // consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Returning to menu.");
+        sc.nextLine();
+        return;
+    }
+    if (projChoice < 0 || projChoice >= projectsWithEnquiries.size()) {
+        System.out.println("Invalid project index. Returning to menu.");
+        return;
+    }
+    
+    Project selectedProject = projectsWithEnquiries.get(projChoice);
+    List<Enquiry> pendingEnquiries = new ArrayList<>();
+    for (Enquiry e : selectedProject.getEnquiries()) {
+        if (e.getResponse().isEmpty()) {
+            pendingEnquiries.add(e);
+        }
+    }
+    
+    if (pendingEnquiries.isEmpty()) {
+        System.out.println("No pending enquiries for the selected project.");
+        return;
+    }
+    
+    System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
+    for (int i = 0; i < pendingEnquiries.size(); i++) {
+        Enquiry e = pendingEnquiries.get(i);
+        System.out.printf("[%d] ID: %d, Question: %s%n", i, e.getEnId(), truncateText(e.getEnquiry(), 30));
+    }
+    
+    int enquiryChoice;
+    try {
+        System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
+        enquiryChoice = sc.nextInt();
+        sc.nextLine(); // consume newline
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Returning to menu.");
+        sc.nextLine();
+        return;
+    }
+    if (enquiryChoice == -1) {
+        System.out.println("Operation cancelled.");
+        return;
+    }
+    if (enquiryChoice < 0 || enquiryChoice >= pendingEnquiries.size()) {
+        System.out.println("Invalid enquiry selection.");
+        return;
+    }
+    
+    Enquiry selectedEnquiry = pendingEnquiries.get(enquiryChoice);
+    System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
+    System.out.print("Enter your reply: ");
+    String reply = sc.nextLine();
+    reply_enquiry(selectedEnquiry, reply);
 }
 
 private void handleGeneralEnquiries(Scanner sc) {
@@ -1311,7 +1384,6 @@ private void handleGeneralEnquiries(Scanner sc) {
         System.out.println("   Enquiry: " + e.getEnquiry());
     }
     
-    // Select an enquiry to respond to
     int enquiryChoice;
     while (true) {
         try {

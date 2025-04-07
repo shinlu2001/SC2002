@@ -28,6 +28,9 @@ public class Project {
     // private int availableOfficerSlots;
     private boolean visibility;
     // private String flatType1, flatType2;
+    // enquiries related to project
+    private List<Enquiry> enquiries = new ArrayList<>();
+
 
     public void toggle_visibility() {
         if (visibility==true) {
@@ -100,6 +103,15 @@ public class Project {
     
     public List<Integer> getAvailableUnits() {
         return new ArrayList<>(availableUnits);
+    }
+    // project related enquiry stuff
+
+    public List<Enquiry> getEnquiries() {
+        return enquiries;
+    }
+
+    public void addEnquiry(Enquiry enquiry) {
+        enquiries.add(enquiry);
     }
 
 

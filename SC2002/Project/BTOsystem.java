@@ -89,6 +89,7 @@ public class BTOsystem implements Input{
                         break;
                     case 4:
                         // clearScreen();
+                        saveData();
                         System.out.println("Exiting program...");
                         System.out.println("--------------------------------");
                         sc.close();
@@ -404,5 +405,101 @@ public class BTOsystem implements Input{
             }
         }
     }
+    public static void saveData() {
+        // Define the output folder (subdirectory "file" of current directory)
+        String folderPath = "/workspaces/SC2002/SC2002/Project/files";
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            folder.mkdirs();  // Create folder if it doesn't exist
+        }
     
+        // Save Applicants
+        String applicantFile = folderPath + File.separator + "ApplicantListNew.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(applicantFile))) {
+            writer.write("Name,NRIC,Age,Marital Status,Password");
+            writer.newLine();
+            for (Applicant a : BTOsystem.applicants) {
+                // Using only first name as per sample format; adjust if needed.
+                String line = String.format("%s,%s,%d,%s,%s",
+                        a.get_firstname(), a.get_nric(), a.get_age(), a.get_maritalstatus(), a.get_password());
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing ApplicantListNew.csv: " + e.getMessage());
+        }
+    
+        // Save Managers
+        String managerFile = folderPath + File.separator + "ManagerListNew.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(managerFile))) {
+            writer.write("Name,NRIC,Age,Marital Status,Password");
+            writer.newLine();
+            for (HDB_Manager m : BTOsystem.managers) {
+                String line = String.format("%s,%s,%d,%s,%s",
+                        m.get_firstname(), m.get_nric(), m.get_age(), m.get_maritalstatus(), m.get_password());
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing ManagerListNew.csv: " + e.getMessage());
+        }
+    
+        // Save Officers
+        String officerFile = folderPath + File.separator + "OfficerListNew.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(officerFile))) {
+            writer.write("Name,NRIC,Age,Marital Status,Password");
+            writer.newLine();
+            for (HDB_Officer o : BTOsystem.officers) {
+                String line = String.format("%s,%s,%d,%s,%s",
+                        o.get_firstname(), o.get_nric(), o.get_age(), o.get_maritalstatus(), o.get_password());
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing OfficerListNew.csv: " + e.getMessage());
+        }
+    
+        // Save Projects
+        String projectFile = folderPath + File.separator + "ProjectListNew.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(projectFile))) {
+            // Header as per sample CSV format
+            writer.write("Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,"
+                    + "Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officer");
+            writer.newLine();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+            for (Project p : BTOsystem.projects) {
+                // For this example, assume we output at most two flat types.
+                String type1 = p.getFlatTypes().size() > 0 ? p.getFlatTypes().get(0) : "";
+                String units1 = p.getTotalUnits().size() > 0 ? p.getTotalUnits().get(0).toString() : "";
+                // We don't have selling price in Project – use 0 as a placeholder.
+                String price1 = "0";
+                String type2 = p.getFlatTypes().size() > 1 ? p.getFlatTypes().get(1) : "";
+                String units2 = p.getTotalUnits().size() > 1 ? p.getTotalUnits().get(1).toString() : "";
+                String price2 = "0";
+                String openDate = p.getOpenDate().format(formatter);
+                String closeDate = p.getCloseDate().format(formatter);
+                String managerName = (p.getManager() != null) ? p.getManager().get_firstname() : "";
+                String officerSlot = String.valueOf(p.getTotalOfficerSlots());
+                // Join officer first names, if any
+                String officers = "";
+                if (p.assignedOfficers != null && !p.assignedOfficers.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (HDB_Officer o : p.assignedOfficers) {
+                        if (sb.length() > 0) {
+                            sb.append(",");
+                        }
+                        sb.append(o.get_firstname());
+                    }
+                    officers = "\"" + sb.toString() + "\""; // Enclose in quotes
+                }
+                String line = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                        p.getProjectName(), p.getneighbourhood(), type1, units1, price1, type2, units2, price2,
+                        openDate, closeDate, managerName, officerSlot, officers);
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing ProjectListNew.csv: " + e.getMessage());
+        }
+    }
 }
