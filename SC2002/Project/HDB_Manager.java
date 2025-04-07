@@ -1058,39 +1058,39 @@ if (!managerProjects.isEmpty())
         // BTOapplication.get_details();   // helpz
         // OR
 
-        // List<BTOapplication> applicationList = BTOapplication.getApplicationList();
+        List<BTOapplication> applicationList = BTOapplication.getApplicationList();
 
-        // if (applicationList.isEmpty()) {
-        //     System.out.println("No applications available.");
-        //     return;
-        // }
+        if (applicationList.isEmpty()) {
+            System.out.println("No applications available.");
+            return;
+        }
 
-        // // View application list
-        // if (!applicationList.isEmpty())
-        // {
-        //     System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
-        //     System.out.println("------------------------------------------------------------");
-        //     for (BTOapplication application : applicationList)
-        //     {   
-        //         // View all officer registration (including projects under other managers)
-        //         Project assignedProject = application.getProject();
-        //         if (assignedProject != null && assignedProject.getManager() == this) 
-        //         {
-        //             // Only display officers assigned to projects managed by the current manager
-        //             System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getId());
-        //         }
-        //     }
-        // }
-        // else{
-        //     System.out.println("No applications available.");
-        // }
+        // View application list
+        if (!applicationList.isEmpty())
+        {
+            System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
+            System.out.println("------------------------------------------------------------");
+            for (BTOapplication application : applicationList)
+            {   
+                // View all officer registration (including projects under other managers)
+                Project assignedProject = application.getProject();
+                if (assignedProject != null && assignedProject.getManager() == this) 
+                {
+                    // Only display officers assigned to projects managed by the current manager
+                    System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getId());
+                }
+            }
+        }
+        else{
+            System.out.println("No applications available.");
+        }
 
-/*         System.out.println("\n---- Generate Report ----");
+         System.out.println("\n---- Generate Report ----");
         System.out.println("1. View All Applicants");
         System.out.println("2. Filter by Marital Status");
         System.out.println("3. Filter by Flat Type");
         System.out.println("4. Filter by Both Marital Status & Flat Type");
-        System.out.println("Enter your choice: "); */
+        System.out.println("Enter your choice: "); 
 
         menu.printReportMenu();
         int choice = Input.getIntInput(sc);
@@ -1098,21 +1098,83 @@ if (!managerProjects.isEmpty())
 
         switch (choice) {
             case 1:
-                System.out.printf("%-20s %-10s %-15s %-15s %-15s%n", "Applicant Name", "Age", "Marital Status", "Flat Type", "Project Name\n");
+            // 1. Show all applications (no filtering)
+            printApplicationList(applicationList);
+            break;
+        case 2:
+            // 2. Filter by marital status
+            System.out.print("Enter marital status (Single/Married): ");
+            String status = sc.nextLine().trim().toLowerCase();
             
-                // for (BTOapplication application : applicationList)
-                // {
-                //     if (application.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
-                //     {
-                //         System.out.println(p);
-                //     }
-                // }
-                
+            List<BTOapplication> filteredByMarital = new ArrayList<>();
+            for (BTOapplication app : applicationList) {
+                String applicantStatus = app.getApplicant().get_maritalstatus().toLowerCase();
+                if (applicantStatus.equals(status)) {
+                    filteredByMarital.add(app);
+                }
+            }
+            printApplicationList(filteredByMarital);
+            break;
+        case 3:
+            // 3. Filter by flat type
+            System.out.print("Enter flat type (2-Room/3-Room): ");
+            String flatType = sc.nextLine().trim();
+            
+            List<BTOapplication> filteredByFlat = new ArrayList<>();
+            for (BTOapplication app : applicationList) {
+                if (app.getFlatType().equalsIgnoreCase(flatType)) {
+                    filteredByFlat.add(app);
+                }
+            }
+            printApplicationList(filteredByFlat);
+            break;
+        case 4:
+            // 4. Filter by both marital status & flat type
+            System.out.print("Enter marital status (Single/Married): ");
+            status = sc.nextLine().trim().toLowerCase();
+            
+            System.out.print("Enter flat type (2-Room/3-Room): ");
+            flatType = sc.nextLine().trim();
+            
+            List<BTOapplication> filteredByBoth = new ArrayList<>();
+            for (BTOapplication app : applicationList) {
+                String applicantStatus = app.getApplicant().get_maritalstatus().toLowerCase();
+                if (applicantStatus.equals(status) && app.getFlatType().equalsIgnoreCase(flatType)) {
+                    filteredByBoth.add(app);
+                }
+            }
+            printApplicationList(filteredByBoth);
+            break;
+        case 5:
+            // 5. Return to the previous menu
+            System.out.println("Returning...");
+            return;
+        default:
+            System.out.println("Invalid choice. Please try again.");
+    }
+    }
+//this should be revised , change to more efficient way
+    private void printApplicationList(List<BTOapplication> apps) {
+        if (apps.isEmpty()) {
+            System.out.println("No matching applications found.");
+            return;
+        }
 
-                break;
-        
-            default:
-                break;
+        // Print a header row
+        System.out.printf("%-20s %-5s %-15s %-10s %-15s%n",
+                "Applicant Name", "Age", "Marital Status", "Flat", "Project");
+
+        // Print each record
+        for (BTOapplication app : apps) {
+            Applicant applicant = app.getApplicant();
+            String fullName = applicant.get_firstname() + " " + applicant.get_lastname();
+            int age = applicant.get_age();
+            String marital = applicant.get_maritalstatus();
+            String flat = app.getFlatType();       // e.g., "2-Room" or "3-Room"
+            String project = app.getProjectName();   // or app.getProject().getProjectName()
+
+            System.out.printf("%-20s %-5d %-15s %-10s %-15s%n",
+                    fullName, age, marital, flat, project);
         }
     }
 
