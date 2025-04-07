@@ -36,7 +36,7 @@ public class BTOapplication {
         this.applicant = applicant;
         this.project = project;
         this.flatType = flatType;
-        this.status = "Pending"; // default status
+        this.status = "PENDING"; // default status
         manager=project.getManager();
     }
     // manager constructor version of btoapplication, for the sake of running tests
@@ -150,18 +150,18 @@ public class BTOapplication {
                 return;
         }
 
-        if (status.equals("Unregistered")) {
+        if (status.equals("UNREGISTERED")) {
             applicationList.add(this);
             this.project = project;
-            status = "Pending";
+            status = "PENDING";
             System.out.println("Registration for " + project.getProjectName() + " successful. Registration request has been sent to the HDB Manager for approval.");
         } else {
             switch (status) {
-                case "Approved":
+                case "APPROVED":
                     System.out.println("You are already registered for a project.");
                     break;
                 
-                case "Pending":
+                case "PENDING":
                     System.out.println("You are already have a pending approval for a project.");
                     break;
             

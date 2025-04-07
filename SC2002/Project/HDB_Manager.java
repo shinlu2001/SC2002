@@ -51,8 +51,8 @@ public class HDB_Manager extends User implements Input {
                 
                 
 
-                choice = sc.nextInt();
-                sc.nextLine(); // Consume leftover newline
+                choice = Input.getIntInput(sc);
+                
                 
                 switch (choice) {
                     case 1:     // create a new project based by keying input in
@@ -141,8 +141,8 @@ public class HDB_Manager extends User implements Input {
                                 break;
 
                             System.out.print("Enter Officer's ID: ");
-                            int withdrawalofficerId = sc.nextInt();
-                            sc.nextLine(); // consume newline
+                            int withdrawalofficerId = Input.getIntInput(sc);
+                            
 
                             HDB_Officer officer_withdrawal = null;
                             // Find the officer by their ID
@@ -171,8 +171,8 @@ public class HDB_Manager extends User implements Input {
                                 break;
 
                             System.out.print("Enter Applicant's ID: ");
-                            int applicationId = sc.nextInt();
-                            sc.nextLine(); // consume newline
+                            int applicationId = Input.getIntInput(sc);
+                            
 
                             String flatType = null;
                             BTOapplication application = null;
@@ -202,8 +202,8 @@ public class HDB_Manager extends User implements Input {
                                 break;
 
                             System.out.print("Enter Applicant's ID: "); 
-                            int withdrawalApplicationId = sc.nextInt();
-                            sc.nextLine(); // consume newline
+                            int withdrawalApplicationId = Input.getIntInput(sc);
+                            
 
                             BTOapplication  withdrawalApplication = null;
                             for (BTOapplication a : BTOsystem.applications)
@@ -230,7 +230,7 @@ public class HDB_Manager extends User implements Input {
                             break;
                         
                         case 12:     // view all enquiries (across all projects)
-                            viewAllEnquiries();
+                            viewAllEnquiries(sc);
                             System.out.println("---------------------------------------------------");
                             break;
                         
@@ -267,8 +267,8 @@ public class HDB_Manager extends User implements Input {
     }
     // find if project exists in allProjects then check if the project is under the current manager
     private Project findAndValidateProject(Scanner sc) {
-        int projectID = sc.nextInt();
-        sc.nextLine(); // consume newline
+        int projectID = Input.getIntInput(sc);
+        
         
         // Find project in allProjects
         Project project = null;
@@ -328,10 +328,10 @@ public class HDB_Manager extends User implements Input {
         System.out.println("            CREATING A PROJECT");
         System.out.println("============================================");
         System.out.print("Enter Project Name: ");
-        String projectName = sc.nextLine();
+        String projectName = Input.getStringInput(sc);
 
         System.out.print("Enter Neighbourhood: ");
-        String neighbourhood = sc.nextLine();
+        String neighbourhood = Input.getStringInput(sc);
 
         // System.out.print("Enter Flat Type (2-Room/3-Room):");
         // // String flatType = scan.next().toLowerCase();
@@ -358,14 +358,14 @@ public class HDB_Manager extends User implements Input {
         boolean addMoreFlats = true;
         while (addMoreFlats) {
             System.out.print("Enter Flat Type (e.g., 2-Room, 3-Room, 4-Room): ");
-            String flatType = sc.nextLine();
+            String flatType = Input.getStringInput(sc);
 
             int units;
             while (true) {
                 try {
                     System.out.print("Enter number of " + flatType + " units (none = 0): ");
-                    units = sc.nextInt();
-                    sc.nextLine(); // Consume newline
+                    units = Input.getIntInput(sc);
+                    
 
                     if (units >= 0) {
                         break;
@@ -400,7 +400,7 @@ public class HDB_Manager extends User implements Input {
         //     try {
         //         System.out.print("Enter number of 2-Room units (none = 0): ");
         //         // int total2Room = scan.nextInt();
-        //         total2Room = (sc.nextInt());
+        //         total2Room = (Input.getIntInput(sc));
         //         sc.nextLine(); // Consume newline
 
         //         if (total2Room >= 0) // if input is positive no. = valid, so break the loop and proceed
@@ -421,7 +421,7 @@ public class HDB_Manager extends User implements Input {
         // {
         //     try {
         //         System.out.print("Enter number of 3-Room units (none = 0): ");
-        //         total3Room = sc.nextInt();
+        //         total3Room = Input.getIntInput(sc);
         //         sc.nextLine(); // Consume newline
                 
         //         if (total3Room >= 0) // if input is positive no. = valid, so break the loop and proceed
@@ -464,7 +464,7 @@ public class HDB_Manager extends User implements Input {
         while (true)
         {   try{
                 System.out.print("Enter Available HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
-                totalOfficerSlots = sc.nextInt();
+                totalOfficerSlots = Input.getIntInput(sc);
                 sc.nextLine(); // Consume newline
 
                 // If input(availableOfficerSlots) is NOT btw 1-10, keep looping
@@ -586,18 +586,18 @@ if (!managerProjects.isEmpty())
 
                         // int option = scan.nextInt();
                         System.out.println("Enter your choice: ");
-                        option = sc.nextInt();
-                        sc.nextLine(); // Consume newline
+                        option = Input.getIntInput(sc);
+                        
 
                         switch (option) {
                             case 1:
                                 System.out.print("Enter new Project Name: ");
-                                p.setProjectName(sc.nextLine());
+                                p.setProjectName(Input.getStringInput(sc));
                                 break;
 
                             case 2:
                                 System.out.print("Enter new Neighbourhood: ");
-                                p.setneighbourhood(sc.nextLine());
+                                p.setneighbourhood(Input.getStringInput(sc));
                                 break;
 
                             case 3:  
@@ -605,7 +605,7 @@ if (!managerProjects.isEmpty())
                                 // while (true) {
                                 //     try {
                                 //         System.out.print("Enter updated number of 2-Room units (none = 0): ");
-                                //         total2Room = sc.nextInt();
+                                //         total2Room = Input.getIntInput(sc);
                                 //         sc.nextLine(); // Consume newline
                             
                                 //         if (total2Room >= 0) {
@@ -635,8 +635,8 @@ if (!managerProjects.isEmpty())
                                 while (true) {
                                     try {
                                         System.out.print("\nSelect flat type to edit (1-" + p.getFlatTypes().size() + "): ");
-                                        flatChoice = sc.nextInt();
-                                        sc.nextLine();
+                                        flatChoice = Input.getIntInput(sc);
+                                        
                                         
                                         if (flatChoice > 0 && flatChoice <= p.getFlatTypes().size()) {
                                             index = flatChoice - 1;
@@ -656,8 +656,8 @@ if (!managerProjects.isEmpty())
                                 while (true) {
                                     try {
                                         System.out.print("Enter new unit count for " + currentType + ": ");
-                                        newUnits = sc.nextInt();
-                                        sc.nextLine();
+                                        newUnits = Input.getIntInput(sc);
+                                        
                                         
                                         if (newUnits >= 0) {
                                             // Update both total and available units
@@ -685,7 +685,7 @@ if (!managerProjects.isEmpty())
                                 // while (true) {
                                 //     try {
                                 //         System.out.print("Enter updated number of 3-Room units (none = 0): ");
-                                //         total3Room = sc.nextInt();
+                                //         total3Room = Input.getIntInput(sc);
                                 //         sc.nextLine(); // Consume newline
                             
                                 //         if (total3Room >= 0) {
@@ -702,7 +702,7 @@ if (!managerProjects.isEmpty())
                                 FlatTypesMenu(p);                                                 
                             
                                 System.out.print("\nEnter new Flat Type: ");
-                                String newType = sc.nextLine();
+                                String newType = Input.getStringInput(sc);
                                 
                                 // Check if flat type already exists
                                 if (p.getFlatTypes().contains(newType)) {
@@ -714,8 +714,8 @@ if (!managerProjects.isEmpty())
                                 while (true) {
                                     try {
                                         System.out.print("Enter number of " + newType + " units (none = 0): ");
-                                        newUnits = sc.nextInt();
-                                        sc.nextLine();
+                                        newUnits = Input.getIntInput(sc);
+                                        
                                         
                                         if (newUnits >= 0) {
                                             p.addFlatType(newType, newUnits);
@@ -745,8 +745,8 @@ if (!managerProjects.isEmpty())
                                     try {
                                         // System.out.print("Select flat type to edit (1-" + p.getFlatTypes().size() + ") (0 to cancel): ");
                                         System.out.print("Select flat type to edit (1-" + p.getFlatTypes().size() + "): ");
-                                        flatChoice = sc.nextInt();
-                                        sc.nextLine();  // Consume the newline
+                                        flatChoice = Input.getIntInput(sc);
+                                        
                                         
                                             // if (flatChoice == 0) {
                                             //     System.out.println("Operation cancelled.");
@@ -915,10 +915,10 @@ if (!managerProjects.isEmpty())
         if (project.addOfficer(officer)) {
             officer.registrationStatus  = "Approved";
             officer.officerProject = project;
-            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getProjectID() + ".");
+            System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() + "'s registration approved and assigned to Project " + project.getId() + ".");
         } else {
             officer.registrationStatus = "Rejected";
-            System.out.println("Maximum number of officers already assigned to Project " + project.getProjectID() + ". Officer's registration rejected.");
+            System.out.println("Maximum number of officers already assigned to Project " + project.getId() + ". Officer's registration rejected.");
         }    
     }
     
@@ -1093,8 +1093,8 @@ if (!managerProjects.isEmpty())
         System.out.println("Enter your choice: "); */
 
         menu.printReportMenu();
-        int choice = sc.nextInt();
-        sc.nextLine(); // Consume newline
+        int choice = Input.getIntInput(sc);
+        // sc.nextLine(); // Consume newline
 
         switch (choice) {
             case 1:
@@ -1144,13 +1144,6 @@ public void viewAllEnquiries(Scanner sc) {
     System.out.println("              ALL ENQUIRIES");
     System.out.println("============================================");
     
-    // First check if there are any enquiries
-    // boolean hasEnquiries = false;
-    // for (Enquiry enquiry : BTOsystem.enquiries) {
-    //     hasEnquiries = true;
-    //     break;
-    // }
-    
     if (BTOsystem.enquiries.size()==0) {
         System.out.println("No enquiries found in the system.");
         return;
@@ -1164,8 +1157,8 @@ public void viewAllEnquiries(Scanner sc) {
     int choice = 0;
     try {
         System.out.print("Enter your choice: ");
-        choice = sc.nextInt();
-        sc.nextLine(); // Consume newline
+        choice = Input.getIntInput(sc);
+        
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Showing all enquiries.");
         choice = 1;
@@ -1189,8 +1182,8 @@ public void viewAllEnquiries(Scanner sc) {
             System.out.println("Showing general (non-project) enquiries only");
             break;
         case 3: // Only for my projects
-            for (Enquiry e : BTOsystem.enquiries) {
-                if (e.getProject() != null && managerProjects.contains(e.getProject())) {
+            for (Project p: managerProjects) {
+                for (Enquiry e : p.getEnquiries()) {
                     filteredEnquiries.add(e);
                 }
             }
@@ -1238,14 +1231,6 @@ public void viewAllEnquiries(Scanner sc) {
     }
 }
 
-private String truncateText(String text, int maxLength) {
-    if (text == null) return "N/A";
-    if (text.length() <= maxLength) {
-        return text;
-    }
-    return text.substring(0, maxLength - 3) + "...";
-}
-
 public void handleProjectEnquiries(Scanner sc) {
     System.out.println("\n============================================");
     System.out.println("            HANDLE ENQUIRIES");
@@ -1281,8 +1266,8 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
     List<Project> projectsWithEnquiries = new ArrayList<>();
     for (Project p : managerProjects) {
         boolean hasPendingEnquiries = false;
-        for (Enquiry e : BTOsystem.enquiries) {
-            if (e.getProject() != null && e.getProject().equals(p) && e.getResponse().isEmpty()) {
+        for (Enquiry e : p.getEnquiries()) {
+            if (e.getResponse().isEmpty()) {
                 hasPendingEnquiries = true;
                 break;
             }
@@ -1301,11 +1286,11 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
     for (int i = 0; i < projectsWithEnquiries.size(); i++) {
         System.out.printf("[%d] %s%n", i, projectsWithEnquiries.get(i).getProjectName());
     }
+
     int projChoice = -1;
     try {
         System.out.print("Enter project index: ");
-        projChoice = sc.nextInt();
-        sc.nextLine(); // consume newline
+        projChoice = Input.getIntInput(sc);
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Returning to menu.");
         sc.nextLine();
@@ -1332,14 +1317,13 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
     System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
     for (int i = 0; i < pendingEnquiries.size(); i++) {
         Enquiry e = pendingEnquiries.get(i);
-        System.out.printf("[%d] ID: %d, Question: %s%n", i, e.getEnId(), truncateText(e.getEnquiry(), 30));
+        System.out.printf("[%d] ID: %d, Question: %s%n", i, e.getId(), truncateText(e.getEnquiry(), 30));
     }
     
     int enquiryChoice;
     try {
         System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
-        enquiryChoice = sc.nextInt();
-        sc.nextLine(); // consume newline
+        enquiryChoice = Input.getIntInput(sc);
     } catch (InputMismatchException e) {
         System.out.println("Invalid input. Returning to menu.");
         sc.nextLine();
@@ -1357,7 +1341,7 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
     Enquiry selectedEnquiry = pendingEnquiries.get(enquiryChoice);
     System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
     System.out.print("Enter your reply: ");
-    String reply = sc.nextLine();
+    String reply = Input.getStringInput(sc);
     reply_enquiry(selectedEnquiry, reply);
 }
 
@@ -1385,29 +1369,28 @@ private void handleGeneralEnquiries(Scanner sc) {
     }
     
     int enquiryChoice;
-    while (true) {
-        try {
-            System.out.print("Enter EnquiryID: ");
-            enquiryChoice = Input.getIntInput(sc);
-            break;
-        } catch (InputMismatchException e) {
-            System.out.println("Error: Please enter a valid number.");
-            sc.nextLine();
-        }
+    try {
+        System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
+        enquiryChoice = Input.getIntInput(sc);
+    } catch (InputMismatchException e) {
+        System.out.println("Invalid input. Returning to menu.");
+        sc.nextLine();
+        return;
+    }
+    if (enquiryChoice == -1) {
+        System.out.println("Operation cancelled.");
+        return;
+    }
+    if (enquiryChoice < 0 || enquiryChoice >= generalEnquiries.size()) {
+        System.out.println("Invalid enquiry selection.");
+        return;
     }
     
-    Enquiry selectedEnquiry = BTOsystem.searchEnquiryById(enquiryChoice);
-    if (selectedEnquiry!=null) {
-        // Respond to the enquiry
-        System.out.println("\nEnquiry: " + selectedEnquiry.getEnquiry());
-        System.out.print("Your response: ");
-        String response = Input.getStringInput(sc);
-        
-        reply_enquiry(selectedEnquiry, response);
-        System.out.println("Response submitted successfully.");
-    } else {
-        System.out.println("No enquiry of ID "+enquiryChoice);
-    }
+    Enquiry selectedEnquiry = generalEnquiries.get(enquiryChoice);
+    System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
+    System.out.print("Enter your reply: ");
+    String reply = Input.getStringInput(sc);
+    reply_enquiry(selectedEnquiry, reply);
     
 }
 }

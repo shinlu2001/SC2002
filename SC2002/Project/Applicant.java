@@ -6,6 +6,7 @@ public class Applicant extends User implements Input {
     protected static int nextId = -1;
     private int applicantID;
     protected BTOapplication application=null;
+    protected List<BTOapplication> applicationHistory=new ArrayList<>();
     private String type="APPLICANT";
     protected List<Enquiry> enquiries = new ArrayList<>();
 
@@ -32,11 +33,15 @@ public class Applicant extends User implements Input {
                     ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
                     switch (selectedOption) {
                         case APPLY:
-                            if (application != null) {
+                            if (application != null && !application.getStatus().equals("WITHDRAWN")) {
                                 System.out.println("You already have an active application. You may not create a new one.");
                                 System.out.println("============================================");
-                                // sc.nextLine();
-                            } else {
+                                
+                            }
+                            else {
+                                if (application.getStatus().equals("WITHDRAWN")) {
+                                    applicationHistory.add(application);
+                                }
                                 System.out.println("Apply for a project");
                                 int count = view_eligible_listings();
                                 if (count==0) {
@@ -151,6 +156,7 @@ public class Applicant extends User implements Input {
                         default:
                             System.out.println("Invalid choice. Please try again.");
                     }
+                
                 // sc.nextLine();
                 }
             } catch (InputMismatchException e) {
@@ -195,14 +201,13 @@ public class Applicant extends User implements Input {
                             view_listings();
                             System.out.println("Enter ID of project to enquire about: ");
                             int projectId = Input.getIntInput(sc);
-                            Project p = BTOsystem.projects.get(projectId);
+                            Project p = BTOsystem.searchProjectById(projectId);
                             while (p==null) {
                                 System.out.println("Invalid ID, try again: ");
                                 projectId = Input.getIntInput(sc);
                                 // scanner.nextLine();
                                 p = BTOsystem.projects.get(projectId);
                             } 
-                            sc.nextLine();
                             System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
                             String flatType = Input.getStringInput(sc);
                             System.out.println("Enquiry: ");
@@ -226,7 +231,7 @@ public class Applicant extends User implements Input {
                                 System.out.println("============================================");
                                 break;
                             } 
-                            // scanner.nextLine();
+                            view_enquiry(result);
                             System.out.print("Enquiry: ");
                             String userInput = Input.getStringInput(sc);
                             // maybe add confirmation?
@@ -258,7 +263,7 @@ public class Applicant extends User implements Input {
                             System.out.println("Invalid choice. Please try again.");
                     }
                 }
-            sc.nextLine();
+            // sc.nextLine();
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
                 sc.nextLine(); 
@@ -402,6 +407,36 @@ public class Applicant extends User implements Input {
     }
     
 
+    private void view_all_enquiry_for_user() {
+        System.out.printf("%-5s %-20s %-30s %-15s%n", 
+            "ID", "Project", "Enquiry", "Status");
+        System.out.println("------------------------------------------------------------------------------------");
+    
+    for (Enquiry enquiry : enquiries) {
+        // User creator = enquiry.getCreatedByUser();
+        // String creatorName = creator.get_firstname() + " " + creator.get_lastname();
+        
+        System.out.printf("%-5d %-20s %-30s %-15s%n",
+                enquiry.getId(),
+                enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
+                truncateText(enquiry.getEnquiry(), 30),
+                enquiry.getResponse().isEmpty() ? "Pending" : "Answered");
+        
+        // If there's a flat type specified
+        if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
+            System.out.println("%-5s Flat Type: " + enquiry.getflatType());
+        }
+        
+        // If there's a response, show it
+        if (!enquiry.getResponse().isEmpty()) {
+            System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
+            if (enquiry.getStaff() != null) {
+                System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + 
+                        enquiry.getStaff().get_lastname());
+            }
+        }
+    }
+    }
     private void view_enquiry(Enquiry en) {
         System.out.println("Enquiry: "+ en.getEnquiry());
         System.out.println("Project: "+ (en.getProject()!=null?en.getProject().getProjectName():null));
@@ -413,22 +448,35 @@ public class Applicant extends User implements Input {
 
         }
     }
-    private void view_all_enquiry_for_user() {
-        for (Enquiry en : enquiries) {
-            System.out.println("#"+en.getId());
-            view_enquiry(en);
-            System.out.println("--------------------------------");
+    private void viewEditableEnquiry() {
+        // for (Enquiry en : enquiries) {
+        //     if (en.getStaff()==null){
+        //         System.out.println("#"+en.getId());
+        //         view_enquiry(en);
+        //         System.out.println("--------------------------------");
+        //     }
+            
+        // }
+        System.out.printf("%-5s %-20s %-30s %-15s%n", 
+            "ID", "Project", "Enquiry", "Status");
+        System.out.println("------------------------------------------------------------------------------------");
+    
+    for (Enquiry enquiry : enquiries) {
+        if (!(enquiry.getResponse().isBlank())) {
+            continue;
+        }
+        
+        System.out.printf("%-5d %-20s %-30s %-15s%n",
+                enquiry.getId(),
+                enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
+                truncateText(enquiry.getEnquiry(), 30),
+                "Pending");
+        
+        // If there's a flat type specified
+        if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
+            System.out.println("   Flat Type: " + enquiry.getflatType());
         }
     }
-    private void viewEditableEnquiry() {
-        for (Enquiry en : enquiries) {
-            if (en.getStaff()==null){
-                System.out.println("#"+en.getId());
-                view_enquiry(en);
-                System.out.println("--------------------------------");
-            }
-            
-        }
     }
     private void editEnquiry(int id, String content) { // can only edit when no response from staff yett
         Iterator<Enquiry> iterator = enquiries.iterator();
@@ -448,6 +496,7 @@ public class Applicant extends User implements Input {
         while (iterator.hasNext()) {
             en = iterator.next();
             if (en.getId() == id) {
+                view_enquiry(en);
                 removedElement = en;
                 iterator.remove();  
                 break;

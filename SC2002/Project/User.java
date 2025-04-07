@@ -63,4 +63,11 @@ public abstract class User {
     }
     public abstract void start_menu(Scanner scanner);
     public void makeEnquiry() {}
+    public String truncateText(String text, int maxLength) {
+        if (text == null) return "N/A";
+        if (text.length() <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength - 3) + "...";
+    }
 }

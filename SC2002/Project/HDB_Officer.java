@@ -14,7 +14,7 @@ public class HDB_Officer extends Applicant {
 
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
-        this.registrationStatus = "Unregistered"; // Default status
+        this.registrationStatus = "UNREGISTERED"; // Default status
         officer_id = ++nextId;
     }
     
@@ -214,7 +214,7 @@ public class HDB_Officer extends Applicant {
         for (int i = 0; i < projectEnquiries.size(); i++) {
             Enquiry en = projectEnquiries.get(i);
             System.out.printf("[%d] ID: %d, Question: %s%s%n",
-                    i, en.getEnId(), en.getEnquiry(), (en.getStaff() != null ? " (Replied)" : ""));
+                    i, en.getId(), en.getEnquiry(), (en.getStaff() != null ? " (Replied)" : ""));
         }
         System.out.print("Enter enquiry index to reply (or -1 to cancel): ");
         int idx = Input.getIntInput(scanner);
