@@ -1080,7 +1080,7 @@ if (!managerProjects.isEmpty())
                 if (assignedProject != null && assignedProject.getManager() == this) 
                 {
                     // Only display officers assigned to projects managed by the current manager
-                    System.out.printf("%-10s %-20s %-15s %-20s%n", application.getApplicationId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getId());
+                    System.out.printf("%-10s %-20s %-15s %-20s%n", application.getId(), application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),application.getStatus() ,assignedProject.getId());
                 }
             }
         }
