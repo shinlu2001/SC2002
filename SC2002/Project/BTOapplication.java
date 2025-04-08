@@ -35,7 +35,7 @@ public class BTOapplication {
         applicationId = ++nextId;
         this.applicant = applicant;
         this.project = project;
-        this.flatType = flatType;
+        this.flatType = flatType.toUpperCase();
         this.status = "PENDING"; // default status
         manager=project.getManager();
     }
