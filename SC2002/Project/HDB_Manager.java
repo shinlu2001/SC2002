@@ -1060,8 +1060,9 @@ if (!managerProjects.isEmpty())
     {
         // BTOapplication.get_details();   // helpz
         // OR
-
-        List<BTOapplication> applicationList = BTOapplication.getApplicationList();
+        
+        List<BTOapplication> applicationList = BTOsystem.applications;
+      
 
         if (applicationList.isEmpty()) {
             System.out.println("No applications available.");
@@ -1070,6 +1071,7 @@ if (!managerProjects.isEmpty())
 
         // View application list
         if (!applicationList.isEmpty())
+        
         {
             System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
             System.out.println("------------------------------------------------------------");

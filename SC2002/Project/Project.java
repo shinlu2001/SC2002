@@ -11,7 +11,7 @@ public class Project {
     // private List<Double> flatPrice;
     private List<Integer> totalUnits;
     private List<Integer> availableUnits;
-    private int projectId;
+    private int projectId = 1;
 
     // // Total units when project starts
     // private int total2Room; 
