@@ -276,15 +276,15 @@ public class Applicant extends User implements Input {
 
     // check eligibility of user to apply for flat
     protected boolean getEligibility(String flatType) {
-        if (get_maritalstatus().equals("SINGLE") && get_age()>=35 && flatType.equalsIgnoreCase("2-Room")) {
+        if (get_maritalstatus().equalsIgnoreCase("SINGLE") && get_age()>=35 && flatType.equalsIgnoreCase("2-Room")) {
             return true;
-        } else if (get_maritalstatus().equals("MARRIED") && get_age()>=21) {
+        } else if (get_maritalstatus().equalsIgnoreCase("MARRIED") && get_age()>=21) {
             return true;
         }
         return false;
     }
 
-    private void view_listings() {
+    protected void view_listings() {
         System.out.println("\n===================================================================================================================");
         System.out.println("                                                  ALL PROJECTS");
         System.out.println("===================================================================================================================");
@@ -324,7 +324,7 @@ public class Applicant extends User implements Input {
         return count;
     }
 
-    private String viewEligibleProjectsApplicant(Project p) {
+    protected String viewEligibleProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
         // get all the flat-types applicants are eligible for
         List<String[]> eflatType = new ArrayList<>(); // max 10 flat-types per project
@@ -364,7 +364,7 @@ public class Applicant extends User implements Input {
         return sb.toString();
     }
 
-    private String viewProjectsApplicant(Project p) {
+    protected String viewProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
             p.getId(),
@@ -393,14 +393,14 @@ public class Applicant extends User implements Input {
     return sb.toString();
     }
 
-    private void makeEnquiry(String content) {
+    protected void makeEnquiry(String content) {
         Enquiry en = new Enquiry(this, content);
         enquiries.add(en);
         // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
         BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
     }
     //to be revised, enquiries tagged to a project
-    private void makeEnquiry(Project project, String content, String flatType) {
+    protected void makeEnquiry(Project project, String content, String flatType) {
         Enquiry en = new Enquiry(this, content);
         en.setProject(project);
         en.setflatType(flatType);
@@ -410,7 +410,7 @@ public class Applicant extends User implements Input {
     }
     
 
-    private void view_all_enquiry_for_user() {
+    protected void view_all_enquiry_for_user() {
         System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n", 
             "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
         System.out.println("------------------------------------------------------------------------------------");
@@ -442,7 +442,7 @@ public class Applicant extends User implements Input {
         // }
     }
     }
-    private void view_enquiry(Enquiry en) {
+    protected void view_enquiry(Enquiry en) {
         System.out.println("Enquiry: "+ en.getEnquiry());
         System.out.println("Project: "+ (en.getProject()!=null?en.getProject().getProjectName():null));
         System.out.println("Flat Type: "+en.getflatType());
@@ -453,7 +453,7 @@ public class Applicant extends User implements Input {
             System.out.println("Replied by: " + en.getStaff().get_firstname());
         }
     }
-    private void viewEditableEnquiry() {
+    protected void viewEditableEnquiry() {
         System.out.printf("%-5s %-20s %-30s %-15s%n", 
             "ID", "Project", "Enquiry", "Status");
         System.out.println("------------------------------------------------------------------------------------");
@@ -475,7 +475,7 @@ public class Applicant extends User implements Input {
         }
     }
     }
-    private void editEnquiry(int id, String content) { // can only edit when no response from staff yett
+    protected void editEnquiry(int id, String content) { // can only edit when no response from staff yett
         Iterator<Enquiry> iterator = enquiries.iterator();
         Enquiry en = iterator.next();
         while (iterator.hasNext()) {
@@ -486,7 +486,7 @@ public class Applicant extends User implements Input {
             }
         }
     }
-    private void deleteEnquiry(int id) {
+    protected void deleteEnquiry(int id) {
         Enquiry removedElement = null;  
         Iterator<Enquiry> iterator = enquiries.iterator();
         Enquiry en = iterator.next();

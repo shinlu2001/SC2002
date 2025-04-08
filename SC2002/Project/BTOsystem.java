@@ -285,7 +285,7 @@ public class BTOsystem implements Input{
             }
         } else if (type=='o') { // for officer
             for (String[] row : rows) {
-                HDB_Officer a = new HDB_Officer(row[1], row[0], "", row[3], Integer.parseInt(row[2]));
+                HDB_Officer a = new HDB_Officer(row[1], row[0], "", row[3].toUpperCase(), Integer.parseInt(row[2]));
                 officers.add(a);
             }
         } else if (type=='m') { // for manager
