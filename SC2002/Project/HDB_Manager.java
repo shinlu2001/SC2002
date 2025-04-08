@@ -172,17 +172,17 @@ public class HDB_Manager extends User implements Input {
                             if(projectForBTO == null)
                                 break;
 
-                            System.out.print("Enter Applicant's ID: ");
+                            System.out.print("Enter Applicant's ID: ");// Application ID? or Applicant's ID
                             int applicationId = Input.getIntInput(sc);
                             
 
                             String flatType = null;
                             BTOapplication application = null;
-                            for (BTOapplication a : BTOsystem.applications)
+                            for (BTOapplication applicationList : BTOsystem.applications)
                             {
-                                if (a.getId() == applicationId){
-                                    application = a;
-                                    flatType = a.getFlatType();
+                                if (applicationList.getId() == applicationId){
+                                    application = applicationList;
+                                    flatType = applicationList.getFlatType();
                                     break;
                                 }
                             }
@@ -190,8 +190,11 @@ public class HDB_Manager extends User implements Input {
                             if (application != null){
                                 System.out.println("Do you want to approve this application? Enter 'y/n': ");
                                 String confirm = Input.getStringInput(sc);
-                                if (confirm.equals('y')) {
+                            
+                                if (confirm.toLowerCase().equals("y")) {
+                        
                                 handleBTOapplication(projectForBTO, application, flatType);
+                       
                                 }
                             }else {
                                 System.out.println("Error: Application not found.");
@@ -212,10 +215,10 @@ public class HDB_Manager extends User implements Input {
                             
 
                             BTOapplication  withdrawalApplication = null;
-                            for (BTOapplication a : BTOsystem.applications)
+                            for (BTOapplication applicationList : BTOsystem.applications)
                             {
-                                if (a.getId() == withdrawalApplicationId){
-                                    withdrawalApplication = a;
+                                if (applicationList.getId() == withdrawalApplicationId){
+                                    withdrawalApplication = applicationList;
                                     break;
                                 }
                             }
@@ -953,6 +956,7 @@ if (!managerProjects.isEmpty())
     }
 
     public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
+        System.out.println("Testing");
     // Check if the flat type exists in the project
     if (!project.getFlatTypes().contains(flatType)) {
         System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
@@ -973,6 +977,7 @@ if (!managerProjects.isEmpty())
     
     // Application Approved, decrement the available units
     application.setStatus("APPROVED");
+    application.get_details();
     
     // Update available units using the Project class method
     int currentAvailable = project.getAvailableUnits().get(index);
@@ -1080,13 +1085,6 @@ if (!managerProjects.isEmpty())
         else{
             System.out.println("No applications available.");
         }
-
-         System.out.println("\n---- Generate Report ----");
-        System.out.println("1. View All Applicants");
-        System.out.println("2. Filter by Marital Status");
-        System.out.println("3. Filter by Flat Type");
-        System.out.println("4. Filter by Both Marital Status & Flat Type");
-        System.out.println("Enter your choice: "); 
 
         menu.printReportMenu();
         int choice = Input.getIntInput(sc);
