@@ -188,10 +188,10 @@ public class HDB_Manager extends User implements Input {
                             }
 
                             if (application != null){
-                                System.out.println("Do you want to approve this application? Enter 'y/n': ");
+                                System.out.println("Do you want to approve this application? Enter 'yes/no': ");
                                 String confirm = Input.getStringInput(sc);
                             
-                                if (confirm.toLowerCase().equals("y")) {
+                                if (confirm.toLowerCase().equals("yes")) {
                         
                                 handleBTOapplication(projectForBTO, application, flatType);
                        
@@ -956,7 +956,7 @@ if (!managerProjects.isEmpty())
     }
 
     public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
-        System.out.println("Testing");
+       
     // Check if the flat type exists in the project
     if (!project.getFlatTypes().contains(flatType)) {
         System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
@@ -975,16 +975,14 @@ if (!managerProjects.isEmpty())
     }
 
     
-    // Application Approved, decrement the available units
-    application.setStatus("APPROVED");
-    application.get_details();
+    // Application Approved
+    application.setStatus("SUCCESSFUL");
     
-    // Update available units using the Project class method
-    int currentAvailable = project.getAvailableUnits().get(index);
-    project.updateAvailableUnits(flatType, currentAvailable - 1);
+    // Update available units using the Project class method 
+   // int currentAvailable = project.getAvailableUnits().get(index);
+   // project.updateAvailableUnits(flatType, currentAvailable - 1);
     
-    System.out.println("Application for " + flatType + " flat approved. Remaining units: " + 
-                        project.getAvailableUnits().get(index));
+    System.out.println("Application for " + project.getProjectName() + " project has approved. Please proceed to book flat with officer in-charge.");
     
 }
     public void handleWithdrawalRequest_application(Project project, BTOapplication application, Scanner sc) {

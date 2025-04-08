@@ -293,6 +293,7 @@ public class HDB_Officer extends Applicant {
         BTOapplication targetApp = null;
         for (BTOapplication app : BTOsystem.applications) {
             if (app.getApplicant().get_nric().equalsIgnoreCase(applicantNRIC)) {
+               // app.get_details();//testing purpose can be removed
                 targetApp = app;
                 break;
             }

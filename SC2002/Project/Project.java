@@ -157,12 +157,13 @@ public class Project {
             
             availableUnits.set(index, newAvailable);
         } else {
-            System.out.println("Error: Flat type not found.");
+            System.out.println("applications");
         }
     }
 
     public void updateAvailableUnits(String flatType, int newAvailableUnits) {
         int index = flatTypes.indexOf(flatType);
+        System.out.println("Error: check index flattype" +index);
         if (index >= 0) {
             if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
                 availableUnits.set(index, newAvailableUnits);
