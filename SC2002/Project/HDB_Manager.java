@@ -59,7 +59,7 @@ public class HDB_Manager extends User implements Input {
                         
                         createProject(sc);
 
-                        System.out.println("---------------------------------------------------");
+                        // System.out.println("---------------------------------------------------");
                         break;
     
                     case 2:     // Edit a Project - editProject(project)
@@ -71,7 +71,7 @@ public class HDB_Manager extends User implements Input {
                             editProject(projectToEdit, sc);
                         }
                         
-                        System.out.println("---------------------------------------------------");
+                        // System.out.println("---------------------------------------------------");
                         break;
                         
                     case 3: // Delete a Project - deleteProject(project)
@@ -83,22 +83,23 @@ public class HDB_Manager extends User implements Input {
                             deleteProject(projectToDelete);
                         }                           
                     
-                        System.out.println("---------------------------------------------------");
+                        // System.out.println("---------------------------------------------------");
                         break;
 
                         case 4:     // view all projects
                             viewAllProjects();
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
                         case 5:     // view own projects
                             viewOwnProjects();
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
                         case 6:     // view officer registration
                             viewOfficerRegistration();
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("------------------------------------------------------------");
+
                             break;
                         
                         case 7:     // handle Officer Registration
@@ -132,7 +133,8 @@ public class HDB_Manager extends User implements Input {
                             }
                             HDB_Officer officerToHandle = pendingOfficers.get(idx);
                             handleOfficerRegistration(projectForOfficer, officerToHandle);
-                            break;                        
+                            break;       
+                                             
                         case 8:     // handle withdrawel requests - handleWithdrawalRequest_officer(project, officer, sc)
                             System.out.print("Enter the Project ID to manage: ");
                             // find if project exists in allProjects then check if the project is under the current manager
@@ -235,7 +237,7 @@ public class HDB_Manager extends User implements Input {
                         
                         case 12:     // view all enquiries (across all projects)
                             viewAllEnquiries(sc);
-                            System.out.println("---------------------------------------------------");
+                            // System.out.println("---------------------------------------------------");
                             break;
                         
                         case 13:     // handle project enquires (view and reply to enquiries for your projects)
@@ -316,10 +318,10 @@ public class HDB_Manager extends User implements Input {
         System.out.println("\n============================================");
         System.out.println("            CURRENT FLAT TYPES");
         System.out.println("============================================");
-        System.out.printf("%-5s %-12s %-15s %-10s%n", "No.", "Flat Type", "Total Units", "Available");
-        System.out.println("--------------------------------------------");
+        System.out.printf("%-5s %-12s %-13s %-15s %-10s%n", "No.", "Flat Type", "Prices", "Total Units", "Available");
+        System.out.println("-----------------------------------------------------------");
         for (int i = 0; i < p.getFlatTypes().size(); i++) {
-            System.out.printf("%-5s %-12s %-15s %-10s%n", i+1, p.getFlatTypes().get(i), p.getTotalUnits().get(i), p.getAvailableUnits().get(i));
+            System.out.printf("%-5s %-12s %-13s %-15s %-10s%n", i+1, p.getFlatTypes().get(i), p.getFlatPrice(p.getFlatTypes().get(i)), p.getTotalUnits().get(i), p.getAvailableUnits().get(i));
             
         }
     }
@@ -379,9 +381,27 @@ public class HDB_Manager extends User implements Input {
                 }
             }
 
+            double price;
+            while(true){
+                try{
+                    System.out.print("Enter price of flat: ");
+                    price = Input.getIntInput(sc);
+                    if (price >= 0) {
+                        break;
+                    }
+                    System.out.println("Error: Number of units cannot be negative.");
+                } catch (InputMismatchException e) {
+                    System.out.println("Error: Please enter a valid number.");
+                }
+            }
+
+            // HELPZ
+            // assign price attribute to FLAT's PRICE
+
             flatTypes.add(flatType);
             totalUnits.add(units);
             availableUnits.add(units); // Initially available equals total
+
             while (true){
                 System.out.print("Add another flat type? (yes/no): ");
                 String response = sc.nextLine().toLowerCase();
@@ -395,47 +415,6 @@ public class HDB_Manager extends User implements Input {
                 }
             }
         }
-        // // Continuously loop until a valid (positive) input is entered
-        // int total2Room;
-        // while (true)
-        // {
-        //     try {
-        //         System.out.print("Enter number of 2-Room units (none = 0): ");
-        //         // int total2Room = scan.nextInt();
-        //         total2Room = (Input.getIntInput(sc));
-        //         sc.nextLine(); // Consume newline
-
-        //         if (total2Room >= 0) // if input is positive no. = valid, so break the loop and proceed
-        //             break;
-
-        //         // else output error msg and continue looping
-        //         System.out.println("Error: Number of 2-Room units cannot be negative.");
-        //     } catch (InputMismatchException e) {
-        //         System.out.println("Error: Please enter a valid number.");
-        //         sc.nextLine(); // Clear invalid input
-        //     }
-
-        // }
-
-        // // Continuously loop until a valid (positive) input is entered
-        // int total3Room;
-        // while (true)
-        // {
-        //     try {
-        //         System.out.print("Enter number of 3-Room units (none = 0): ");
-        //         total3Room = Input.getIntInput(sc);
-        //         sc.nextLine(); // Consume newline
-                
-        //         if (total3Room >= 0) // if input is positive no. = valid, so break the loop and proceed
-        //             break;
-
-        //         // else output error msg and continue looping
-        //         System.out.println("Error: Number of 3-Room units cannot be negative.");
-        //     } catch (InputMismatchException e) {
-        //         System.out.println("Error: Please enter a valid number.");
-        //         sc.nextLine(); // Clear invalid input
-        //     }
-        // }
         
         // Continuously loop until a valid (date format) input is entered
         LocalDate openDate = null;
@@ -467,7 +446,7 @@ public class HDB_Manager extends User implements Input {
         {   try{
                 System.out.print("Enter Available HDB Officer Slots (MAX " + Project.getmaxOfficerSlots() + "): ");
                 totalOfficerSlots = Input.getIntInput(sc);
-                sc.nextLine(); // Consume newline
+                // sc.nextLine(); // Consume newline
 
                 // If input(availableOfficerSlots) is NOT btw 1-10, keep looping
                 if (totalOfficerSlots > Project.getmaxOfficerSlots() || totalOfficerSlots <= 0 ) {
@@ -516,7 +495,7 @@ public class HDB_Manager extends User implements Input {
 if (!managerProjects.isEmpty())
         {
             System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-            System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
+            System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
             for (Project p : managerProjects)
             {
                 if (p.getManager() == this) // Check if the reference to the HDB_Manager is the same as this manager
@@ -540,7 +519,7 @@ if (!managerProjects.isEmpty())
         if (!BTOsystem.projects.isEmpty())
                 {
                     System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-                    System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
+                    System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
                     // for (Project p : allProjects) {
                     for (Project p : BTOsystem.projects) {
                         System.out.println(p);
@@ -569,22 +548,23 @@ if (!managerProjects.isEmpty())
                         System.out.println("              EDITING PROJECT");
                         System.out.println("============================================");
                         System.out.println("Currently Editing:");
-                        System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
+                        System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
                         System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", "ID","Project Name", "Neighbourhood", "Flat Types","Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
-                        System.err.println("-------------------------------------------------------------------------------------------------------------------------------");
+                        System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
                         System.out.println(project.toString());
 
                         System.out.println("Select attribute to edit: ");
                         System.out.println("1. Project Name");
                         System.out.println("2. Neighbourhood");
-                        System.out.println("3. Edit Existing Flat Types");
+                        System.out.println("3. Edit Unit Count for Existing Flats");
                         System.out.println("4. Add New Flat Type");
                         System.out.println("5. Remove Flat Type");
-                        System.out.println("6. Application opening date");
-                        System.out.println("7. Application closing date");
-                        System.out.println("8. Toggle Visibility");
-                        System.out.println("9. Available HDB Officer Slots");
-                        System.out.println("10. Return to Manager Menu");
+                        System.out.println("6. Edit Existing Flat Prices");
+                        System.out.println("7. Application Opening Date");
+                        System.out.println("8. Application Closing Date");
+                        System.out.println("9. Toggle Visibility");
+                        System.out.println("10. Available HDB Officer Slots");
+                        System.out.println("11. Return to Manager Menu");
 
                         // int option = scan.nextInt();
                         System.out.println("Enter your choice: ");
@@ -603,29 +583,6 @@ if (!managerProjects.isEmpty())
                                 break;
 
                             case 3:  
-                                // int total2Room;
-                                // while (true) {
-                                //     try {
-                                //         System.out.print("Enter updated number of 2-Room units (none = 0): ");
-                                //         total2Room = Input.getIntInput(sc);
-                                //         sc.nextLine(); // Consume newline
-                            
-                                //         if (total2Room >= 0) {
-                                //             p.setTotal2Room(total2Room);
-                                //             break;
-                                //         }
-                                //         System.out.println("Error: Number of 2-Room units cannot be negative.");
-                                //     } catch (InputMismatchException e) {
-                                //         System.out.println("Error: Please enter a valid number.");
-                                //         sc.nextLine(); // Clear invalid input
-                                //     }
-                                // }
-                                // break;
-
-                                // if (p.getFlatTypes().isEmpty()) {
-                                //     System.out.println("No flat types available to edit.");
-                                //     break;
-                                // }
                                 
                                 FlatTypesMenu(p);
                                 
@@ -636,7 +593,7 @@ if (!managerProjects.isEmpty())
                                 
                                 while (true) {
                                     try {
-                                        System.out.print("\nSelect flat type to edit (1-" + p.getFlatTypes().size() + "): ");
+                                        System.out.print("\nSelect flat type to edit (No. 1-" + p.getFlatTypes().size() + "): ");
                                         flatChoice = Input.getIntInput(sc);
                                         
                                         
@@ -683,24 +640,6 @@ if (!managerProjects.isEmpty())
                                 break;
 
                             case 4:
-                                // int total3Room;
-                                // while (true) {
-                                //     try {
-                                //         System.out.print("Enter updated number of 3-Room units (none = 0): ");
-                                //         total3Room = Input.getIntInput(sc);
-                                //         sc.nextLine(); // Consume newline
-                            
-                                //         if (total3Room >= 0) {
-                                //             p.setTotal3Room(total3Room);
-                                //             break;
-                                //         }
-                                //         System.out.println("Error: Number of 3-Room units cannot be negative.");
-                                //     } catch (InputMismatchException e) {
-                                //         System.out.println("Error: Please enter a valid number.");
-                                //         sc.nextLine(); // Clear invalid input
-                                //     }
-                                // }
-                                // break;
                                 FlatTypesMenu(p);                                                 
                             
                                 System.out.print("\nEnter new Flat Type: ");
@@ -745,8 +684,8 @@ if (!managerProjects.isEmpty())
 
                                 while (true) {
                                     try {
-                                        // System.out.print("Select flat type to edit (1-" + p.getFlatTypes().size() + ") (0 to cancel): ");
-                                        System.out.print("Select flat type to edit (1-" + p.getFlatTypes().size() + "): ");
+                                        // System.out.print("Select flat type to edit (No. 1-" + p.getFlatTypes().size() + ") (0 to cancel): ");
+                                        System.out.print("\nSelect flat type to edit (No. 1-" + p.getFlatTypes().size() + "): ");
                                         flatChoice = Input.getIntInput(sc);
                                         
                                         
@@ -775,7 +714,57 @@ if (!managerProjects.isEmpty())
                                         }
                                     }
                                 break;
-                            case 6:
+                            case 6: 
+                                
+                                FlatTypesMenu(p); 
+                                while (true) {
+                                    try {
+                                        System.out.print("\nSelect flat type to edit (No. 1-" + p.getFlatTypes().size() + "): ");
+                                        flatChoice = Input.getIntInput(sc);
+                                        
+                                        
+                                        if (flatChoice > 0 && flatChoice <= p.getFlatTypes().size()) {
+                                            index = flatChoice - 1;
+                                            currentType = p.getFlatTypes().get(index);
+                                            break;
+                                        } 
+                                        
+                                        System.out.println("Error: Please enter a number between 1 and " + p.getFlatTypes().size());
+                                        
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine();
+                                    }
+                                }
+
+                                double newPrice;
+                                while (true) {
+                                    try {
+                                        System.out.print("Enter new price for " + currentType + ": ");
+                                        newPrice = Input.getIntInput(sc);
+                                        
+                                        
+                                        if (newPrice >= 0) {
+                                            // HELPZ
+                                            // Update price of selected unit
+
+
+                                            // // Update both total and available units
+                                            // p.updateFlatTypeUnits(currentType, newUnits);
+                                            System.out.println(currentType + " updated successfully.");
+                                            
+                                            break;
+                                        }
+                                        System.out.println("Error: Price cannot be negative.");
+                                    } catch (InputMismatchException e) {
+                                        System.out.println("Error: Please enter a valid number.");
+                                        sc.nextLine();
+                                    }
+                                }
+
+                                break;
+
+                            case 7:
                                 LocalDate openDate;
                                 while(true){
                                     try {
@@ -790,7 +779,7 @@ if (!managerProjects.isEmpty())
                                 }
                                 break;
 
-                            case 7:
+                            case 8:
                                 LocalDate closeDate;
                                 while(true){
                                     try {
@@ -804,13 +793,13 @@ if (!managerProjects.isEmpty())
                                 }
                                 break;
 
-                            case 8:
+                            case 9:
                                 p.toggle_visibility();
                                 // toggleVisibility(p);
                                 // p.setVisibility(!p.isVisibility());
                                 break;
 
-                            case 9:
+                            case 10:
                                 int totalOfficerSlots;
                                 while (true) {
                                     try {
@@ -842,7 +831,7 @@ if (!managerProjects.isEmpty())
                                 }
                                 break;
                                 
-                            case 10:
+                            case 11:
                                 System.out.println("---------------------------------------------------");
                                 System.out.println("Exiting editing mode...");
                                 loop = false;  // Exit the loop
@@ -1058,9 +1047,6 @@ if (!managerProjects.isEmpty())
     
     public void generateReport(Scanner sc)
     {
-        // BTOapplication.get_details();   // helpz
-        // OR
-
         List<BTOapplication> applicationList = BTOapplication.getApplicationList();
 
         if (applicationList.isEmpty()) {
