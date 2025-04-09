@@ -143,6 +143,7 @@ public class Project {
     
     public void updateFlatTypeUnits(String flatType, int newTotalUnits) {
         int index = flatTypes.indexOf(flatType);
+  
         if (index >= 0) {
             // Calculate the difference between new and old total units
             int diff = newTotalUnits - totalUnits.get(index);
@@ -162,9 +163,8 @@ public class Project {
     }
 
     public void updateAvailableUnits(String flatType, int newAvailableUnits) {
-        int index = flatTypes.indexOf(flatType);
-        System.out.println("Error: check index flattype" +index);
-        if (index >= 0) {
+        int index = flatTypes.indexOf(flatType.toUpperCase());
+          if (index >= 0) {
             if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
                 availableUnits.set(index, newAvailableUnits);
             } else {

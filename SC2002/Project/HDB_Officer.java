@@ -319,6 +319,7 @@ public class HDB_Officer extends Applicant {
             System.out.println("Flat type " + chosenFlatType + " is not available in this project.");
             return;
         }
+     
         List<Integer> availableUnits = proj.getAvailableUnits();
         int currentAvailable = availableUnits.get(index);
         if (currentAvailable <= 0) {
