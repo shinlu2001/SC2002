@@ -213,7 +213,7 @@ public class HDB_Officer extends Applicant {
         System.out.println("Enquiries for project " + officerProject.getProjectName() + ":");
         for (int i = 0; i < projectEnquiries.size(); i++) {
             Enquiry en = projectEnquiries.get(i);
-            System.out.printf("[%d] ID: %d, Question: %s%s%n",
+            System.out.printf("ID: %d, Question: %s%s%n",
                     i, en.getId(), en.getEnquiry(), (en.getStaff() != null ? " (Replied)" : ""));
         }
         System.out.print("Enter enquiry index to reply (or -1 to cancel): ");
@@ -226,7 +226,7 @@ public class HDB_Officer extends Applicant {
             System.out.println("Invalid index.");
             return;
         }
-        Enquiry selected = projectEnquiries.get(idx);
+        Enquiry selected = BTOsystem.searchById(projectEnquiries, idx, null);
         System.out.println("Selected enquiry: " + selected.getEnquiry());
         System.out.print("Enter your reply: ");
         String reply = Input.getStringInput(scanner);

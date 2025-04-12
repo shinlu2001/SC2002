@@ -196,18 +196,15 @@ public class BTOsystem implements Input{
         String firstname = Input.getStringInput(sc);
         System.out.print("Last name: ");
         String lastname = Input.getStringInput(sc);
-        System.out.print("Marital status (s: single, m: married): ");
+        
         char marital_status='a';
         do {
-            try {
-                marital_status = sc.next().charAt(0);
-                if (marital_status!='m' || marital_status!='s') {
-                    break;
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Error: Invalid input. Please enter either 'm' or 's'.");
-                sc.next(); 
+            System.out.print("Marital status (s: single, m: married): ");
+            marital_status = Input.getStringInput(sc).charAt(0);
+            if (marital_status=='m' || marital_status=='s') {
+                break;
             }
+            System.out.println("Invalid input. Please enter either 'm' or 's'.");
         } while (true);
         String mar_stat = "SINGLE";
         if (marital_status=='m') {

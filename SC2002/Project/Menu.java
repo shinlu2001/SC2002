@@ -37,7 +37,7 @@ public class Menu {
         this.applicantMenu = Arrays.asList(
                 "Please choose an option:",
                 "1. Apply for a project",
-                "2. View active application",
+                "2. Manage active application",
                 "3. View only eligible listings",
                 "4. View all listings",
                 "5. Withdraw application",

@@ -22,18 +22,21 @@ public class Applicant extends User implements Input {
         int choice=0;
         do {
             try {
-                System.out.println("============================================");
-                System.out.println("         A P P L I C A N T   M E N U");
-                System.out.println("============================================");
+                System.out.println("====================================================================================================================");
+                System.out.println("                                          A P P L I C A N T   M E N U");
+                System.out.println("====================================================================================================================");
                 menu.printApplicantMenu();
                 
                 choice = Input.getIntInput(sc);
-                System.out.println("============================================");
+                System.out.println("====================================================================================================================");
                 if (choice >= 1 && choice <= ApplicantOption.values().length) {
                     ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
                     switch (selectedOption) {
                         case APPLY:
                             if (application == null || application.getStatus().equals("WITHDRAWN")) {
+                                if (application!=null) {
+                                    applicationHistory.add(application);
+                                }
                                 System.out.println("Apply for a project");
                                 int count = view_eligible_listings();
                                 if (count==0) {
@@ -53,22 +56,20 @@ public class Applicant extends User implements Input {
                                     if (!getEligibility(roomtype)) {
                                         System.out.println("Not eligible for this project and room type.");
                                     } else {
-                                        BTOapplication b = new BTOapplication(this, p, roomtype);
+                                        BTOapplication b = new BTOapplication(this, p, roomtype.toUpperCase());
                                         BTOsystem.applications.add(b);
                                         System.out.println("Application submitted!");
                                         application = b;
                                     }
                                 }
-                            } else if (application != null || !application.getStatus().equals("WITHDRAWN")) {
+                            } else {
                                 System.out.println("You already have an active application. You may not create a new one.");
-                                System.out.println("============================================");
                                 
                             }
                             break;
                         case VIEW_APPLICATION:
                             if (application == null) {
                                 System.out.println("You have no active application. Please create a new application.");
-                                System.out.println("============================================");
                             } else {
                                 application.get_details();
                                 if (application.getStatus().equalsIgnoreCase("Successful")) {
@@ -108,24 +109,21 @@ public class Applicant extends User implements Input {
                                 } else {
                                     System.out.println("Wrong NRIC, Withdrawal Unsuccessful.");
                                 }
-                                System.out.println("============================================");
                             } else {
                                 System.out.println("Nothing to withdraw.");
                             }
                             break;
                         case ENQUIRY:
                             manage_enquiry(sc);
-                            System.out.println("============================================");
                             break;
                         case ACCOUNT:
-                            System.out.println("             Account details");
-                            System.out.println("============================================");
+                            System.out.println("                                               Account details");
+                            System.out.println("====================================================================================================================");
                             to_string();
-                            System.out.println("============================================");
                             break;
                         case CHANGE_PASSWORD:
-                            System.out.println("          Change your password");
-                            System.out.println("============================================");
+                            System.out.println("                                            Change your password");
+                            System.out.println("====================================================================================================================");
                             // sc.nextLine();
                             System.out.print("Enter current password: ");
                             String oldpass = Input.getStringInput(sc);
@@ -142,18 +140,15 @@ public class Applicant extends User implements Input {
                                 change_password(new_pass2);
                                 System.out.println("Password changed successfully.");
                             }
-                            System.out.println("============================================");
 
                             break;
                         case EXIT:
                             System.out.println("Logged out. Returning to main menu...");
-                            System.out.println("============================================");
+                            System.out.println("================================================================================================================");
                             break;
                         default:
                             System.out.println("Invalid choice. Please try again.");
                     }
-                
-                // sc.nextLine();
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
@@ -176,13 +171,13 @@ public class Applicant extends User implements Input {
         int choice=0;
         do {
             try {
-                System.out.println("============================================");
-                System.out.println("         E N Q U I R Y   M E N U");
-                System.out.println("============================================");
+                System.out.println("====================================================================================================================");
+                System.out.println("                                         E N Q U I R Y   M E N U");
+                System.out.println("====================================================================================================================");
                 menu.printEnquiryMenu();
                 choice = Input.getIntInput(sc);
                 // scanner.nextLine();
-                System.out.println("============================================");
+                System.out.println("====================================================================================================================");
                 if (choice >= 1 && choice <= EnquiryOption.values().length) {
                     EnquiryOption selectedOption = EnquiryOption.values()[choice - 1];
                     switch (selectedOption) {
@@ -191,7 +186,7 @@ public class Applicant extends User implements Input {
                             String content = Input.getStringInput(sc);
                             makeEnquiry(content);
                             System.out.println("Enquiry sent!");
-                            System.out.println("============================================");
+                            // System.out.println("============================================");
                             break;
                         case PROJECT_RELATED:
                             view_listings();
@@ -210,7 +205,6 @@ public class Applicant extends User implements Input {
                             String project_content = Input.getStringInput(sc);
                             makeEnquiry(p, project_content, flatType);
                             System.out.println("Enquiry sent!");
-                            System.out.println("============================================");
                             break;
                         case EDIT:
                             System.out.println("Edit enquiry");
@@ -222,22 +216,23 @@ public class Applicant extends User implements Input {
                                 .filter(en -> en.getId() == id)
                                 .findFirst()
                                 .orElse(null);
-                            if (result.getStaff()!=null) {
-                                System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
-                                System.out.println("============================================");
+                            if (result==null) {
+                                System.out.println("No such enquiry.");
                                 break;
-                            } 
+                            } else if (result.getStaff()!=null) {
+                                System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
+                                break;
+                            }
                             view_enquiry(result);
                             System.out.print("Enquiry: ");
                             String userInput = Input.getStringInput(sc);
                             // maybe add confirmation?
-                            editEnquiry(id, userInput);
+                            editEnquiry(result, userInput);
                             System.out.println("Enquiry edited!");
-                            System.out.println("============================================");
                             break;
                         case VIEW_ALL:
-                            System.out.println("All enquiries");
-                            System.out.println("============================================");
+                            System.out.println("                                              All Enquiries");
+                            System.out.println("====================================================================================================================");
                             view_all_enquiry_for_user();
                             System.out.println("Select enquiry to view (-1 to cancel)");
                             int en_id = Input.getIntInput(sc);
@@ -245,11 +240,15 @@ public class Applicant extends User implements Input {
                                 break;
                             }
                             Enquiry en = BTOsystem.searchById(enquiries, en_id, Enquiry::getId);
+                            if (en==null) {
+                                System.err.println("Invalid ID");
+                                break;
+                            }
                             view_enquiry(en);
                             break;
                         case DELETE:
-                            System.out.println("Delete enquiry");
-                            System.out.println("============================================");
+                            System.out.println("                                           Delete enquiry");
+                            System.out.println("================================================================================================================");
                             view_all_enquiry_for_user();
                             System.out.print("Enter ID of enquiry to delete: ");
                             // add confirmation before deleting
@@ -257,7 +256,7 @@ public class Applicant extends User implements Input {
                             // scanner.nextLine();
                             deleteEnquiry(del_id);
                             System.out.println("Enquiry deleted!");
-                            System.out.println("============================================");
+
                             break;
                         case RETURN:
                             System.out.println("Returning to applicant menu...");
@@ -304,11 +303,11 @@ public class Applicant extends User implements Input {
     }
 
     protected int view_eligible_listings() {
-        System.out.println("\n================================================================================================================");
+        // System.out.println("\n================================================================================================================");
         System.out.println("                                                  ELIGIBLE PROJECTS");
-        System.out.println("================================================================================================================");
+        System.out.println("====================================================================================================================");
         System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
-        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        System.err.println("--------------------------------------------------------------------------------------------------------------------");
         List<Project> list = BTOsystem.projects;
         int count = 0;
         for (Project p : list) {
@@ -320,7 +319,7 @@ public class Applicant extends User implements Input {
                 System.out.print(str);
             }
         }
-        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        System.err.println("--------------------------------------------------------------------------------------------------------------------");
         return count;
     }
 
@@ -409,11 +408,10 @@ public class Applicant extends User implements Input {
         project.addEnquiry(en);  // Ensure enquiry is tied to the project
     }
     
-
     protected void view_all_enquiry_for_user() {
         System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n", 
             "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
-        System.out.println("------------------------------------------------------------------------------------");
+            System.out.println("====================================================================================================================");
     
     for (Enquiry enquiry : enquiries) {
         // User creator = enquiry.getCreatedByUser();
@@ -431,15 +429,6 @@ public class Applicant extends User implements Input {
         if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
             System.out.printf("%-5s %-20s %-30s%n", "","","Flat type: "+ enquiry.getflatType());
         }
-        
-        // // If there's a response, show it
-        // if (!enquiry.getResponse().isEmpty()) {
-        //     System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
-        //     if (enquiry.getStaff() != null) {
-        //         System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + 
-        //                 enquiry.getStaff().get_lastname());
-        //     }
-        // }
     }
     }
     protected void view_enquiry(Enquiry en) {
@@ -456,7 +445,7 @@ public class Applicant extends User implements Input {
     protected void viewEditableEnquiry() {
         System.out.printf("%-5s %-20s %-30s %-15s%n", 
             "ID", "Project", "Enquiry", "Status");
-        System.out.println("------------------------------------------------------------------------------------");
+        System.out.println("==================================================================================================================");
     
     for (Enquiry enquiry : enquiries) {
         if (!(enquiry.getResponse().isBlank())) {
@@ -475,16 +464,8 @@ public class Applicant extends User implements Input {
         }
     }
     }
-    protected void editEnquiry(int id, String content) { // can only edit when no response from staff yett
-        Iterator<Enquiry> iterator = enquiries.iterator();
-        Enquiry en = iterator.next();
-        while (iterator.hasNext()) {
-            en = iterator.next();
-            if (en.getId() == id) {
-                en.setEnquiry(content);
-                break; 
-            }
-        }
+    protected void editEnquiry(Enquiry en, String content) { // can only edit when no response from staff yett
+        en.setEnquiry(content);
     }
     protected void deleteEnquiry(int id) {
         Enquiry removedElement = null;  
@@ -495,13 +476,13 @@ public class Applicant extends User implements Input {
             if (en.getId() == id) {
                 view_enquiry(en);
                 removedElement = en;
-                iterator.remove();  
+                BTOsystem.enquiries.remove(en);
+                iterator.remove();
                 break;
             }
         }
         System.out.println("Deleted enquiry: " + removedElement.getEnquiry());
         System.out.println("Deleted response: " + removedElement.getResponse());
-        removedElement = null;
     }
 }
 

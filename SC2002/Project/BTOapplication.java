@@ -119,9 +119,10 @@ public class BTOapplication {
      * Print application details for debugging or user output.
      */
     public void get_details() {
-        System.out.println("=== Application Details ===");
+        System.out.println("====================================================================================================================");
+        System.out.println("                                            Application Details");
         if (withdrawalRequested) {
-            System.out.println("|WITHDRAWAL Requested|");
+            System.out.println("|W I T H D R A W A L Requested|");
         }
         System.out.println("Application ID: " + applicationId);
         if (applicant != null) {
