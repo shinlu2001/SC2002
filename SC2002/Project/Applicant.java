@@ -59,7 +59,7 @@ public class Applicant extends User implements Input {
                                         application = b;
                                     }
                                 }
-                            } else if (application != null || !application.getStatus().equals("WITHDRAWN")) {
+                            } else{
                                 System.out.println("You already have an active application. You may not create a new one.");
                                 System.out.println("============================================");
                                 
@@ -475,34 +475,38 @@ public class Applicant extends User implements Input {
         }
     }
     }
-    protected void editEnquiry(int id, String content) { // can only edit when no response from staff yett
-        Iterator<Enquiry> iterator = enquiries.iterator();
-        Enquiry en = iterator.next();
-        while (iterator.hasNext()) {
-            en = iterator.next();
+    protected void editEnquiry(int id, String content) {
+        boolean found = false;
+        for (Enquiry en : enquiries) {
             if (en.getId() == id) {
                 en.setEnquiry(content);
-                break; 
-            }
-        }
-    }
-    protected void deleteEnquiry(int id) {
-        Enquiry removedElement = null;  
-        Iterator<Enquiry> iterator = enquiries.iterator();
-        Enquiry en = iterator.next();
-        while (iterator.hasNext()) {
-            en = iterator.next();
-            if (en.getId() == id) {
-                view_enquiry(en);
-                removedElement = en;
-                iterator.remove();  
+                found = true;
                 break;
             }
         }
-        System.out.println("Deleted enquiry: " + removedElement.getEnquiry());
-        System.out.println("Deleted response: " + removedElement.getResponse());
-        removedElement = null;
+        if (!found) {
+            System.out.println("No enquiry found with ID: " + id);
+        }
     }
+    
+    protected void deleteEnquiry(int id) {
+        Enquiry toRemove = null;
+        for (Enquiry en : enquiries) {
+            if (en.getId() == id) {
+                toRemove = en;
+                break;
+            }
+        }
+        if (toRemove != null) {
+            view_enquiry(toRemove);
+            enquiries.remove(toRemove);
+            System.out.println("Deleted enquiry: " + toRemove.getEnquiry());
+            System.out.println("Deleted response: " + toRemove.getResponse());
+        } else {
+            System.out.println("No enquiry found with ID: " + id);
+        }
+    }
+    
 }
 
 // for filtering enquiries/projects/application

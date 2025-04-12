@@ -158,7 +158,7 @@ public class Project {
             
             availableUnits.set(index, newAvailable);
         } else {
-            System.out.println("applications");
+            System.out.println("Error: Flat type '" + flatType + "' not found.");
         }
     }
 
@@ -321,17 +321,12 @@ public class Project {
     }
 
     public double getFlatPrice(String flatType) {
-        // Iterator<Flat> iterator = BTOsystem.getFlats().iterator();
-        Iterator<Flat> iterator = BTOsystem.flats.iterator();
-        Flat f = iterator.next();
-        while (iterator.hasNext()) {
-            f = iterator.next();
-            if (f.getProject().equals(this)) {
-                if (f.getFlatType().equals(flatType)) {
-                    return f.getPrice();
-                }
+        for (Flat f : BTOsystem.flats) {
+            if (f.getProject().equals(this) && f.getFlatType().equals(flatType)) {
+                return f.getPrice();
             }
         }
         return 0;
     }
+    
 }
