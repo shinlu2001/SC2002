@@ -62,7 +62,7 @@ public class Applicant extends User implements Input {
                                         application = b;
                                     }
                                 }
-                            } else {
+                            } else{
                                 System.out.println("You already have an active application. You may not create a new one.");
                                 
                             }
@@ -467,23 +467,25 @@ public class Applicant extends User implements Input {
     protected void editEnquiry(Enquiry en, String content) { // can only edit when no response from staff yett
         en.setEnquiry(content);
     }
+    
     protected void deleteEnquiry(int id) {
-        Enquiry removedElement = null;  
-        Iterator<Enquiry> iterator = enquiries.iterator();
-        Enquiry en = iterator.next();
-        while (iterator.hasNext()) {
-            en = iterator.next();
+        Enquiry toRemove = null;
+        for (Enquiry en : enquiries) {
             if (en.getId() == id) {
-                view_enquiry(en);
-                removedElement = en;
-                BTOsystem.enquiries.remove(en);
-                iterator.remove();
+                toRemove = en;
                 break;
             }
         }
-        System.out.println("Deleted enquiry: " + removedElement.getEnquiry());
-        System.out.println("Deleted response: " + removedElement.getResponse());
+        if (toRemove != null) {
+            view_enquiry(toRemove);
+            enquiries.remove(toRemove);
+            System.out.println("Deleted enquiry: " + toRemove.getEnquiry());
+            System.out.println("Deleted response: " + toRemove.getResponse());
+        } else {
+            System.out.println("No enquiry found with ID: " + id);
+        }
     }
+    
 }
 
 // for filtering enquiries/projects/application

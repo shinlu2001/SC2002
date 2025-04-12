@@ -196,16 +196,29 @@ public class BTOsystem implements Input{
         String firstname = Input.getStringInput(sc);
         System.out.print("Last name: ");
         String lastname = Input.getStringInput(sc);
+        System.out.print("Marital status (s: single, m: married): ");
+        String maritalInput = "";
+        char marital_status = 'a';
         
-        char marital_status='a';
         do {
-            System.out.print("Marital status (s: single, m: married): ");
-            marital_status = Input.getStringInput(sc).charAt(0);
-            if (marital_status=='m' || marital_status=='s') {
-                break;
+            try {
+                maritalInput = Input.getStringInput(sc).toLowerCase();
+                if (maritalInput.equals("m") || maritalInput.equals("married")) {
+                    marital_status = 'm';
+                    break;
+                } else if (maritalInput.equals("s") || maritalInput.equals("single")) {
+                    marital_status = 's';
+                    break;
+                } else {
+                    System.out.println("Error: Please enter 'm', 's', 'married', or 'single'.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Error: Invalid input. Please try again.");
+                sc.nextLine(); // Clear buffer
             }
             System.out.println("Invalid input. Please enter either 'm' or 's'.");
         } while (true);
+        
         String mar_stat = "SINGLE";
         if (marital_status=='m') {
             mar_stat = "MARRIED";
@@ -357,41 +370,6 @@ public class BTOsystem implements Input{
                     }
                 }
                 
-                // HARD CODED ONLY WORKS FOR Daniel,Emily -> Name1,Name2
-
-                // System.out.println("Raw data: " + row[12] + row[13] + row[14]);
-                // System.out.println("Raw data: " + row[12] + row[13]);
-
-                // // First check if we need to reconstruct a quoted field
-                // String officerField;
-                // if (row.length > 13 && row[12].startsWith("\"") && !row[12].endsWith("\"")) {
-                //     // Reconstruct quoted field that was split across columns
-                //     officerField = row[12] + "," + row[13];
-                // } else {
-                //     officerField = row[12];
-                // }
-
-                // // Now properly parse the officer names
-                // String[] project_officer = officerField.replace("\"", "").split(",");
-                // System.out.println("Officers after proper parsing: " + Arrays.toString(project_officer));
-
-                // for (String officerName : project_officer) {
-                //     officerName = officerName.trim();
-                //     System.out.println("Processing officer: " + officerName);
-                //     for (HDB_Officer off : officers) {
-                //         if (off.get_firstname().equalsIgnoreCase(officerName)) {
-
-                //             // off.registerForProject(a);
-                //             // HDB_Officer.getOfficerList().add(off);  // does this work compared to registerForProject(a)??
-                //             // officers.add(off);
-                //             a.addOfficer(off);
-                //             // a.assignOfficer(off);
-                //             // a.handleOfficerRegistration();
-                //             System.out.println("Assigned officer: " + off.get_firstname());
-                //             break;
-                //         }
-                //     }
-                // }
 
                 // create flat objects for first type
                 for (int j=0;j<a.getAvailableUnits().get(0);j++){

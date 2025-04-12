@@ -143,6 +143,7 @@ public class Project {
     
     public void updateFlatTypeUnits(String flatType, int newTotalUnits) {
         int index = flatTypes.indexOf(flatType);
+  
         if (index >= 0) {
             // Calculate the difference between new and old total units
             int diff = newTotalUnits - totalUnits.get(index);
@@ -157,14 +158,13 @@ public class Project {
             
             availableUnits.set(index, newAvailable);
         } else {
-            System.out.println("applications");
+            System.out.println("Error: Flat type '" + flatType + "' not found.");
         }
     }
 
     public void updateAvailableUnits(String flatType, int newAvailableUnits) {
-        int index = flatTypes.indexOf(flatType);
-        System.out.println("Error: check index flattype" +index);
-        if (index >= 0) {
+        int index = flatTypes.indexOf(flatType.toUpperCase());
+          if (index >= 0) {
             if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
                 availableUnits.set(index, newAvailableUnits);
             } else {
@@ -321,17 +321,12 @@ public class Project {
     }
 
     public double getFlatPrice(String flatType) {
-        // Iterator<Flat> iterator = BTOsystem.getFlats().iterator();
-        Iterator<Flat> iterator = BTOsystem.flats.iterator();
-        Flat f = iterator.next();
-        while (iterator.hasNext()) {
-            f = iterator.next();
-            if (f.getProject().equals(this)) {
-                if (f.getFlatType().equals(flatType)) {
-                    return f.getPrice();
-                }
+        for (Flat f : BTOsystem.flats) {
+            if (f.getProject().equals(this) && f.getFlatType().equals(flatType)) {
+                return f.getPrice();
             }
         }
         return 0;
     }
+    
 }

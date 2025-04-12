@@ -982,7 +982,7 @@ if (!managerProjects.isEmpty())
    // int currentAvailable = project.getAvailableUnits().get(index);
    // project.updateAvailableUnits(flatType, currentAvailable - 1);
     
-    System.out.println("Application for " + project.getProjectName() + " project has approved. Please proceed to book flat with officer in-charge.");
+    System.out.println("Application ID: " + application.getId() + " for project " + project.getProjectName() + " has been approved.");
     
 }
     public void handleWithdrawalRequest_application(Project project, BTOapplication application, Scanner sc) {
