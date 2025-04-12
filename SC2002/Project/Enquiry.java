@@ -49,5 +49,17 @@ public class Enquiry {
     public Project getProject() {
         return project;
     }
+    public void display() {
+        // System.out.println("ID: " + enId);
+        System.out.println("Enquiry: "+ content);
+        System.out.println("Project: "+ (project!=null?project.getProjectName():null));
+        System.out.println("Flat Type: "+flatType);
+        if (repliedBy==null) {
+            System.out.println("No reply to this enquiry yet.");
+        } else {
+            System.out.println("Response: "+response);
+            System.out.println("Replied by: " + repliedBy.get_firstname());
+        }
+    }
 }
 

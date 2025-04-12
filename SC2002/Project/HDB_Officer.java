@@ -1,5 +1,6 @@
 package SC2002.Project;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -97,16 +98,20 @@ public class HDB_Officer extends Applicant {
                         }
                         System.out.println("--------------------------------");
                         break;
-                    case 6: // Manage enquiries
-                        manage_enquiry(scanner);
+                    case 6: // Manage user enquiries
+                        manage_other_enquiry(scanner);
                         System.out.println("--------------------------------");
                         break;
-                    case 7: // View account details
+                    case 7: // Manage own enquiries
+                        manage_own_enquiry(scanner); 
+                        System.out.println("--------------------------------");
+                        break;
+                    case 8: // View account details
                         System.out.println("Account details");
                         to_string();
                         System.out.println("--------------------------------");
                         break;
-                    case 8: // Change account password
+                    case 9: // Change account password
                         System.out.println("Change your password");
                         System.out.print("Enter current password: ");
                         String oldpass = Input.getStringInput(scanner);
@@ -124,7 +129,7 @@ public class HDB_Officer extends Applicant {
                         }
                         System.out.println("--------------------------------");
                         break;
-                    case 9: // Register to be a HDB officer of a project
+                    case 10: // Register to be a HDB officer of a project
                         List<Project> allProjects = BTOsystem.projects;
                         System.out.println("=== Choose a project to register as Officer ===");
                         for (int i = 0; i < allProjects.size(); i++) {
@@ -148,7 +153,7 @@ public class HDB_Officer extends Applicant {
                         }
                         registerForProject(target);
                         break;
-                    case 10: // Check status of registration to be an officer
+                    case 11: // Check status of registration to be an officer
                         System.out.println("Your Officer Registration Status: " + registrationStatus);
                         if (officerProject != null) {
                             System.out.println("Assigned Project: " + officerProject.getProjectName());
@@ -157,7 +162,7 @@ public class HDB_Officer extends Applicant {
                         }
                         System.out.println("--------------------------------");
                         break;
-                    case 11: // View project details
+                    case 12: // View project details
                         if (officerProject != null) {
                             System.out.println(officerProject.toString());
                         } else {
@@ -179,7 +184,7 @@ public class HDB_Officer extends Applicant {
                         }
                         System.out.println("--------------------------------");
                         break;
-                    case 12: // Process flat booking
+                    case 13: // Process flat booking
                         System.out.println("Processing flat booking...");
                         System.out.print("Enter applicant NRIC for booking: ");
                         String applicantNRIC = Input.getStringInput(scanner);
@@ -187,11 +192,11 @@ public class HDB_Officer extends Applicant {
                         String chosenFlatType = Input.getStringInput(scanner);
                         processFlatBooking(applicantNRIC, chosenFlatType);
                         break;
-                    case 13: // View applications for assigned project
+                    case 14: // View applications for assigned project
                         System.out.println("Viewing all applications for your assigned project:");
                         viewApplicationsForAssignedProject();
                         break;
-                    case 14: // Log out
+                    case 15: // Log out
                         System.out.println("Logged out. Returning to main menu...");
                         break;
                     default:
@@ -202,7 +207,7 @@ public class HDB_Officer extends Applicant {
                 System.out.println("Invalid input. Please enter a number.");
                 scanner.nextLine();
             }
-        } while (choice != 14);
+        } while (choice != 15);
     }
     
     public void to_string() {
@@ -216,22 +221,42 @@ public class HDB_Officer extends Applicant {
         enquiry.setStaffReply(this);
         enquiry.setResponse(response);
     }
-    
-    private void manage_enquiry(Scanner scanner) {
-        if (officerProject == null) {
-            System.out.println("You are not assigned to any project; no enquiries available.");
-            return;
+
+    private void manage_own_enquiry(Scanner sc) {
+        super.manage_enquiry(sc); // use applicant one
+    }
+
+    private void manage_other_enquiry(Scanner scanner) {
+        List<Enquiry> filteredEnquiries = new ArrayList<>();
+        if (officerProject == null) { // if have no assigned project, they will be tasked to handle general enquiries
+            if (BTOsystem.enquiries.size()!=0){
+                for (Enquiry e : BTOsystem.enquiries) {
+                    if (e.getProject() == null && !e.getCreatedByUser().equals(this)) { //cannot answer their own questions
+                        filteredEnquiries.add(e);
+                    }
+                }
+                System.out.println("You are not assigned to any project. Showing general (non-project) enquiries only: ");
+            }
+            
+            // return;
+        } else {
+        
+        for (Enquiry en : officerProject.getEnquiries()) {
+            if (!en.getCreatedByUser().equals(this)){
+                filteredEnquiries.add(en);
         }
-        List<Enquiry> projectEnquiries = officerProject.getEnquiries();
-        if (projectEnquiries == null || projectEnquiries.isEmpty()) {
-            System.out.println("No enquiries available for your project.");
-            return;
         }
         System.out.println("Enquiries for project " + officerProject.getProjectName() + ":");
-        for (int i = 0; i < projectEnquiries.size(); i++) {
-            Enquiry en = projectEnquiries.get(i);
+        }
+        if (filteredEnquiries.isEmpty()) {
+            System.out.println("No enquiries available.");
+            return;
+        }
+
+        for (Enquiry en : filteredEnquiries) {
             System.out.printf("ID: %d, Question: %s%s%n",
-                    i, en.getId(), en.getEnquiry(), (en.getStaff() != null ? " (Replied)" : ""));
+                en.getId(), truncateText(en.getEnquiry(), 30), (en.getStaff() != null ? " (Replied)" : ""));
+            
         }
         System.out.print("Enter enquiry index to reply (or -1 to cancel): ");
         int idx = Input.getIntInput(scanner);
@@ -239,17 +264,18 @@ public class HDB_Officer extends Applicant {
             System.out.println("Operation cancelled.");
             return;
         }
-        if (idx < 0 || idx >= projectEnquiries.size()) {
+        Enquiry selected = BTOsystem.searchById(filteredEnquiries, idx, Enquiry::getId);
+        if (selected==null) {
             System.out.println("Invalid index.");
             return;
         }
-        Enquiry selected = BTOsystem.searchById(projectEnquiries, idx, null);
-        System.out.println("Selected enquiry: " + selected.getEnquiry());
+        selected.display();
         System.out.print("Enter your reply: ");
         String reply = Input.getStringInput(scanner);
         reply_enquiry(selected, reply);
         System.out.println("Reply submitted successfully.");
     }
+
     
     public void registerForProject(Project project) {
         if (hasAppliedAsApplicant()) {

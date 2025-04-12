@@ -148,22 +148,6 @@ public class BTOsystem implements Input{
         }
         return null;
     }
-    // public static Project searchProjectById(int id) {
-    //     for (Project p : projects) {
-    //         if (p.getId()== id) {
-    //             return p;
-    //         }
-    //     }
-    //     return null;
-    // }
-    // public static Enquiry searchEnquiryById(List<Enquiry> list,int id) {
-    //     for (Enquiry p : list) {
-    //         if (p.getId()== id) {
-    //             return p;
-    //         }
-    //     }
-    //     return null;
-    // }
     public static <T> T searchById(List<T> list, int id, Function<T, Integer> getId) {
         for (T item : list) {
             if (getId.apply(item) == id) {

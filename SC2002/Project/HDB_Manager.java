@@ -1356,24 +1356,23 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
     }
     
     Project selectedProject = projectsWithEnquiries.get(projChoice);
-    List<Enquiry> pendingEnquiries = new ArrayList<>();
-    for (Enquiry e : selectedProject.getEnquiries()) {
-        if (e.getResponse().isEmpty()) {
-            pendingEnquiries.add(e);
-        }
-    }
+    // List<Enquiry> pendingEnquiries = new ArrayList<>();
+    // for (Enquiry e : selectedProject.getEnquiries()) {
+    //     if (e.getResponse().isEmpty()) {
+    //         pendingEnquiries.add(e);
+    //     }
+    // }
     
-    if (pendingEnquiries.isEmpty()) {
-        System.out.println("No pending enquiries for the selected project.");
-        return;
-    }
+    // if (pendingEnquiries.isEmpty()) {
+    //     System.out.println("No pending enquiries for the selected project.");
+    //     return;
+    // }
     
     System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
-    for (int i = 0; i < pendingEnquiries.size(); i++) {
-        Enquiry e = pendingEnquiries.get(i);
-        System.out.printf("[%d] ID: %d, Question: %s%n", i, e.getId(), truncateText(e.getEnquiry(), 30));
+    for (Enquiry e : selectedProject.getEnquiries()) {
+        System.out.printf("ID: %d, Question: %s%s%n", e.getId(), truncateText(e.getEnquiry(), 30), (e.getStaff() != null ? " (Replied)" : ""));
     }
-    
+
     int enquiryChoice;
     try {
         System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
@@ -1387,16 +1386,16 @@ private void handleProjectSpecificEnquiries(Scanner sc) {
         System.out.println("Operation cancelled.");
         return;
     }
-    if (enquiryChoice < 0 || enquiryChoice >= pendingEnquiries.size()) {
-        System.out.println("Invalid enquiry selection.");
+    Enquiry selected = BTOsystem.searchById(selectedProject.getEnquiries(), enquiryChoice, Enquiry::getId);
+    if (selected==null) {
+        System.out.println("Invalid index.");
         return;
     }
-    
-    Enquiry selectedEnquiry = pendingEnquiries.get(enquiryChoice);
-    System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
+    selected.display();
     System.out.print("Enter your reply: ");
     String reply = Input.getStringInput(sc);
-    reply_enquiry(selectedEnquiry, reply);
+    reply_enquiry(selected, reply);
+    System.out.println("Reply submitted successfully.");
 }
 
 private void handleGeneralEnquiries(Scanner sc) {

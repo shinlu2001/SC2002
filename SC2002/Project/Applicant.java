@@ -167,7 +167,7 @@ public class Applicant extends User implements Input {
         GENERAL, PROJECT_RELATED, EDIT, VIEW_ALL, DELETE, RETURN;
     }
 
-    private void manage_enquiry(Scanner sc) {
+    protected void manage_enquiry(Scanner sc) {
         int choice=0;
         do {
             try {
@@ -226,7 +226,6 @@ public class Applicant extends User implements Input {
                             view_enquiry(result);
                             System.out.print("Enquiry: ");
                             String userInput = Input.getStringInput(sc);
-                            // maybe add confirmation?
                             editEnquiry(result, userInput);
                             System.out.println("Enquiry edited!");
                             break;
@@ -395,7 +394,6 @@ public class Applicant extends User implements Input {
     protected void makeEnquiry(String content) {
         Enquiry en = new Enquiry(this, content);
         enquiries.add(en);
-        // BTOsystem.getEnquiries().add(en); // add enquiry to global enquiry list to be accessed by staff
         BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
     }
     //to be revised, enquiries tagged to a project
@@ -432,15 +430,7 @@ public class Applicant extends User implements Input {
     }
     }
     protected void view_enquiry(Enquiry en) {
-        System.out.println("Enquiry: "+ en.getEnquiry());
-        System.out.println("Project: "+ (en.getProject()!=null?en.getProject().getProjectName():null));
-        System.out.println("Flat Type: "+en.getflatType());
-        if (en.getStaff()==null) {
-            System.out.println("No reply to your enquiry yet.");
-        } else {
-            System.out.println("Response: "+en.getResponse());
-            System.out.println("Replied by: " + en.getStaff().get_firstname());
-        }
+        en.display();
     }
     protected void viewEditableEnquiry() {
         System.out.printf("%-5s %-20s %-30s %-15s%n", 
