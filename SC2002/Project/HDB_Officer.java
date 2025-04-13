@@ -23,6 +23,28 @@ public class HDB_Officer extends Applicant {
         return officer_id;
     }
 
+    @Override
+    protected int view_eligible_listings() {
+        System.out.println("\n================================================================================================================");
+        System.out.println("                                                  ELIGIBLE PROJECTS");
+        System.out.println("================================================================================================================");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
+        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        List<Project> list = BTOsystem.projects;
+        int count = 0;
+        for (Project p : list) {
+            // Exclude project if officer is already assigned to it.
+            if (p.isVisible() && (officerProject == null || !p.equals(officerProject))) {
+                String str = viewEligibleProjectsApplicant(p); // Uses the existing method from Applicant
+                if (!str.isBlank()){
+                    count++;
+                }
+                System.out.print(str);
+            }
+        }
+        System.err.println("----------------------------------------------------------------------------------------------------------------");
+        return count;
+    }    
     // Updated start_menu: first 8 options mirror Applicant menu, then officer-specific features.
     public void start_menu(Scanner scanner) {
         int choice = 0;
@@ -37,7 +59,7 @@ public class HDB_Officer extends Applicant {
                             System.out.println("You already have an active application. You may not create a new one.");
                         } else {
                             System.out.println("Apply for a project");
-                            int count = view_eligible_listings();
+                            int count = view_eligible_listings(); // Overridden in HDB_Officer, this will filter out assigned project
                             if (count == 0) {
                                 System.out.println("You are not eligible to apply for any project.");
                                 break;
@@ -48,6 +70,11 @@ public class HDB_Officer extends Applicant {
                             if (p == null || !p.isVisible()) {
                                 System.out.println("No such project.");
                             } else {
+                                // New check: if this officer is already assigned to project 'p'
+                                if (officerProject != null && officerProject.equals(p)) {
+                                    System.out.println("You are already assigned as an officer for this project and cannot apply as an applicant.");
+                                    break;
+                                }
                                 System.out.println("Enter room type (2-Room, 3-Room, etc): ");
                                 String roomtype = Input.getStringInput(scanner);
                                 if (!getEligibility(roomtype)) {
@@ -61,7 +88,7 @@ public class HDB_Officer extends Applicant {
                             }
                         }
                         System.out.println("--------------------------------");
-                        break;
+                        break;                
                     case 2: // View active application
                         if (application == null) {
                             System.out.println("You have no active application. Please create a new application.");
