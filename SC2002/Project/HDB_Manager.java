@@ -152,12 +152,15 @@ public class HDB_Manager extends User implements Input {
                             String confirm = Input.getStringInput(sc);
                             if (confirm.toLowerCase().equals("yes")) {
                                 handleBTOapplication(projectForBTO, application, flatType);
-                            }
+                            } else if (confirm.toLowerCase().equals("no")) {
+                                // Change the application's status to rejected
+                                application.setStatus("REJECTED");  
+                                System.out.println("Application has been rejected.");
                         } else {
                             System.out.println("Error: Application not found.");
                         }
                         break;
-
+                    }
                     case 10:    // Handle application withdrawal requests
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForWithdrawal_a = findAndValidateProject(sc);
@@ -754,7 +757,7 @@ public class HDB_Manager extends User implements Input {
                     " did not register for Project " + project.getId() + ".");
             return;
         }
-        if (officer.isApplicationPeriodOverlapping(project)) {
+        if (!officer.isApplicationPeriodOverlapping(project)) {
             officer.registrationStatus = "REJECTED";
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() +
                     "'s registration rejected. Officer is already assigned to another project during this application period.");

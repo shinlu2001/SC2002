@@ -24,139 +24,185 @@ public class Applicant extends User implements Input {
     public void start_menu(Scanner sc) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
         int choice = 0;
-        do {
+        // Continue displaying the applicant menu until the user selects the explicit exit option.
+        while (true) {
             try {
                 System.out.println("====================================================================================================================");
                 System.out.println("                                          A P P L I C A N T   M E N U");
                 System.out.println("====================================================================================================================");
                 menu.printApplicantMenu();
-
-                choice = Input.getIntInput(sc);
+                try {
+                    choice = Input.getIntInput(sc);
+                } catch (Input.InputExitException e) {
+                    System.out.println("Operation cancelled. Returning to Applicant menu.");
+                    continue; // re-display the applicant menu
+                }
                 System.out.println("====================================================================================================================");
                 if (choice >= 1 && choice <= ApplicantOption.values().length) {
                     ApplicantOption selectedOption = ApplicantOption.values()[choice - 1];
                     switch (selectedOption) {
                         case APPLY:
-                            if (application == null || application.getStatus().equals("WITHDRAWN")) {
-                                if (application != null) {
-                                    applicationHistory.add(application);
-                                }
-                                System.out.println("Apply for a project");
-                                int count = view_eligible_listings();
-                                if (count == 0) {
-                                    System.out.println("You are not eligible to apply for any project.");
-                                    break;
-                                }
-                                System.out.println("Enter ProjectID: ");
-                                int id = Input.getIntInput(sc);
-                                Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
-                                if (p == null || !p.isVisible()) {
-                                    System.out.println("No such project.");
-                                } else {
-                                    System.out.println("Enter room type (2-Room, 3-Room, etc): ");
-                                    String roomtype = Input.getStringInput(sc);
-                                    if (!getEligibility(roomtype)) {
-                                        System.out.println("Not eligible for this project and room type.");
+                            try {
+                                if (application == null || application.getStatus().equals("WITHDRAWN" ) || application.getStatus().equals("REJECTED")) {
+                                    if (application != null) {
+                                        applicationHistory.add(application);
+                                    }
+                                    System.out.println("Apply for a project");
+                                    int count = view_eligible_listings();
+                                    if (count == 0) {
+                                        System.out.println("You are not eligible to apply for any project.");
+                                        break;
+                                    }
+                                    System.out.println("Enter ProjectID: ");
+                                    int id = Input.getIntInput(sc);
+                                    Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
+                                    if (p == null || !p.isVisible()) {
+                                        System.out.println("No such project.");
                                     } else {
-                                        BTOapplication b = new BTOapplication(this, p, roomtype.toUpperCase());
-                                        BTOsystem.applications.add(b);
-                                        System.out.println("Application submitted!");
-                                        application = b;
+                                        System.out.println("Enter room type (2-Room, 3-Room, etc): ");
+                                        String roomtype = Input.getStringInput(sc);
+                                        if (!getEligibility(roomtype)) {
+                                            System.out.println("Not eligible for this project and room type.");
+                                        } else {
+                                            BTOapplication b = new BTOapplication(this, p, roomtype.toUpperCase());
+                                            BTOsystem.applications.add(b);
+                                            System.out.println("Application submitted!");
+                                            application = b;
+                                        }
                                     }
+                                } else {
+                                    System.out.println("You already have an active application. You may not create a new one." + application.getStatus());
                                 }
-                            } else {
-                                System.out.println("You already have an active application. You may not create a new one.");
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }
                             break;
+                            
                         case VIEW_APPLICATION:
-                            if (application == null) {
-                                System.out.println("You have no active application. Please create a new application.");
-                            } else {
-                                application.get_details();
-                                if (application.getStatus().equalsIgnoreCase("Successful")) {
-                                    System.out.println("Congrats! Your application is successful!");
-                                    System.out.println("Enter 1 to book a flat (any other key to exit): ");
-                                    int book = Input.getIntInput(sc);
-                                    if (book == 1) {
-                                        System.out.println("Your request to book a flat has been submitted.");
-                                        System.out.println("Our friendly HDB officer will assist you in the booking of a flat");
-                                        application.requestBooking();
+                            try {
+                                if (application == null) {
+                                    System.out.println("You have no active application. Please create a new application.");
+                                } else {
+                                    application.get_details();
+                                    if (application.getStatus().equalsIgnoreCase("Successful")) {
+                                        System.out.println("Congrats! Your application is successful!");
+                                        System.out.println("Enter 1 to book a flat (any other key to exit): ");
+                                        int book = Input.getIntInput(sc);
+                                        if (book == 1) {
+                                            System.out.println("Your request to book a flat has been submitted.");
+                                            System.out.println("Our friendly HDB officer will assist you in the booking of a flat");
+                                            application.requestBooking();
+                                        }
                                     }
                                 }
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }
                             break;
+                            
                         case VIEW_ELIGIBLE:
-                            int countEligible = view_eligible_listings();
-                            if (countEligible == 0) {
-                                System.out.println("You are not eligible to apply for any project.");
+                            try {
+                                int countEligible = view_eligible_listings();
+                                if (countEligible == 0) {
+                                    System.out.println("You are not eligible to apply for any project.");
+                                }
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }
                             break;
+                            
                         case VIEW_LISTINGS:
                             view_listings();
                             break;
+                            
                         case WITHDRAW:
-                            System.out.println("Withdraw Request");
-                            if (application != null) {
-                                application.get_details();
-                                // Allow user to press Enter (use direct sc.nextLine() here if needed)
-                                System.out.println("(Press Enter to continue)");
-                                sc.nextLine();
-                                System.out.println("Enter NRIC to confirm withdrawal: ");
-                                String confirm = Input.getStringInput(sc);
-                                if (confirm.equals(get_nric())) {
-                                    application.withdraw();
-                                    System.out.println("Withdrawal request has been submitted.");
-                                } else {
-                                    System.out.println("Wrong NRIC, Withdrawal Unsuccessful.");
+                            try {
+                                if (application.getStatus().equals("REJECTED")) {
+                                    System.out.println("Application already rejected. Press enter to return to role menu");
+                                    sc.nextLine();
+                                    break;
                                 }
-                                System.out.println("====================================================================================================================");
-                            } else {
-                                System.out.println("Nothing to withdraw.");
+                                System.out.println("Withdraw Request");
+                                if (application != null) {
+                                    application.get_details();
+                                    // Allow user to press Enter to continue
+                                    System.out.println("(Press Enter to continue)");
+                                    sc.nextLine();
+                                    System.out.println("Enter NRIC to confirm withdrawal: ");
+                                    String confirm = Input.getStringInput(sc);
+                                    if (confirm.equals(get_nric())) {
+                                        application.withdraw();
+                                        System.out.println("Withdrawal request has been submitted.");
+                                    } else {
+                                        System.out.println("Wrong NRIC, Withdrawal Unsuccessful.");
+                                    }
+                                    System.out.println("====================================================================================================================");
+                                } else {
+                                    System.out.println("Nothing to withdraw.");
+                                }
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }
                             break;
+                            
                         case ENQUIRY:
-                            manage_enquiry(sc);
-                            break;
-                        case ACCOUNT:
-                            System.out.println("                                               Account details");
-                            System.out.println("====================================================================================================================");
-                            to_string();
-                            break;
-                        case CHANGE_PASSWORD:
-                            System.out.println("                                            Change your password");
-                            System.out.println("====================================================================================================================");
-                            System.out.print("Enter current password: ");
-                            String oldpass = Input.getStringInput(sc);
-                            System.out.print("Enter new password: ");
-                            String new_pass1 = Input.getStringInput(sc);
-                            System.out.print("Enter new password again to confirm: ");
-                            String new_pass2 = Input.getStringInput(sc);
-                            if (!verify_password(oldpass)) {
-                                System.out.println("Current password is wrong. Password change unsuccessful.");
-                            } else if (!new_pass1.equals(new_pass2)) {
-                                System.out.println("New passwords do not match.");
-                            } else {
-                                change_password(new_pass2);
-                                System.out.println("Password changed successfully.");
+                            try {
+                                manage_enquiry(sc);
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }
                             break;
-                        case EXIT:
-                            System.out.println("Logged out. Returning to main menu...");
-                            System.out.println("================================================================================================================");
+                            
+                        case ACCOUNT:
+                            try {
+                                System.out.println("                                               Account details");
+                                System.out.println("====================================================================================================================");
+                                to_string();
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
+                            }
                             break;
+                            
+                        case CHANGE_PASSWORD:
+                            try {
+                                System.out.println("                                            Change your password");
+                                System.out.println("====================================================================================================================");
+                                System.out.print("Enter current password: ");
+                                String oldpass = Input.getStringInput(sc);
+                                System.out.print("Enter new password: ");
+                                String new_pass1 = Input.getStringInput(sc);
+                                System.out.print("Enter new password again to confirm: ");
+                                String new_pass2 = Input.getStringInput(sc);
+                                if (!verify_password(oldpass)) {
+                                    System.out.println("Current password is wrong. Password change unsuccessful.");
+                                } else if (!new_pass1.equals(new_pass2)) {
+                                    System.out.println("New passwords do not match.");
+                                } else {
+                                    change_password(new_pass2);
+                                    System.out.println("Password changed successfully.");
+                                }
+                            } catch (Input.InputExitException e) {
+                                System.out.println("Operation cancelled. Returning to Applicant menu.");
+                            }
+                            break;
+                            
+                        case EXIT:
+                            System.out.println("Logged out. Returning to role menu...");
+                            return;
+                            
                         default:
                             System.out.println("Invalid choice. Please try again.");
                     }
                 }
             } catch (Input.InputExitException e) {
-                System.out.println("User requested exit/back. Returning to previous menu.");
-                break;
+                System.out.println("Operation cancelled by user. Returning to Applicant menu.");
+                continue;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
                 sc.nextLine();
             }
-        } while (choice != 9);
-    }
+        }
+    }    
 
     public void to_string() {
         super.to_string();
