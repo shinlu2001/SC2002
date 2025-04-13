@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Menu {
-    // Using a generic List of Strings for the welcome menu
+    // Using a generic List of Strings for the different menus
     private List<String> welcomeMenu;
     private List<String> loginError;
     private List<String> role;
@@ -14,7 +14,7 @@ public class Menu {
     private List<String> managerMenu;
     private List<String> reportMenu;
 
-    // Constructor that uses a default welcome menu
+    // Constructor that uses default menus
     public Menu() {
         this.welcomeMenu = Arrays.asList(
                 "Please choose an option:",
@@ -46,23 +46,6 @@ public class Menu {
                 "8. Change account password",
                 "9. Log out and return to main program",
                 "Enter your choice: ");
-        this.managerMenu = Arrays.asList(
-                "1. Create a Project",
-                "2. Edit a Project",
-                "3. Delete a Project",
-                "4. View All Projects",
-                "5. View My Projects",
-                "6. View Officer Registrations",
-                "7. Handle Officer Registration",
-                "8. Handle Officer Registration Withdrawal Requests",
-                "9. Handle BTO Applications",
-                "10. Handle BTO Application Withdrawal Requests",
-                "11. Generate Applicant Report",
-                "12. View All Enquiries",
-                "13. Handle Project Enquiries",
-                "14. View account details",
-                "15. Log out",
-                "Enter your choice: ");
         this.officerMenu = Arrays.asList(
                 "Please choose an option:",
                 "1. Apply for a project",
@@ -80,7 +63,24 @@ public class Menu {
                 "13. Process flat booking",
                 "14. View applications for assigned project",
                 "15. Log out and return to main program",
-                "Enter your choice: ");                            
+                "Enter your choice: ");
+        this.managerMenu = Arrays.asList(
+                "1. Create a Project",
+                "2. Edit a Project",
+                "3. Delete a Project",
+                "4. View All Projects",
+                "5. View My Projects",
+                "6. View Officer Registrations",
+                "7. Handle Officer Registration",
+                "8. Handle Officer Registration Withdrawal Requests",
+                "9. Handle BTO Applications",
+                "10. Handle BTO Application Withdrawal Requests",
+                "11. Generate Applicant Report",
+                "12. View All Enquiries",
+                "13. Handle Project Enquiries",
+                "14. View account details",
+                "15. Log out",
+                "Enter your choice: ");
         this.enquiryMenu = Arrays.asList(
                 "Please choose an option:",
                 "1. Make General enquiry (select if not regarding a specific project)",
@@ -99,9 +99,9 @@ public class Menu {
                 "Enter your choice: ");
     }
 
-    // Optional: Constructor to allow passing a custom welcome menu
+    // Optional: Constructor to allow using custom menus
     public Menu(List<String> welcomeMenu, List<String> loginError, List<String> role, List<String> applicantMenu,
-            List<String> enquiryMenu, List<String> managerMenu,List<String> reportMenu) {
+            List<String> enquiryMenu, List<String> managerMenu, List<String> reportMenu) {
         this.welcomeMenu = welcomeMenu;
         this.loginError = loginError;
         this.role = role;
@@ -109,7 +109,6 @@ public class Menu {
         this.enquiryMenu = enquiryMenu;
         this.managerMenu = managerMenu;
         this.reportMenu = reportMenu;
-
     }
 
     public void printMenu(List<String> list) {
@@ -145,6 +144,7 @@ public class Menu {
     public void printOfficerMenu() {
         printMenu(officerMenu);
     }
+
     public void printReportMenu() {
         printMenu(reportMenu);
     }

@@ -1,32 +1,36 @@
 package SC2002.Project;
 
 import java.util.*;
+import java.time.LocalDate;
 
 public class Applicant extends User implements Input {
     protected static int nextId = -1;
     private int applicantID;
-    protected BTOapplication application=null;
-    protected List<BTOapplication> applicationHistory=new ArrayList<>();
-    private String type="APPLICANT";
+    protected BTOapplication application = null;
+    protected List<BTOapplication> applicationHistory = new ArrayList<>();
+    private String type = "APPLICANT";
     protected List<Enquiry> enquiries = new ArrayList<>();
 
     public Applicant(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
         applicantID = ++nextId;
     }
+
     enum ApplicantOption {
         APPLY, VIEW_APPLICATION, VIEW_ELIGIBLE, VIEW_LISTINGS, WITHDRAW, ENQUIRY, ACCOUNT, CHANGE_PASSWORD, EXIT;
     }
+
+    @Override
     public void start_menu(Scanner sc) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
-        int choice=0;
+        int choice = 0;
         do {
             try {
                 System.out.println("====================================================================================================================");
                 System.out.println("                                          A P P L I C A N T   M E N U");
                 System.out.println("====================================================================================================================");
                 menu.printApplicantMenu();
-                
+
                 choice = Input.getIntInput(sc);
                 System.out.println("====================================================================================================================");
                 if (choice >= 1 && choice <= ApplicantOption.values().length) {
@@ -34,25 +38,23 @@ public class Applicant extends User implements Input {
                     switch (selectedOption) {
                         case APPLY:
                             if (application == null || application.getStatus().equals("WITHDRAWN")) {
-                                if (application!=null) {
+                                if (application != null) {
                                     applicationHistory.add(application);
                                 }
                                 System.out.println("Apply for a project");
                                 int count = view_eligible_listings();
-                                if (count==0) {
+                                if (count == 0) {
                                     System.out.println("You are not eligible to apply for any project.");
                                     break;
                                 }
                                 System.out.println("Enter ProjectID: ");
                                 int id = Input.getIntInput(sc);
-                                // sc.nextLine();
                                 Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
-                                if (p==null || !p.isVisible()) {
+                                if (p == null || !p.isVisible()) {
                                     System.out.println("No such project.");
                                 } else {
                                     System.out.println("Enter room type (2-Room, 3-Room, etc): ");
                                     String roomtype = Input.getStringInput(sc);
-                                    
                                     if (!getEligibility(roomtype)) {
                                         System.out.println("Not eligible for this project and room type.");
                                     } else {
@@ -62,9 +64,8 @@ public class Applicant extends User implements Input {
                                         application = b;
                                     }
                                 }
-                            } else{
+                            } else {
                                 System.out.println("You already have an active application. You may not create a new one.");
-                                
                             }
                             break;
                         case VIEW_APPLICATION:
@@ -76,19 +77,17 @@ public class Applicant extends User implements Input {
                                     System.out.println("Congrats! Your application is successful!");
                                     System.out.println("Enter 1 to book a flat (any other key to exit): ");
                                     int book = Input.getIntInput(sc);
-                                    // sc.nextLine();
-                                    if (book==1) {
+                                    if (book == 1) {
                                         System.out.println("Your request to book a flat has been submitted.");
                                         System.out.println("Our friendly HDB officer will assist you in the booking of a flat");
                                         application.requestBooking();
-                                        // on officer side, book a flat from the list of flats available, set application status to booked
                                     }
                                 }
                             }
                             break;
                         case VIEW_ELIGIBLE:
-                            int count = view_eligible_listings();
-                            if (count==0) {
+                            int countEligible = view_eligible_listings();
+                            if (countEligible == 0) {
                                 System.out.println("You are not eligible to apply for any project.");
                             }
                             break;
@@ -99,7 +98,8 @@ public class Applicant extends User implements Input {
                             System.out.println("Withdraw Request");
                             if (application != null) {
                                 application.get_details();
-                                System.out.println("(Enter to continue) ");
+                                // Allow user to press Enter (use direct sc.nextLine() here if needed)
+                                System.out.println("(Press Enter to continue)");
                                 sc.nextLine();
                                 System.out.println("Enter NRIC to confirm withdrawal: ");
                                 String confirm = Input.getStringInput(sc);
@@ -109,6 +109,7 @@ public class Applicant extends User implements Input {
                                 } else {
                                     System.out.println("Wrong NRIC, Withdrawal Unsuccessful.");
                                 }
+                                System.out.println("====================================================================================================================");
                             } else {
                                 System.out.println("Nothing to withdraw.");
                             }
@@ -124,23 +125,20 @@ public class Applicant extends User implements Input {
                         case CHANGE_PASSWORD:
                             System.out.println("                                            Change your password");
                             System.out.println("====================================================================================================================");
-                            // sc.nextLine();
                             System.out.print("Enter current password: ");
                             String oldpass = Input.getStringInput(sc);
                             System.out.print("Enter new password: ");
                             String new_pass1 = Input.getStringInput(sc);
                             System.out.print("Enter new password again to confirm: ");
                             String new_pass2 = Input.getStringInput(sc);
-                            
-                            if (verify_password(oldpass)!=true) {
+                            if (!verify_password(oldpass)) {
                                 System.out.println("Current password is wrong. Password change unsuccessful.");
-                            } else if (new_pass1.equals(new_pass2)!=true) {
+                            } else if (!new_pass1.equals(new_pass2)) {
                                 System.out.println("New passwords do not match.");
                             } else {
                                 change_password(new_pass2);
                                 System.out.println("Password changed successfully.");
                             }
-
                             break;
                         case EXIT:
                             System.out.println("Logged out. Returning to main menu...");
@@ -150,9 +148,12 @@ public class Applicant extends User implements Input {
                             System.out.println("Invalid choice. Please try again.");
                     }
                 }
+            } catch (Input.InputExitException e) {
+                System.out.println("User requested exit/back. Returning to previous menu.");
+                break;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
-                sc.nextLine(); 
+                sc.nextLine();
             }
         } while (choice != 9);
     }
@@ -168,7 +169,7 @@ public class Applicant extends User implements Input {
     }
 
     protected void manage_enquiry(Scanner sc) {
-        int choice=0;
+        int choice = 0;
         do {
             try {
                 System.out.println("====================================================================================================================");
@@ -176,7 +177,6 @@ public class Applicant extends User implements Input {
                 System.out.println("====================================================================================================================");
                 menu.printEnquiryMenu();
                 choice = Input.getIntInput(sc);
-                // scanner.nextLine();
                 System.out.println("====================================================================================================================");
                 if (choice >= 1 && choice <= EnquiryOption.values().length) {
                     EnquiryOption selectedOption = EnquiryOption.values()[choice - 1];
@@ -186,19 +186,17 @@ public class Applicant extends User implements Input {
                             String content = Input.getStringInput(sc);
                             makeEnquiry(content);
                             System.out.println("Enquiry sent!");
-                            // System.out.println("============================================");
                             break;
                         case PROJECT_RELATED:
                             view_listings();
                             System.out.println("Enter ID of project to enquire about: ");
                             int projectId = Input.getIntInput(sc);
                             Project p = BTOsystem.searchById(BTOsystem.projects, projectId, Project::getId);
-                            while (p==null) {
+                            while (p == null) {
                                 System.out.println("Invalid ID, try again: ");
                                 projectId = Input.getIntInput(sc);
-                                // scanner.nextLine();
                                 p = BTOsystem.projects.get(projectId);
-                            } 
+                            }
                             System.out.println("Enter flat type (2-Room, 3-Room, etc.): ");
                             String flatType = Input.getStringInput(sc).toUpperCase();
                             System.out.println("Enquiry: ");
@@ -211,15 +209,14 @@ public class Applicant extends User implements Input {
                             viewEditableEnquiry();
                             System.out.println("Enter ID of enquiry to edit: ");
                             int id = Input.getIntInput(sc);
-                            // cannot edit enquiries that have been replied to 
                             Enquiry result = enquiries.stream()
-                                .filter(en -> en.getId() == id)
-                                .findFirst()
-                                .orElse(null);
-                            if (result==null) {
+                                    .filter(en -> en.getId() == id)
+                                    .findFirst()
+                                    .orElse(null);
+                            if (result == null) {
                                 System.out.println("No such enquiry.");
                                 break;
-                            } else if (result.getStaff()!=null) {
+                            } else if (result.getStaff() != null) {
                                 System.out.println("Enquiry has already been replied to. Please make a new enquiry instead.");
                                 break;
                             }
@@ -235,11 +232,11 @@ public class Applicant extends User implements Input {
                             view_all_enquiry_for_user();
                             System.out.println("Select enquiry to view (-1 to cancel)");
                             int en_id = Input.getIntInput(sc);
-                            if (en_id==-1) {
+                            if (en_id == -1) {
                                 break;
                             }
                             Enquiry en = BTOsystem.searchById(enquiries, en_id, Enquiry::getId);
-                            if (en==null) {
+                            if (en == null) {
                                 System.err.println("Invalid ID");
                                 break;
                             }
@@ -250,12 +247,9 @@ public class Applicant extends User implements Input {
                             System.out.println("================================================================================================================");
                             view_all_enquiry_for_user();
                             System.out.print("Enter ID of enquiry to delete: ");
-                            // add confirmation before deleting
                             int del_id = Input.getIntInput(sc);
-                            // scanner.nextLine();
                             deleteEnquiry(del_id);
                             System.out.println("Enquiry deleted!");
-
                             break;
                         case RETURN:
                             System.out.println("Returning to applicant menu...");
@@ -264,19 +258,20 @@ public class Applicant extends User implements Input {
                             System.out.println("Invalid choice. Please try again.");
                     }
                 }
-            // sc.nextLine();
+            } catch (Input.InputExitException e) {
+                System.out.println("User requested exit/back in enquiry menu. Returning to applicant menu.");
+                break;
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a number.");
-                sc.nextLine(); 
+                sc.nextLine();
             }
         } while (choice != 6);
     }
 
-    // check eligibility of user to apply for flat
     protected boolean getEligibility(String flatType) {
-        if (get_maritalstatus().equalsIgnoreCase("SINGLE") && get_age()>=35 && flatType.equalsIgnoreCase("2-Room")) {
+        if (get_maritalstatus().equalsIgnoreCase("SINGLE") && get_age() >= 35 && flatType.equalsIgnoreCase("2-Room")) {
             return true;
-        } else if (get_maritalstatus().equalsIgnoreCase("MARRIED") && get_age()>=21) {
+        } else if (get_maritalstatus().equalsIgnoreCase("MARRIED") && get_age() >= 21) {
             return true;
         }
         return false;
@@ -286,33 +281,29 @@ public class Applicant extends User implements Input {
         System.out.println("\n===================================================================================================================");
         System.out.println("                                                  ALL PROJECTS");
         System.out.println("===================================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
         System.err.println("-------------------------------------------------------------------------------------------------------------------");
-        
+
         List<Project> list = BTOsystem.projects;
-        
         for (Project p : list) {
             if (p.isVisible()) {
-                // there are details we want to keep hidden from an applicant e.g. manager name, visibility, etc. so cannot just use toString()
                 System.out.print(viewProjectsApplicant(p));
-                
             }
         }
         System.err.println("-------------------------------------------------------------------------------------------------------------------");
     }
 
     protected int view_eligible_listings() {
-        // System.out.println("\n================================================================================================================");
         System.out.println("                                                  ELIGIBLE PROJECTS");
         System.out.println("====================================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID","Project Name", "Neighbourhood", "Flat Types", "Price","Open Date", "Close Date", "Eligibilty");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
         System.err.println("--------------------------------------------------------------------------------------------------------------------");
         List<Project> list = BTOsystem.projects;
         int count = 0;
         for (Project p : list) {
             if (p.isVisible()) {
                 String str = viewEligibleProjectsApplicant(p);
-                if (!str.isBlank()){
+                if (!str.isBlank()) {
                     count++;
                 }
                 System.out.print(str);
@@ -324,140 +315,124 @@ public class Applicant extends User implements Input {
 
     protected String viewEligibleProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
-        // get all the flat-types applicants are eligible for
-        List<String[]> eflatType = new ArrayList<>(); // max 10 flat-types per project
-
-        for (String ft:p.getFlatTypes()) {
+        List<String[]> eflatType = new ArrayList<>();
+        for (String ft : p.getFlatTypes()) {
             if (getEligibility(ft)) {
                 eflatType.add(new String[]{ft, String.valueOf(p.getFlatTypes().indexOf(ft))});
             }
         }
-        
         if (!eflatType.isEmpty()) {
             sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-                p.getId(),
-                p.getProjectName(),
-                p.getneighbourhood(),
-                (eflatType.size() > 0 && getEligibility(p.getFlatTypes().get(0))) ? 
-                    eflatType.get(0)[0] + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1])) - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(0)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1])) : "",
-                p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(0)[0]) : 0,
-                p.getOpenDate(), 
-                p.getCloseDate(), 
-                "Eligible"
+                    p.getId(),
+                    p.getProjectName(),
+                    p.getneighbourhood(),
+                    (eflatType.size() > 0 && getEligibility(p.getFlatTypes().get(0)))
+                            ? eflatType.get(0)[0] + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1]))
+                            - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(0)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(0)[1]))
+                            : "",
+                    p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(0)[0]) : 0,
+                    p.getOpenDate(),
+                    p.getCloseDate(),
+                    "Eligible"
             ));
         }
-
-        // additional lines for remaining flat types
         for (int i = 1; i < eflatType.size(); i++) {
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-            "", "", "",  // empty project name and neighbourhood
-            eflatType.get(i)[0] + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1])) - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(i)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1])),
-            p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(i)[0]) : 0,
-            "", "", "Eligible"));  // empty other fields  
+            sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+                    "", "", "",
+                    eflatType.get(i)[0] + ": " + (p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1]))
+                            - p.getAvailableUnits().get(Integer.parseInt(eflatType.get(i)[1]))) + "/" + p.getTotalUnits().get(Integer.parseInt(eflatType.get(i)[1])),
+                    p.getFlatTypes().size() > 0 ? p.getFlatPrice(eflatType.get(i)[0]) : 0,
+                    "", "", "Eligible"));
         }
-
-        // add blank line between projects
         sb.append("\n");
-
         return sb.toString();
     }
 
     protected String viewProjectsApplicant(Project p) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-            p.getId(),
-            p.getProjectName(),
-            p.getneighbourhood(),
-            (p.getFlatTypes().size() > 0) ? 
-                p.getFlatTypes().get(0) + ": " + (p.getTotalUnits().get(0) - p.getAvailableUnits().get(0)) + "/" + p.getTotalUnits().get(0) : "",
-            p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(0)) : 0,
-            p.getOpenDate(), 
-            p.getCloseDate(), 
-            getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible" 
+                p.getId(),
+                p.getProjectName(),
+                p.getneighbourhood(),
+                (p.getFlatTypes().size() > 0)
+                        ? p.getFlatTypes().get(0) + ": " + (p.getTotalUnits().get(0) - p.getAvailableUnits().get(0)) + "/" + p.getTotalUnits().get(0)
+                        : "",
+                p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(0)) : 0,
+                p.getOpenDate(),
+                p.getCloseDate(),
+                getEligibility(p.getFlatTypes().get(0)) ? "Eligible" : "Not Eligible"
         ));
-
-    // Additional lines for remaining flat types
-    for (int i = 1; i < p.getFlatTypes().size(); i++) {
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-            "", "", "",  // Empty project name and neighbourhood
-            p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
-            p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(i)) : 0,
-            "", "", getEligibility(p.getFlatTypes().get(i)) ? "Eligible" : "Not Eligible"));  // Empty other fields
-    }
-
-    // Add blank line between projects
-    sb.append("\n");
-
-    return sb.toString();
+        for (int i = 1; i < p.getFlatTypes().size(); i++) {
+            sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+                    "", "", "",
+                    p.getFlatTypes().get(i) + ": " + (p.getTotalUnits().get(i) - p.getAvailableUnits().get(i)) + "/" + p.getTotalUnits().get(i),
+                    p.getFlatTypes().size() > 0 ? p.getFlatPrice(p.getFlatTypes().get(i)) : 0,
+                    "", "", getEligibility(p.getFlatTypes().get(i)) ? "Eligible" : "Not Eligible"));
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     protected void makeEnquiry(String content) {
         Enquiry en = new Enquiry(this, content);
         enquiries.add(en);
-        BTOsystem.enquiries.add(en); // add enquiry to global enquiry list to be accessed by staff
+        BTOsystem.enquiries.add(en);
     }
-    //to be revised, enquiries tagged to a project
+
     protected void makeEnquiry(Project project, String content, String flatType) {
         Enquiry en = new Enquiry(this, content);
         en.setProject(project);
         en.setflatType(flatType);
         enquiries.add(en);
         BTOsystem.enquiries.add(en);
-        project.addEnquiry(en);  // Ensure enquiry is tied to the project
+        project.addEnquiry(en);
     }
-    
+
     protected void view_all_enquiry_for_user() {
-        System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n", 
-            "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
-            System.out.println("====================================================================================================================");
-    
-    for (Enquiry enquiry : enquiries) {
-        // User creator = enquiry.getCreatedByUser();
-        // String creatorName = creator.get_firstname() + " " + creator.get_lastname();
-        
-        System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
-                enquiry.getId(),
-                enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
-                truncateText(enquiry.getEnquiry(), 30),
-                truncateText(enquiry.getResponse(), 30),
-                enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
-                enquiry.getStaff()!=null? enquiry.getStaff().get_firstname():"");
-        
-        // If there's a flat type specified
-        if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
-            System.out.printf("%-5s %-20s %-30s%n", "","","Flat type: "+ enquiry.getflatType());
+        System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n",
+                "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
+        System.out.println("====================================================================================================================");
+        for (Enquiry enquiry : enquiries) {
+            System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
+                    enquiry.getId(),
+                    enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
+                    truncateText(enquiry.getEnquiry(), 30),
+                    truncateText(enquiry.getResponse(), 30),
+                    enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
+                    enquiry.getStaff() != null ? enquiry.getStaff().get_firstname() : "");
+            if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
+                System.out.printf("%-5s %-20s %-30s%n", "", "", "Flat type: " + enquiry.getflatType());
+            }
         }
     }
-    }
+
     protected void view_enquiry(Enquiry en) {
         en.display();
     }
+
     protected void viewEditableEnquiry() {
-        System.out.printf("%-5s %-20s %-30s %-15s%n", 
-            "ID", "Project", "Enquiry", "Status");
+        System.out.printf("%-5s %-20s %-30s %-15s%n",
+                "ID", "Project", "Enquiry", "Status");
         System.out.println("==================================================================================================================");
-    
-    for (Enquiry enquiry : enquiries) {
-        if (!(enquiry.getResponse().isBlank())) {
-            continue;
-        }
-        
-        System.out.printf("%-5d %-20s %-30s %-15s%n",
-                enquiry.getId(),
-                enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
-                truncateText(enquiry.getEnquiry(), 30),
-                "Pending");
-        
-        // If there's a flat type specified
-        if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
-            System.out.printf("%-5s %-20s %-30s%n", "","","Flat type: "+ enquiry.getflatType());
+        for (Enquiry enquiry : enquiries) {
+            if (!enquiry.getResponse().isBlank()) {
+                continue;
+            }
+            System.out.printf("%-5d %-20s %-30s %-15s%n",
+                    enquiry.getId(),
+                    enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry",
+                    truncateText(enquiry.getEnquiry(), 30),
+                    "Pending");
+            if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
+                System.out.printf("%-5s %-20s %-30s%n", "", "", "Flat type: " + enquiry.getflatType());
+            }
         }
     }
-    }
-    protected void editEnquiry(Enquiry en, String content) { // can only edit when no response from staff yett
+
+    protected void editEnquiry(Enquiry en, String content) {
         en.setEnquiry(content);
     }
-    
+
     protected void deleteEnquiry(int id) {
         Enquiry toRemove = null;
         for (Enquiry en : enquiries) {
@@ -475,12 +450,4 @@ public class Applicant extends User implements Input {
             System.out.println("No enquiry found with ID: " + id);
         }
     }
-    
 }
-
-// for filtering enquiries/projects/application
-// List<Enquiry> matching = enquiries.stream()
-//     .filter(en -> en.getStatus().equals("Pending"))
-//     .collect(Collectors.toList());
-
-// System.out.println("Matching Enquiries: " + matching);

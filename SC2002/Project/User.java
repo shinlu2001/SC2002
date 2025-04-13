@@ -4,6 +4,12 @@ import java.util.*;
 import java.time.LocalDate;
 // import java.util.ArrayList;
 // import java.util.List;
+/**
+ * IMPORTANT: All subclasses must use the standardized input methods defined in Input.java:
+ *   - Input.getStringInput(Scanner sc)
+ *   - Input.getIntInput(Scanner sc)
+ * instead of calling Scanner's nextLine(), nextInt(), etc., directly.
+ */
 
 public abstract class User {
     private String nric;
