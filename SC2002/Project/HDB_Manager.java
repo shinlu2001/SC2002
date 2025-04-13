@@ -39,15 +39,17 @@ public class HDB_Manager extends User implements Input {
                 System.out.println("============================================");
                 System.out.println("         M A N A G E R   M E N U");
                 System.out.println("============================================");
+                // Print manager menu from the Menu class
                 menu.printManagerMenu();
-                
+
+                // Get menu choice with proper exit handling.
                 choice = Input.getIntInput(sc);
-                
+
                 switch (choice) {
                     case 1:     // Create a new project via keyboard input
                         createProject(sc);
                         break;
-    
+
                     case 2:     // Edit a Project
                         System.out.print("Enter the ID of the project you wish to edit: ");
                         Project projectToEdit = findAndValidateProject(sc);
@@ -55,31 +57,32 @@ public class HDB_Manager extends User implements Input {
                             editProject(projectToEdit, sc);
                         }
                         break;
-                        
+
                     case 3: // Delete a Project
                         System.out.print("Enter the ID of the project you wish to delete: ");
                         Project projectToDelete = findAndValidateProject(sc);
                         if (projectToDelete != null) {
                             deleteProject(projectToDelete);
-                        }                           
+                        }
                         break;
-    
+
                     case 4:     // View all projects
                         viewAllProjects();
                         break;
-                        
+
                     case 5:     // View own projects
                         viewOwnProjects();
                         break;
-                        
+
                     case 6:     // View officer registration
                         viewOfficerRegistration();
                         break;
-                        
+
                     case 7:     // Handle Officer Registration
                         System.out.print("Enter the Project ID to manage officer registrations: ");
                         Project projectForOfficer = findAndValidateProject(sc);
-                        if (projectForOfficer == null) break;
+                        if (projectForOfficer == null)
+                            break;
                         List<HDB_Officer> pendingOfficers = new ArrayList<>();
                         for (HDB_Officer o : BTOsystem.officers) {
                             if (o.officerProject != null &&
@@ -95,7 +98,7 @@ public class HDB_Manager extends User implements Input {
                         System.out.println("Pending officer registrations:");
                         for (int i = 0; i < pendingOfficers.size(); i++) {
                             System.out.println("[" + i + "] Officer ID: " + pendingOfficers.get(i).getOfficerId() +
-                                               ", Name: " + pendingOfficers.get(i).get_firstname());
+                                    ", Name: " + pendingOfficers.get(i).get_firstname());
                         }
                         System.out.print("Enter index of officer to review: ");
                         int idx = Input.getIntInput(sc);
@@ -106,15 +109,16 @@ public class HDB_Manager extends User implements Input {
                         HDB_Officer officerToHandle = pendingOfficers.get(idx);
                         handleOfficerRegistration(projectForOfficer, officerToHandle);
                         break;
-                        
+
                     case 8:     // Handle officer withdrawal requests
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForWithdrawal_o = findAndValidateProject(sc);
-                        if(projectForWithdrawal_o == null) break;
+                        if (projectForWithdrawal_o == null) break;
 
                         System.out.print("Enter Officer's ID: ");
                         int withdrawalOfficerId = Input.getIntInput(sc);
                         HDB_Officer officer_withdrawal = null;
+                        // Find the officer by ID
                         for (HDB_Officer o : BTOsystem.officers) {
                             if (o.getOfficerId() == withdrawalOfficerId) {
                                 officer_withdrawal = o;
@@ -127,11 +131,11 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("Error: Officer not found.");
                         }
                         break;
-    
+
                     case 9:     // Handle BTO application (approve/reject)
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForBTO = findAndValidateProject(sc);
-                        if(projectForBTO == null) break;
+                        if (projectForBTO == null) break;
                         System.out.print("Enter Applicant's ID: ");
                         int applicationId = Input.getIntInput(sc);
                         String flatType = null;
@@ -153,12 +157,12 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("Error: Application not found.");
                         }
                         break;
-                        
+
                     case 10:    // Handle application withdrawal requests
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForWithdrawal_a = findAndValidateProject(sc);
-                        if(projectForWithdrawal_a == null) break;
-                        System.out.print("Enter application ID: "); 
+                        if (projectForWithdrawal_a == null) break;
+                        System.out.print("Enter application ID: ");
                         int withdrawalApplicationId = Input.getIntInput(sc);
                         BTOapplication withdrawalApplication = null;
                         for (BTOapplication app : BTOsystem.applications) {
@@ -173,47 +177,52 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("Error: Application not found.");
                         }
                         break;
-                        
+
                     case 11:    // Generate applicant report
                         generateReport(sc);
                         break;
-                        
+
                     case 12:    // View all enquiries
                         viewAllEnquiries(sc);
                         break;
-                        
+
                     case 13:    // Handle project enquiries
                         handleProjectEnquiries(sc);
                         break;
-                        
+
                     case 14:    // View manager account details
                         System.out.println("---------------------------------------------------");
                         to_string();
                         System.out.println("---------------------------------------------------");
                         break;
-                        
+
                     case 15:    // Log out
                         System.out.println("---------------------------------------------------");
                         System.out.println("Logged out. Returning to main menu...");
                         System.out.println("---------------------------------------------------");
                         loop = false;
                         break;
-                        
+
                     default:
                         System.out.println("---------------------------------------------------");
                         System.out.println("Error: Invalid choice. Please try again.");
                         System.out.println("---------------------------------------------------");
+                        break;
                 }
+            } catch (Input.InputExitException e) {
+                // This catch will capture exit/back commands thrown from any inner input
+                System.out.println("Operation cancelled by user. Returning to Manager Menu.");
+                // Continue the outer manager menu loop.
             } catch (InputMismatchException e) {
                 System.out.println("---------------------------------------------------");
-                System.out.println("Error: Invalid input. Please try again.");
+                System.out.println("Error: Invalid input. Please enter a number.");
                 System.out.println("---------------------------------------------------");
                 sc.nextLine();  // Consume leftover newline
             }
-        }
+        } // end of while(loop)
     }
 
-    // Find and validate project by ID ensuring that the manager is responsible for it.
+    // Find and validate project by ID ensuring the manager is responsible for it.
     private Project findAndValidateProject(Scanner sc) {
         int projectID = Input.getIntInput(sc);
         Project project = null;
@@ -236,12 +245,13 @@ public class HDB_Manager extends User implements Input {
         return project;
     }
 
-    // Display current flat types for a project
+    // Display current flat types for a project.
     public void FlatTypesMenu(Project p) {
         System.out.println("\n============================================");
         System.out.println("            CURRENT FLAT TYPES");
         System.out.println("============================================");
-        System.out.printf("%-5s %-12s %-13s %-15s %-10s%n", "No.", "Flat Type", "Prices", "Total Units", "Available");
+        System.out.printf("%-5s %-12s %-13s %-15s %-10s%n", 
+                "No.", "Flat Type", "Prices", "Total Units", "Available");
         System.out.println("-----------------------------------------------------------");
         for (int i = 0; i < p.getFlatTypes().size(); i++) {
             System.out.printf("%-5s %-12s %-13s %-15s %-10s%n",
@@ -253,7 +263,7 @@ public class HDB_Manager extends User implements Input {
         }
     }
 
-    // Create a new project
+    // Create a new project.
     public Project createProject(Scanner sc) {
         System.out.println("\n============================================");
         System.out.println("            CREATING A PROJECT");
@@ -275,7 +285,9 @@ public class HDB_Manager extends User implements Input {
                 try {
                     System.out.print("Enter number of " + flatType + " units (none = 0): ");
                     units = Input.getIntInput(sc);
-                    if (units >= 0) break;
+                    if (units >= 0) {
+                        break;
+                    }
                     System.out.println("Error: Number of units cannot be negative.");
                 } catch (InputMismatchException e) {
                     System.out.println("Error: Please enter a valid number.");
@@ -287,7 +299,9 @@ public class HDB_Manager extends User implements Input {
                 try {
                     System.out.print("Enter price of flat: ");
                     price = Input.getIntInput(sc);
-                    if (price >= 0) break;
+                    if (price >= 0) {
+                        break;
+                    }
                     System.out.println("Error: Price cannot be negative.");
                 } catch (InputMismatchException e) {
                     System.out.println("Error: Please enter a valid number.");
@@ -295,7 +309,7 @@ public class HDB_Manager extends User implements Input {
             }
             flatTypes.add(flatType);
             totalUnits.add(units);
-            availableUnits.add(units); // Initially available equals total
+            availableUnits.add(units); // Initially, available units equal total units.
             while (true) {
                 try {
                     System.out.print("Add another flat type? (yes/no): ");
@@ -315,7 +329,8 @@ public class HDB_Manager extends User implements Input {
                 }
             }
         }
-        // Open date input with exit handling
+
+        // Get the application opening date.
         LocalDate openDate = null;
         while (true) {
             try {
@@ -330,7 +345,7 @@ public class HDB_Manager extends User implements Input {
                 break;
             }
         }
-        // Close date input
+        // Get the application closing date.
         LocalDate closeDate;
         while (true) {
             try {
@@ -361,7 +376,7 @@ public class HDB_Manager extends User implements Input {
                 sc.nextLine();
             }
         }
-        // Check for project overlap with manager's existing projects
+        // Check if the manager already has a project within the same application period.
         for (Project existingProject : managerProjects) {
             LocalDate existingOpen = existingProject.getOpenDate();
             LocalDate existingClose = existingProject.getCloseDate();
@@ -370,7 +385,7 @@ public class HDB_Manager extends User implements Input {
                 return null;
             }
         }
-        // Create and register the new project
+        // Create the project.
         Project project = new Project(projectName, neighbourhood, flatTypes, totalUnits,
                 openDate, closeDate, false, totalOfficerSlots);
         project.setManager(this);
@@ -387,10 +402,10 @@ public class HDB_Manager extends User implements Input {
         System.out.println("============================================");
         if (!managerProjects.isEmpty()) {
             System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", 
-                "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
+                    "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
             System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
             for (Project p : managerProjects) {
-                if (p.getManager() == this) { // Verify that the manager is in charge
+                if (p.getManager() == this) {
                     System.out.println(p);
                 }
             }
@@ -405,7 +420,7 @@ public class HDB_Manager extends User implements Input {
         System.out.println("============================================");
         if (!BTOsystem.projects.isEmpty()) {
             System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n", 
-                "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
+                    "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots");
             System.err.println("------------------------------------------------------------------------------------------------------------------------------------------------");
             for (Project p : BTOsystem.projects) {
                 System.out.println(p);
@@ -415,9 +430,10 @@ public class HDB_Manager extends User implements Input {
         }
     }
 
-    // Edit project attributes with proper try/catch handling for exit/back commands.
+    // Edit project attributes with proper try/catch handling so that exit/back aborts the current operation only.
     public void editProject(Project project, Scanner sc) {
         int option = 0;
+        // Find the project in the global list
         for (Project p : BTOsystem.projects) {
             if (p.equals(project)) {
                 boolean loop = true;
@@ -450,7 +466,7 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("Operation cancelled. Returning to editing menu.");
                             continue;
                         }
-    
+                        
                         switch (option) {
                             case 1:
                                 System.out.print("Enter new Project Name: ");
@@ -582,16 +598,16 @@ public class HDB_Manager extends User implements Input {
                                 }
                                 break;
     
-                                case 6:
+                            case 6:
                                 FlatTypesMenu(p);
-                                currentType = null;  // Declare currentType variable
+                                String currentTypeForPrice = null;  // Declare new variable for price editing
                                 while (true) {
                                     try {
                                         System.out.print("\nSelect flat type to edit price (No. 1-" + p.getFlatTypes().size() + "): ");
                                         flatChoice = Input.getIntInput(sc);
                                         if (flatChoice > 0 && flatChoice <= p.getFlatTypes().size()) {
                                             index = flatChoice - 1;
-                                            currentType = p.getFlatTypes().get(index);
+                                            currentTypeForPrice = p.getFlatTypes().get(index);
                                             break;
                                         }
                                         System.out.println("Error: Please enter a number between 1 and " + p.getFlatTypes().size());
@@ -603,17 +619,17 @@ public class HDB_Manager extends User implements Input {
                                         break;
                                     }
                                 }
-                                // If the operation was cancelled, currentType might be null. Check before proceeding.
-                                if (currentType == null) {
+                                // Check if the operation was cancelled.
+                                if (currentTypeForPrice == null) {
                                     break;
                                 }
                                 double newPrice;
                                 while (true) {
                                     try {
-                                        System.out.print("Enter new price for " + currentType + ": ");
+                                        System.out.print("Enter new price for " + currentTypeForPrice + ": ");
                                         newPrice = Input.getIntInput(sc);
                                         if (newPrice >= 0) {
-                                            System.out.println(currentType + " updated successfully.");
+                                            System.out.println(currentTypeForPrice + " updated successfully.");
                                             break;
                                         }
                                         System.out.println("Error: Price cannot be negative.");
@@ -625,7 +641,7 @@ public class HDB_Manager extends User implements Input {
                                         break;
                                     }
                                 }
-                                break;                            
+                                break;
     
                             case 7:
                                 LocalDate openDate;
@@ -697,7 +713,7 @@ public class HDB_Manager extends User implements Input {
                             case 11:
                                 System.out.println("---------------------------------------------------");
                                 System.out.println("Exiting editing mode...");
-                                loop = false;
+                                loop = false;  // Exit editing mode
                                 break;
     
                             default:
@@ -715,7 +731,7 @@ public class HDB_Manager extends User implements Input {
     public void deleteProject(Project project) {
         managerProjects.remove(project);
         BTOsystem.projects.remove(project);
-    
+
         // Unregister any officers assigned to the project
         List<HDB_Officer> officerList = BTOsystem.officers;
         List<HDB_Officer> officersToRemove = new ArrayList<>();
@@ -730,7 +746,7 @@ public class HDB_Manager extends User implements Input {
         System.out.println("---------------------------------------------------");
         System.out.println("Successfully deleted.");
     }
-    
+
     // Approve or reject an officer's registration.
     public void handleOfficerRegistration(Project project, HDB_Officer officer) {
         if (!project.equals(officer.officerProject)) {
@@ -761,7 +777,7 @@ public class HDB_Manager extends User implements Input {
                     ". Officer's registration rejected.");
         }
     }
-    
+
     // View officer registrations under the manager.
     public void viewOfficerRegistration() {
         System.out.println("\n============================================================");
@@ -780,8 +796,8 @@ public class HDB_Manager extends User implements Input {
             for (HDB_Officer officer : BTOsystem.officers) {
                 Project assignedProject = officer.officerProject;
                 if (assignedProject != null && assignedProject.getManager() == this) {
-                    System.out.printf("%-10s %-20s %-15s %-20s%n", 
-                            officer.getOfficerId(), 
+                    System.out.printf("%-10s %-20s %-15s %-20s%n",
+                            officer.getOfficerId(),
                             officer.get_firstname() + " " + officer.get_lastname(),
                             officer.registrationStatus,
                             assignedProject.getId());
@@ -791,7 +807,7 @@ public class HDB_Manager extends User implements Input {
             System.out.println("No officers available.");
         }
     }
-    
+
     public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Invalid flat type '" + flatType + "'. Available types: " + project.getFlatTypes());
@@ -813,10 +829,12 @@ public class HDB_Manager extends User implements Input {
             System.out.println("Error: Withdrawal was not requested.");
             return;
         }
+    
         if (application.getStatus().equals("WITHDRAWN")) {
             System.out.println("Application has already been withdrawn.");
             return;
         }
+    
         while (true) {
             System.out.println("Do you want to approve the withdrawal request? (yes/no): ");
             String input = Input.getStringInput(sc).toLowerCase();
@@ -826,6 +844,8 @@ public class HDB_Manager extends User implements Input {
                     int currentAvailable = project.getAvailableUnits().get(index);
                     project.updateAvailableUnits(application.getFlatType(), currentAvailable + 1);
                     application.setStatus("WITHDRAWN");
+                    // Clear the applicant's active application so they can apply again
+                    application.getApplicant().application = null;
                     System.out.println("Withdrawal request approved.");
                 } else {
                     System.out.println("Withdrawal request rejected.");
@@ -836,7 +856,7 @@ public class HDB_Manager extends User implements Input {
             }
         }
     }
-    
+
     public void handleWithdrawalRequest_officer(Project project, HDB_Officer officer, Scanner sc) {
         if (!officer.getwithdrawalRequested()) {
             System.out.println("Error: Withdrawal was not requested.");
@@ -852,6 +872,7 @@ public class HDB_Manager extends User implements Input {
             if (input.equals("yes") || input.equals("no")) {
                 if (input.equals("yes")) {
                     officer.registrationStatus = "WITHDRAWN";
+                    officer.officerProject = null; // Clear the assignment so the officer can apply again
                     System.out.println("Withdrawal request approved.");
                 } else {
                     System.out.println("Withdrawal request rejected.");
@@ -862,7 +883,7 @@ public class HDB_Manager extends User implements Input {
             }
         }
     }
-    
+
     public void generateReport(Scanner sc) {
         List<BTOapplication> applicationList = BTOsystem.applications;
         if (applicationList.isEmpty()) {
@@ -874,8 +895,8 @@ public class HDB_Manager extends User implements Input {
         for (BTOapplication application : applicationList) {
             Project assignedProject = application.getProject();
             if (assignedProject != null && assignedProject.getManager() == this) {
-                System.out.printf("%-10s %-20s %-15s %-20s%n", 
-                        application.getId(), 
+                System.out.printf("%-10s %-20s %-15s %-20s%n",
+                        application.getId(),
                         application.getApplicant().get_firstname() + " " + application.getApplicant().get_lastname(),
                         application.getStatus(),
                         assignedProject.getId());
@@ -931,7 +952,7 @@ public class HDB_Manager extends User implements Input {
                 System.out.println("Invalid choice. Please try again.");
         }
     }
-    
+
     private void printApplicationList(List<BTOapplication> apps) {
         if (apps.isEmpty()) {
             System.out.println("No matching applications found.");
@@ -948,7 +969,7 @@ public class HDB_Manager extends User implements Input {
             System.out.printf("%-20s %-5d %-15s %-10s %-15s%n", fullName, age, marital, flat, project);
         }
     }
-    
+
     public void reply_enquiry(Enquiry enquiry, String response) {
         if (enquiry == null) {
             System.out.println("Error: Enquiry not found.");
@@ -962,7 +983,7 @@ public class HDB_Manager extends User implements Input {
         enquiry.setStaffReply(this);
         System.out.println("Successfully replied to enquiry ID: " + enquiry.getId());
     }
-    
+
     public void viewAllEnquiries(Scanner sc) {
         System.out.println("\n============================================");
         System.out.println("              ALL ENQUIRIES");
@@ -1031,12 +1052,13 @@ public class HDB_Manager extends User implements Input {
             if (!enquiry.getResponse().isEmpty()) {
                 System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
                 if (enquiry.getStaff() != null) {
-                    System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " + enquiry.getStaff().get_lastname());
+                    System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " +
+                            enquiry.getStaff().get_lastname());
                 }
             }
         }
     }
-    
+
     public void handleProjectEnquiries(Scanner sc) {
         System.out.println("\n============================================");
         System.out.println("            HANDLE ENQUIRIES");
@@ -1060,7 +1082,7 @@ public class HDB_Manager extends User implements Input {
             System.out.println("Invalid choice. Returning to main menu.");
         }
     }
-    
+
     private void handleProjectSpecificEnquiries(Scanner sc) {
         List<Project> projectsWithEnquiries = new ArrayList<>();
         for (Project p : managerProjects) {
@@ -1099,7 +1121,7 @@ public class HDB_Manager extends User implements Input {
         Project selectedProject = projectsWithEnquiries.get(projChoice);
         System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
         for (Enquiry e : selectedProject.getEnquiries()) {
-            System.out.printf("ID: %d, Question: %s%s%n", e.getId(), truncateText(e.getEnquiry(), 30), 
+            System.out.printf("ID: %d, Question: %s%s%n", e.getId(), truncateText(e.getEnquiry(), 30),
                     (e.getStaff() != null ? " (Replied)" : ""));
         }
         int enquiryChoice;
@@ -1126,7 +1148,7 @@ public class HDB_Manager extends User implements Input {
         reply_enquiry(selected, reply);
         System.out.println("Reply submitted successfully.");
     }
-    
+
     private void handleGeneralEnquiries(Scanner sc) {
         List<Enquiry> generalEnquiries = new ArrayList<>();
         for (Enquiry e : BTOsystem.enquiries) {
@@ -1142,7 +1164,7 @@ public class HDB_Manager extends User implements Input {
         for (int i = 0; i < generalEnquiries.size(); i++) {
             Enquiry e = generalEnquiries.get(i);
             User creator = e.getCreatedByUser();
-            System.out.println((i + 1) + ". From: " + creator.get_firstname() + " " + 
+            System.out.println((i + 1) + ". From: " + creator.get_firstname() + " " +
                     creator.get_lastname() + " | ID: " + e.getId());
             System.out.println("   Enquiry: " + e.getEnquiry());
         }
@@ -1159,11 +1181,11 @@ public class HDB_Manager extends User implements Input {
             System.out.println("Operation cancelled.");
             return;
         }
-        if (enquiryChoice < 0 || enquiryChoice >= generalEnquiries.size()) {
+        if (enquiryChoice < 0 || enquiryChoice > generalEnquiries.size()) {
             System.out.println("Invalid enquiry selection.");
             return;
         }
-        Enquiry selectedEnquiry = generalEnquiries.get(enquiryChoice);
+        Enquiry selectedEnquiry = generalEnquiries.get(enquiryChoice - 1); // Adjusting for numbering
         System.out.println("Selected enquiry: " + selectedEnquiry.getEnquiry());
         System.out.print("Enter your reply: ");
         String reply = Input.getStringInput(sc);
