@@ -9,20 +9,74 @@ public class HDB_Officer extends Applicant {
     private String type = "OFFICER";
     protected static int nextId = -1;
     private int officer_id;
-    protected String registrationStatus;
-    protected Project officerProject;
     private boolean withdrawalRequested;
-
+    
+    // New list to hold multiple officer registrations.
+    private List<OfficerRegistration> officerRegistrations = new ArrayList<>();
+    
+    // Inner class to encapsulate each registration.
+    public static class OfficerRegistration {
+        private Project project;
+        private String status; // e.g., "PENDING", "APPROVED"
+        
+        public OfficerRegistration(Project project, String status) {
+            this.project = project;
+            this.status = status;
+        }
+        
+        public Project getProject() {
+            return project;
+        }
+        
+        public String getStatus() {
+            return status;
+        }
+        
+        public void setStatus(String status) {
+            this.status = status;
+        }
+    }
+    
     public HDB_Officer(String nric, String firstname, String lastname, String marital_status, int age) {
         super(nric, firstname, lastname, marital_status, age);
-        this.registrationStatus = "UNREGISTERED"; // Default status
         officer_id = ++nextId;
     }
-
+    
     public int getOfficerId() {
         return officer_id;
     }
-
+    
+    // Getter for the list of officer registrations.
+    public List<OfficerRegistration> getOfficerRegistrations() {
+        return officerRegistrations;
+    }
+    
+    // Helper method to retrieve the registration for a given project.
+    public OfficerRegistration getRegistrationForProject(Project project) {
+        for (OfficerRegistration reg : officerRegistrations) {
+            if (reg.getProject().equals(project)) {
+                return reg;
+            }
+        }
+        return null;
+    }
+    
+    // Convenience method: returns true if officer is already registered for the given project.
+    public boolean isRegisteredForProject(Project project) {
+        return getRegistrationForProject(project) != null;
+    }
+    
+    // Returns true if the officer has an active application as an applicant.
+    public boolean hasAppliedAsApplicant() {
+        // Using similar logic as in your Applicant class.
+        if (this.application != null &&
+            !this.application.getStatus().equalsIgnoreCase("WITHDRAWN") &&
+            !this.application.getStatus().toUpperCase().contains("REJECTED")) {
+            return true;
+        }
+        return false;
+    }
+    
     @Override
     protected int view_eligible_listings() {
         System.out.println("\n================================================================================================================");
@@ -34,8 +88,8 @@ public class HDB_Officer extends Applicant {
         List<Project> list = BTOsystem.projects;
         int count = 0;
         for (Project p : list) {
-            // Exclude project if officer is already assigned to it.
-            if (p.isVisible() && (officerProject == null || !p.equals(officerProject))) {
+            // Exclude project if officer is already registered for it.
+            if (p.isVisible() && !isRegisteredForProject(p)) {
                 String str = viewEligibleProjectsApplicant(p);
                 if (!str.isBlank()) {
                     count++;
@@ -46,21 +100,21 @@ public class HDB_Officer extends Applicant {
         System.err.println("----------------------------------------------------------------------------------------------------------------");
         return count;
     }
-
+    
     @Override
     public void start_menu(Scanner scanner) {
         int choice = 0;
         do {
             try {
                 System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");
-                    System.out.println("====================================================================================================================");
-                    System.out.println("                                           O F F I C E R   M E N U");
-                    System.out.println("====================================================================================================================");
+                System.out.println("====================================================================================================================");
+                System.out.println("                                           O F F I C E R   M E N U");
+                System.out.println("====================================================================================================================");
                 menu.printOfficerMenu(); // Officer menu with 15 options.
                 choice = Input.getIntInput(scanner);
                 System.out.println("--------------------------------");
                 switch (choice) {
-                    case 1: // Apply for a project
+                    case 1: // Apply for a project (as an applicant)
                         try {
                             if (application != null) {
                                 System.out.println("You already have an active application. You may not create a new one.");
@@ -77,8 +131,8 @@ public class HDB_Officer extends Applicant {
                                 if (p == null || !p.isVisible()) {
                                     System.out.println("No such project.");
                                 } else {
-                                    if (officerProject != null && officerProject.equals(p)) {
-                                        System.out.println("You are already assigned as an officer for this project and cannot apply as an applicant.");
+                                    if (isRegisteredForProject(p)) {
+                                        System.out.println("You are already registered as an officer for this project and cannot apply as an applicant.");
                                         break;
                                     }
                                     System.out.println("Enter room type (2-Room, 3-Room, etc): ");
@@ -202,31 +256,44 @@ public class HDB_Officer extends Applicant {
                                 System.out.println("You are already assigned or pending another project overlapping these dates!");
                                 break;
                             }
-                            // Directly call registerForProject(target). The method itself checks if you have applied for that project.
+                            // Register using our new multi-registration method.
                             registerForProject(target);
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
-                        break;                    
+                        break;
                     case 11: // Check status of registration to be an officer
                         try {
-                            System.out.println("Your Officer Registration Status: " + registrationStatus);
-                            if (officerProject != null) {
-                                System.out.println("Assigned Project: " + officerProject.getProjectName());
+                            System.out.println("Your Officer Registration Statuses:");
+                            if (officerRegistrations.isEmpty()) {
+                                System.out.println("No registrations found.");
                             } else {
-                                System.out.println("No assigned project currently.");
+                                for (OfficerRegistration reg : officerRegistrations) {
+                                    System.out.println("Project: " + reg.getProject().getProjectName() + " | Status: " + reg.getStatus());
+                                }
                             }
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
                         break;
-                        case 12: // View project details
+                    case 12: // View project details
                         try {
-                            if (officerProject != null) {
-                                System.out.println(officerProject.toString());
+                            if (!officerRegistrations.isEmpty()) {
+                                // If there is at least one registration, let the officer choose which project to view.
+                                System.out.println("Your Registered Projects:");
+                                for (int i = 0; i < officerRegistrations.size(); i++) {
+                                    System.out.println("[" + i + "] " + officerRegistrations.get(i).getProject().getProjectName());
+                                }
+                                System.out.print("Enter index or -1 to cancel: ");
+                                int idx = Input.getIntInput(scanner);
+                                if (idx >= 0 && idx < officerRegistrations.size()) {
+                                    System.out.println(officerRegistrations.get(idx).getProject().toString());
+                                } else {
+                                    System.out.println("Operation cancelled or invalid index.");
+                                }
                             } else {
-                                System.out.println("You have no assigned project. You may view any visible projects:");
-                                List<Project> allProjects = BTOsystem.projects;  // Declare local variable
+                                System.out.println("You have no registered projects. You may view any visible projects:");
+                                List<Project> allProjects = BTOsystem.projects;
                                 for (int i = 0; i < allProjects.size(); i++) {
                                     Project p = allProjects.get(i);
                                     if (p.isVisible()) {
@@ -238,7 +305,7 @@ public class HDB_Officer extends Applicant {
                                 if (idx >= 0 && idx < allProjects.size() && allProjects.get(idx).isVisible()) {
                                     System.out.println(allProjects.get(idx));
                                 } else {
-                                    System.out.println("No such project or canceled.");
+                                    System.out.println("No such project or cancelled.");
                                 }
                             }
                         } catch (Input.InputExitException e) {
@@ -288,35 +355,38 @@ public class HDB_Officer extends Applicant {
         System.out.println("Account type: " + type);
         System.out.println("Officer ID: " + officer_id);
     }
-
+    
     // Public reply method.
     public void reply_enquiry(Enquiry enquiry, String response) {
         enquiry.setStaffReply(this);
         enquiry.setResponse(response);
     }
-
+    
     private void manage_own_enquiry(Scanner sc) {
         super.manage_enquiry(sc); // Use Applicant’s enquiry management for own enquiries.
     }
-
+    
     private void manage_other_enquiry(Scanner scanner) {
         List<Enquiry> filteredEnquiries = new ArrayList<>();
-        if (officerProject == null) { // If not assigned, show general enquiries.
+        if (officerRegistrations.isEmpty()) { // If not registered to any project, show general enquiries.
             if (BTOsystem.enquiries.size() != 0) {
                 for (Enquiry e : BTOsystem.enquiries) {
                     if (e.getProject() == null && !e.getCreatedByUser().equals(this)) {
                         filteredEnquiries.add(e);
                     }
                 }
-                System.out.println("You are not assigned to any project. Showing general (non-project) enquiries only:");
+                System.out.println("You are not registered to any project. Showing general (non-project) enquiries only:");
             }
         } else {
-            for (Enquiry en : officerProject.getEnquiries()) {
-                if (!en.getCreatedByUser().equals(this)) {
-                    filteredEnquiries.add(en);
+            // If registered, display enquiries from all the officer's projects.
+            for (OfficerRegistration reg : officerRegistrations) {
+                for (Enquiry en : reg.getProject().getEnquiries()) {
+                    if (!en.getCreatedByUser().equals(this)) {
+                        filteredEnquiries.add(en);
+                    }
                 }
             }
-            System.out.println("Enquiries for project " + officerProject.getProjectName() + ":");
+            System.out.println("Enquiries for your registered projects:");
         }
         if (filteredEnquiries.isEmpty()) {
             System.out.println("No enquiries available.");
@@ -343,80 +413,60 @@ public class HDB_Officer extends Applicant {
         reply_enquiry(selected, reply);
         System.out.println("Reply submitted successfully.");
     }
-
+    
+    // Updated registerForProject method using the new multi-registration approach.
     public void registerForProject(Project project) {
-        // Check if the user has applied for this particular project.
-        if (application != null && application.getProject() != null &&
-                application.getProject().equals(project)) {
-            System.out.println("You cannot register as an officer for a project you have applied for as an Applicant.");
-            return;
-        }
         if (project == null) {
             System.out.println("Project does not exist. Registration unsuccessful.");
             return;
         }
-        if (officerProject != null && officerProject.equals(project)) {
+        if (getRegistrationForProject(project) != null) {
             System.out.println("You are already registered as an officer for this project.");
             return;
         }
-        if (officerProject != null && isApplicationPeriodOverlapping(project)) {
+        if (isApplicationPeriodOverlapping(project)) {
             System.out.println("You are already assigned or pending another project that overlaps in application period.");
             return;
         }
-        if (registrationStatus.equals("UNREGISTERED")) {
-            officerProject = project;
-            registrationStatus = "PENDING";
-            if (!BTOsystem.officers.contains(this)) {
-                BTOsystem.officers.add(this);
+        // NEW CHECK: Prevent officer registration if the officer has applied as an applicant for the same project.
+        if (hasAppliedAsApplicant() && application.getProject().equals(project)) {
+            System.out.println("You cannot register as an officer for a project that you have applied for as an applicant.");
+            return;
+        }
+        // Add a new registration with status "PENDING"
+        officerRegistrations.add(new OfficerRegistration(project, "PENDING"));
+        if (!BTOsystem.officers.contains(this)) {
+            BTOsystem.officers.add(this);
+        }
+        System.out.println("Registration for " + project.getProjectName() + " submitted. Awaiting manager approval.");
+    }
+    
+    // Check all current registrations for overlapping dates.
+    public boolean isApplicationPeriodOverlapping(Project project) {
+        for (OfficerRegistration reg : officerRegistrations) {
+            Project existingProject = reg.getProject();
+            if (!(project.getCloseDate().isBefore(existingProject.getOpenDate()) ||
+                  project.getOpenDate().isAfter(existingProject.getCloseDate()))) {
+                return true;
             }
-            System.out.println("Registration for " + project.getProjectName() + " submitted. Awaiting manager approval.");
-        } else {
-            switch (registrationStatus) {
-                case "APPROVED":
-                    System.out.println("You are already registered for a project.");
-                    break;
-                case "PENDING":
-                    System.out.println("Your registration is already pending approval.");
-                    break;
-                default:
-                    System.out.println("Unexpected registration status: " + registrationStatus);
-                    break;
+        }
+        return false;
+    }
+    
+    // Force register and approve a project.
+    public void forceRegisterAndApprove(Project project) {
+        for (OfficerRegistration reg : officerRegistrations) {
+            if (reg.getProject().equals(project) && reg.getStatus().equals("PENDING")) {
+                reg.setStatus("APPROVED");
+                project.addOfficer(this); // This may update fields in the project if needed.
+                System.out.println("Officer registration for " + project.getProjectName() + " is now approved.");
+                break;
             }
         }
     }
     
-
-    public boolean isApplicationPeriodOverlapping(Project project) {
-        if (officerProject == null) {
-            return false;
-        }
-        if (project.getCloseDate().isBefore(officerProject.getOpenDate()) ||
-                project.getOpenDate().isAfter(officerProject.getCloseDate())) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean hasAppliedAsApplicant() {
-        if (this.application != null &&
-                !this.application.getStatus().equals("WITHDRAWN") &&
-                !this.application.getStatus().contains("REJECTED")) {
-            return true;
-        }
-        return false;
-    }
-
-    public void forceRegisterAndApprove(Project project) {
-        if (registrationStatus.equals("UNREGISTERED")) {
-            registrationStatus = "APPROVED";
-            project.addOfficer(this);
-        }
-    }
-
     public void processFlatBooking(String applicantNRIC, String chosenFlatType) {
         BTOapplication targetApp = null;
-        // Iterate through all applications to find one that belongs to the applicant
-        // and that is in the "SUCCESSFUL" state.
         for (BTOapplication app : BTOsystem.applications) {
             if (app.getApplicant().get_nric().equalsIgnoreCase(applicantNRIC)
                     && app.getStatus().equalsIgnoreCase("SUCCESSFUL")) {
@@ -428,12 +478,9 @@ public class HDB_Officer extends Applicant {
             System.out.println("No successful application found for NRIC: " + applicantNRIC);
             return;
         }
-        
-        // Get the project from the successful application.
         Project proj = targetApp.getProject();
         int index = -1;
         List<String> flatTypes = proj.getFlatTypes();
-        // Search for the chosen flat type (case-insensitive) in the project’s list.
         for (int i = 0; i < flatTypes.size(); i++) {
             if (flatTypes.get(i).equalsIgnoreCase(chosenFlatType)) {
                 index = i;
@@ -444,21 +491,14 @@ public class HDB_Officer extends Applicant {
             System.out.println("Flat type " + chosenFlatType + " is not available in this project.");
             return;
         }
-        
         List<Integer> availableUnits = proj.getAvailableUnits();
         int currentAvailable = availableUnits.get(index);
         if (currentAvailable <= 0) {
             System.out.println("No available units for " + chosenFlatType + " in this project.");
             return;
         }
-        
-        // Update the available units list by decreasing the count for the chosen flat type.
         proj.updateAvailableUnits(chosenFlatType, currentAvailable - 1);
-        
-        // Mark the application as booked.
         targetApp.setStatus("Booked");
-        
-        // Find an unbooked flat matching the project and flat type.
         Flat bookedFlat = null;
         for (Flat flat : BTOsystem.flats) {
             if (flat.getProject().equals(proj) &&
@@ -472,8 +512,6 @@ public class HDB_Officer extends Applicant {
             System.out.println("Error: No available flat unit found despite availability count.");
             return;
         }
-        
-        // Mark the flat as booked, assign it to the application, generate and print a receipt.
         bookedFlat.setBooked(true);
         targetApp.bookFlat(bookedFlat);
         Receipt receipt = generateBookingReceipt(targetApp, bookedFlat);
@@ -481,7 +519,6 @@ public class HDB_Officer extends Applicant {
         receipt.printReceipt();
     }
     
-
     public Receipt generateBookingReceipt(BTOapplication application, Flat flat) {
         String details = "Flat Booking Receipt\n" +
                 "---------------------\n" +
@@ -494,40 +531,47 @@ public class HDB_Officer extends Applicant {
                 "Flat Price: " + flat.getPrice() + "\n";
         return new Receipt(details);
     }
-
+    
     public void viewApplicationsForAssignedProject() {
-        if (officerProject == null) {
-            System.out.println("You are not assigned to any project.");
+        // Display applications for projects where registration status is "APPROVED"
+        boolean found = false;
+        if (officerRegistrations.isEmpty()) {
+            System.out.println("You are not registered to any project.");
             return;
         }
-        System.out.println("Applications for project " + officerProject.getProjectName() + ":");
-        boolean found = false;
-        for (BTOapplication app : BTOsystem.applications) {
-            if (app.getProject().equals(officerProject)) {
+        for (OfficerRegistration reg : officerRegistrations) {
+            if ("APPROVED".equalsIgnoreCase(reg.getStatus())) {
                 found = true;
-                app.get_details();
-                System.out.println("--------------------------------");
+                System.out.println("Applications for project " + reg.getProject().getProjectName() + ":");
+                for (BTOapplication app : BTOsystem.applications) {
+                    if (app.getProject().equals(reg.getProject())) {
+                        app.get_details();
+                        System.out.println("--------------------------------");
+                    }
+                }
             }
         }
         if (!found) {
-            System.out.println("No applications found for this project.");
+            System.out.println("No applications found for your approved projects.");
         }
     }
-
+    
     public boolean getwithdrawalRequested() {
         return withdrawalRequested;
     }
+    
     private void viewListingsOfficer() {
         System.out.println("\n===================================================================================================================");
         System.out.println("                                                  ALL PROJECTS");
         System.out.println("===================================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n", "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
+        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+                "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
         System.err.println("-------------------------------------------------------------------------------------------------------------------");
     
         List<Project> list = BTOsystem.projects;
         for (Project p : list) {
-            // Display the project if it is visible or it is the project the officer is handling.
-            if (p.isVisible() || (officerProject != null && officerProject.equals(p))) {
+            // Display the project if it is visible or if the officer is registered for it.
+            if (p.isVisible() || isRegisteredForProject(p)) {
                 System.out.print(viewProjectsApplicant(p));
             }
         }

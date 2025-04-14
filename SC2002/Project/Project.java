@@ -8,52 +8,35 @@ public class Project {
     private String ProjectName;
     private String neighbourhood;
     private List<String> flatTypes;
-    // private List<Double> flatPrice;
     private List<Integer> totalUnits;
     private List<Integer> availableUnits;
     private int projectId = 1;
-
-    // // Total units when project starts
-    // private int total2Room; 
-    // private int total3Room;
-    // // Remaining units
-    // private int available2Room;
-    // private int available3Room;
     private LocalDate openDate;
     private LocalDate closeDate;
     private HDB_Manager manager;
     protected List<HDB_Officer> assignedOfficers;  // List to hold up to 10 assignedOfficers
     private static int maxOfficerSlots = 10;
     private int totalOfficerSlots;
-    // private int availableOfficerSlots;
     private boolean visibility;
-    // private String flatType1, flatType2;
     // enquiries related to project
     private List<Enquiry> enquiries = new ArrayList<>();
 
-
     public void toggle_visibility() {
-        if (visibility==true) {
-            visibility=false;
+        if (visibility == true) {
+            visibility = false;
         } else {
-            visibility=true;
+            visibility = true;
         }
     }
-    // public void assignOfficer(HDB_Officer off) {
-    //     assignedOfficers.add(off);
-    // }
+    
     public void setManager(HDB_Manager man) {
         this.manager = man;
     }
 
-    // public Project(String ProjectName, String neighbourhood, int total2Room, int total3Room, LocalDate openDate, LocalDate closeDate, boolean visibility, int totalOfficerSlots) {
-    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits,LocalDate openDate, LocalDate closeDate, boolean visibility, int totalOfficerSlots) {
+    public Project(String projectName, String neighbourhood, List<String> flatTypes, List<Integer> totalUnits,
+                   LocalDate openDate, LocalDate closeDate, boolean visibility, int totalOfficerSlots) {
         this.ProjectName = projectName;
         this.neighbourhood = neighbourhood;
-        // this.total2Room = total2Room;
-        // this.total3Room = total3Room;
-        // available2Room = total2Room;
-        // available3Room = total3Room;`
         this.flatTypes = new ArrayList<>(flatTypes);
         this.totalUnits = new ArrayList<>(totalUnits);
         this.availableUnits = new ArrayList<>(totalUnits);
@@ -63,16 +46,11 @@ public class Project {
         
         assignedOfficers = new ArrayList<>();  // Initialize the list to hold assignedOfficers
         this.totalOfficerSlots = totalOfficerSlots;
-        // this.availableOfficerSlots = totalOfficerSlots;
         projectId = ++nextId; // auto-increment ID
     }
 
-    public Project(String string, String string2, String string3, int i, String string4, int j, double d,
-            LocalDate openDate2, LocalDate closeDate2, HDB_Manager manager2, int k, List<String> assignedOfficers2) {
-        //TODO Auto-generated constructor stub
-    }
-    
-    // Getter and Setter methods
+    // ... [Other constructors and getter/setter methods remain unchanged.]
+
     public int getId() {
         return projectId;
     }
@@ -104,7 +82,6 @@ public class Project {
     public List<Integer> getAvailableUnits() {
         return new ArrayList<>(availableUnits);
     }
-    // project related enquiry stuff
 
     public List<Enquiry> getEnquiries() {
         return enquiries;
@@ -113,7 +90,6 @@ public class Project {
     public void addEnquiry(Enquiry enquiry) {
         enquiries.add(enquiry);
     }
-
 
     public void addFlatType(String flatType, int units) {
         flatTypes.add(flatType);
@@ -145,17 +121,11 @@ public class Project {
         int index = flatTypes.indexOf(flatType);
   
         if (index >= 0) {
-            // Calculate the difference between new and old total units
             int diff = newTotalUnits - totalUnits.get(index);
-            
-            // Update total units
             totalUnits.set(index, newTotalUnits);
-            
-            // Update available units by the same difference
             int newAvailable = availableUnits.get(index) + diff;
             if (newAvailable < 0) newAvailable = 0;
             if (newAvailable > newTotalUnits) newAvailable = newTotalUnits;
-            
             availableUnits.set(index, newAvailable);
         } else {
             System.out.println("Error: Flat type '" + flatType + "' not found.");
@@ -164,7 +134,7 @@ public class Project {
 
     public void updateAvailableUnits(String flatType, int newAvailableUnits) {
         int index = flatTypes.indexOf(flatType.toUpperCase());
-          if (index >= 0) {
+        if (index >= 0) {
             if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
                 availableUnits.set(index, newAvailableUnits);
             } else {
@@ -199,28 +169,15 @@ public class Project {
         this.visibility = visibility;
     }
 
-    // Add max officer to the project
-    // public boolean addOfficer(HDB_Officer officer) {
-    //     if (assignedOfficers.size() < totalOfficerSlots) {
-    //         assignedOfficers.add(officer);
-    //         // availableOfficerSlots--;
-    //         return true;
-    //     }
-    //     return false;  // Return false if there are already 10 assignedOfficers
-    // }
-
+    // Updated method: addOfficer now only adds the officer to the assigned list.
     public boolean addOfficer(HDB_Officer officer) {
         if (assignedOfficers.size() < totalOfficerSlots) {
             assignedOfficers.add(officer);
-            // availableOfficerSlots = totalOfficerSlots - assignedOfficers.size();
-            officer.officerProject = this;
-            officer.registrationStatus = "Approved";
             return true;
         }
         return false;
     }
 
-    // Getter method for manager
     public HDB_Manager getManager() {
         return manager;
     }
@@ -228,10 +185,6 @@ public class Project {
     public static int getmaxOfficerSlots() {
         return maxOfficerSlots;
     }
-
-    // public void setmaxOfficerSlots(int maxOfficerSlots) {
-    //     Project.maxOfficerSlots = maxOfficerSlots;
-    // }
     
     public int getTotalOfficerSlots() {
         return totalOfficerSlots;
@@ -239,85 +192,33 @@ public class Project {
 
     public void setTotalOfficerSlots(int totalOfficerSlots) {
         this.totalOfficerSlots = totalOfficerSlots;
-        // System.out.println("Updated number of available HDB Officer Slots is " + this.totalOfficerSlots + ".");
     }
-    
-    // public int getAvailableOfficerSlots(){
-    //     return availableOfficerSlots;
-    // }
-    // public void setAvailableOfficerSlots(int availableOfficerSlots){
-    //     this.availableOfficerSlots = availableOfficerSlots;
-    // }
-
-    // Get the list of assigned officers
-    // public List<HDB_Officer> getAssignedOfficerList() {
-    //     return assignedOfficers;
-    // }
-
-
-//     @Override
-// public String toString() {
-//     String managerName = (manager != null) ? manager.get_firstname() + " " + manager.get_lastname() : "No Manager Assigned";
-//     // System.out.println(manager);
-//     return "{" + ProjectName + ", " + neighbourhood + ", " + available2Room + ", " + available3Room + ", " + openDate + ", " + closeDate + ", " + visibility + ", " + managerName+ ", " + totalOfficerSlots + "}";
-// }
-
-    // @Override
-    // public String toString() {
-    //     StringBuilder sb = new StringBuilder();
-    //     sb.append("{").append(ProjectName).append(", ").append(neighbourhood).append(", [");
-        
-    //     for (int i = 0; i < flatTypes.size(); i++) {
-    //         if (i > 0) sb.append(", ");
-    //         sb.append(flatTypes.get(i)).append(": ")
-    //         .append(availableUnits.get(i)).append("/")
-    //         .append(totalUnits.get(i));
-    //     }
-        
-    //     sb.append("], ").append(openDate).append(", ")
-    //     .append(closeDate).append(", ").append(visibility)
-    //     .append(", ").append(manager.get_firstname()).append(", ")
-    //     .append(totalOfficerSlots).append("}");
-        
-    //     return sb.toString();
-    // }
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        
-        // sb.append(String.format("%-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n", "Project Name", "Neighbourhood", "Flat Types", "Open Date", "Close Date", "Visible", "Manager", "Officer Slots"));
-        // sb.append("--------------------------------------------------------------------------------------------------------------------\n");
-        
-        // First line with first flat type and all other details
         sb.append(String.format("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %-15s %-15s%n",
-        projectId,
-        ProjectName,
-        neighbourhood,
-        flatTypes.size() > 0 ? 
-            flatTypes.get(0) + ": " + (totalUnits.get(0) - availableUnits.get(0)) + "/" + totalUnits.get(0) : "",
-        flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(0)) : 0,
-        openDate,
-        closeDate,
-        visibility,
-        manager.get_firstname(),
-        assignedOfficers.size() + "/" + totalOfficerSlots));
-        // (totalOfficerSlots-availableOfficerSlots) + "/" + totalOfficerSlots));
-        // (maxOfficerSlots - totalOfficerSlots) + "/" + totalOfficerSlots));
-
-    // Additional lines for remaining flat types
-    for (int i = 1; i < flatTypes.size(); i++) {
-        sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n",
-            "", "", "",  // Empty project name and neighbourhood
-            flatTypes.get(i) + ": " + (totalUnits.get(i) - availableUnits.get(i)) + "/" + totalUnits.get(i),
-            flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(i)) : 0,
-            "", "", "", "", ""));  // Empty other fields
-    }
-
-    // Add blank line between projects
-    sb.append("\n");
-
-    return sb.toString();
+            projectId,
+            ProjectName,
+            neighbourhood,
+            flatTypes.size() > 0 ? 
+                flatTypes.get(0) + ": " + (totalUnits.get(0) - availableUnits.get(0)) + "/" + totalUnits.get(0) : "",
+            flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(0)) : 0,
+            openDate,
+            closeDate,
+            visibility,
+            manager.get_firstname(),
+            assignedOfficers.size() + "/" + totalOfficerSlots));
+    
+        for (int i = 1; i < flatTypes.size(); i++) {
+            sb.append(String.format("%-5s %-20s %-15s %-15s %-15s %-15s %-10s %-15s %-15s%n",
+                "", "", "",
+                flatTypes.get(i) + ": " + (totalUnits.get(i) - availableUnits.get(i)) + "/" + totalUnits.get(i),
+                flatTypes.size() > 0 ? this.getFlatPrice(flatTypes.get(i)) : 0,
+                "", "", "", "", ""));
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     public double getFlatPrice(String flatType) {
@@ -328,5 +229,4 @@ public class Project {
         }
         return 0;
     }
-    
 }

@@ -20,6 +20,10 @@ public class Applicant extends User implements Input {
         APPLY, VIEW_APPLICATION, VIEW_ELIGIBLE, VIEW_LISTINGS, WITHDRAW, ENQUIRY, ACCOUNT, CHANGE_PASSWORD, EXIT;
     }
 
+    public BTOapplication getApplication() {
+        return application;
+    }
+    
     @Override
     public void start_menu(Scanner sc) {
         System.out.println("Welcome to HDB BTO Management System, " + this.get_firstname() + "!");

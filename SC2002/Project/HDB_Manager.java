@@ -51,6 +51,8 @@ public class HDB_Manager extends User implements Input {
                         break;
 
                     case 2:     // Edit a Project
+                        System.out.println("Available projects managed by you:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the ID of the project you wish to edit: ");
                         Project projectToEdit = findAndValidateProject(sc);
                         if (projectToEdit != null) {
@@ -59,6 +61,8 @@ public class HDB_Manager extends User implements Input {
                         break;
 
                     case 3: // Delete a Project
+                        System.out.println("Available projects managed by you:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the ID of the project you wish to delete: ");
                         Project projectToDelete = findAndValidateProject(sc);
                         if (projectToDelete != null) {
@@ -79,15 +83,18 @@ public class HDB_Manager extends User implements Input {
                         break;
 
                     case 7:     // Handle Officer Registration
+                        System.out.println("Available projects (by ID) that you manage:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the Project ID to manage officer registrations: ");
                         Project projectForOfficer = findAndValidateProject(sc);
                         if (projectForOfficer == null)
                             break;
                         List<HDB_Officer> pendingOfficers = new ArrayList<>();
+                        // Iterate over all officers in the system and check their registrations for this project.
                         for (HDB_Officer o : BTOsystem.officers) {
-                            if (o.officerProject != null &&
-                                    o.officerProject.equals(projectForOfficer) &&
-                                    o.registrationStatus.equals("PENDING")) {
+                            // Using the new list: get the registration entry for the target project.
+                            HDB_Officer.OfficerRegistration reg = o.getRegistrationForProject(projectForOfficer);
+                            if (reg != null && reg.getStatus().equals("PENDING")) {
                                 pendingOfficers.add(o);
                             }
                         }
@@ -95,11 +102,8 @@ public class HDB_Manager extends User implements Input {
                             System.out.println("No pending officer registrations for this project.");
                             break;
                         }
-                        System.out.println("Pending officer registrations:");
-                        for (int i = 0; i < pendingOfficers.size(); i++) {
-                            System.out.println("[" + i + "] Officer ID: " + pendingOfficers.get(i).getOfficerId() +
-                                    ", Name: " + pendingOfficers.get(i).get_firstname());
-                        }
+                        // Print a table of pending officers for selection
+                        printOfficerTable(pendingOfficers);
                         System.out.print("Enter index of officer to review: ");
                         int idx = Input.getIntInput(sc);
                         if (idx < 0 || idx >= pendingOfficers.size()) {
@@ -107,19 +111,46 @@ public class HDB_Manager extends User implements Input {
                             break;
                         }
                         HDB_Officer officerToHandle = pendingOfficers.get(idx);
-                        handleOfficerRegistration(projectForOfficer, officerToHandle);
-                        break;
-
+                        System.out.print("Do you approve this officer's registration? (yes/no): ");
+                        String decision = Input.getStringInput(sc);
+                        if (decision.equalsIgnoreCase("yes")) {
+                            handleOfficerRegistration(projectForOfficer, officerToHandle);
+                        } else if (decision.equalsIgnoreCase("no")) {
+                            // Mark the registration as rejected if it exists.
+                            HDB_Officer.OfficerRegistration reg = officerToHandle.getRegistrationForProject(projectForOfficer);
+                            if (reg != null) {
+                                reg.setStatus("REJECTED");
+                            }
+                            System.out.println("Officer " + officerToHandle.get_firstname() + " " + officerToHandle.get_lastname() 
+                                    + "'s registration has been rejected.");
+                        } else {
+                            System.out.println("Invalid decision. Operation cancelled.");
+                        }
+                        break;                        
                     case 8:     // Handle officer withdrawal requests
+                        System.out.println("Available projects managed by you:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForWithdrawal_o = findAndValidateProject(sc);
                         if (projectForWithdrawal_o == null) break;
 
-                        System.out.print("Enter Officer's ID: ");
+                        // Print officers registered for the selected project (by table)
+                        List<HDB_Officer> officersForWithdrawal = new ArrayList<>();
+                        for (HDB_Officer o : BTOsystem.officers) {
+                            if (o.isRegisteredForProject(projectForWithdrawal_o)) {
+                                officersForWithdrawal.add(o);
+                            }
+                        }
+                        if (officersForWithdrawal.isEmpty()) {
+                            System.out.println("No officers found for the selected project.");
+                            break;
+                        }
+                        printOfficerTable(officersForWithdrawal);
+                        System.out.print("Enter Officer's ID (as shown in the table): ");
                         int withdrawalOfficerId = Input.getIntInput(sc);
                         HDB_Officer officer_withdrawal = null;
-                        // Find the officer by ID
-                        for (HDB_Officer o : BTOsystem.officers) {
+                        // Find the officer by ID from the printed list.
+                        for (HDB_Officer o : officersForWithdrawal) {
                             if (o.getOfficerId() == withdrawalOfficerId) {
                                 officer_withdrawal = o;
                                 break;
@@ -133,14 +164,28 @@ public class HDB_Manager extends User implements Input {
                         break;
 
                     case 9:     // Handle BTO application (approve/reject)
+                        System.out.println("Available projects managed by you:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForBTO = findAndValidateProject(sc);
                         if (projectForBTO == null) break;
-                        System.out.print("Enter Applicant's ID: ");
+                        // Filter applications for this project and print them in a table format.
+                        List<BTOapplication> appsForProject = new ArrayList<>();
+                        for (BTOapplication app : BTOsystem.applications) {
+                            if (app.getProject().equals(projectForBTO)) {
+                                appsForProject.add(app);
+                            }
+                        }
+                        if (appsForProject.isEmpty()) {
+                            System.out.println("No applications found for this project.");
+                            break;
+                        }
+                        printApplicationTable(appsForProject);
+                        System.out.print("Enter Applicant's ID (as shown in the table): ");
                         int applicationId = Input.getIntInput(sc);
                         String flatType = null;
                         BTOapplication application = null;
-                        for (BTOapplication app : BTOsystem.applications) {
+                        for (BTOapplication app : appsForProject) {
                             if (app.getId() == applicationId) {
                                 application = app;
                                 flatType = app.getFlatType();
@@ -156,19 +201,33 @@ public class HDB_Manager extends User implements Input {
                                 // Change the application's status to rejected
                                 application.setStatus("REJECTED");  
                                 System.out.println("Application has been rejected.");
+                            }
                         } else {
                             System.out.println("Error: Application not found.");
                         }
                         break;
-                    }
                     case 10:    // Handle application withdrawal requests
+                        System.out.println("Available projects managed by you:");
+                        printProjectTable(managerProjects);
                         System.out.print("Enter the Project ID to manage: ");
                         Project projectForWithdrawal_a = findAndValidateProject(sc);
                         if (projectForWithdrawal_a == null) break;
-                        System.out.print("Enter application ID: ");
+                        // Filter applications by this project and print the table
+                        List<BTOapplication> appsForWithdrawal = new ArrayList<>();
+                        for (BTOapplication app : BTOsystem.applications) {
+                            if (app.getProject().equals(projectForWithdrawal_a)) {
+                                appsForWithdrawal.add(app);
+                            }
+                        }
+                        if (appsForWithdrawal.isEmpty()) {
+                            System.out.println("No applications found for this project.");
+                            break;
+                        }
+                        printApplicationTable(appsForWithdrawal);
+                        System.out.print("Enter application ID (as shown in the table): ");
                         int withdrawalApplicationId = Input.getIntInput(sc);
                         BTOapplication withdrawalApplication = null;
-                        for (BTOapplication app : BTOsystem.applications) {
+                        for (BTOapplication app : appsForWithdrawal) {
                             if (app.getId() == withdrawalApplicationId) {
                                 withdrawalApplication = app;
                                 break;
@@ -737,79 +796,90 @@ public class HDB_Manager extends User implements Input {
 
         // Unregister any officers assigned to the project
         List<HDB_Officer> officerList = BTOsystem.officers;
-        List<HDB_Officer> officersToRemove = new ArrayList<>();
+        // Instead of clearing a single field, remove the registration from each officer's registration list.
         for (HDB_Officer officer : officerList) {
-            if (officer.officerProject != null && officer.officerProject.equals(project)) {
-                officer.officerProject = null;
-                officer.registrationStatus = "UNREGISTERED";
-                officersToRemove.add(officer);
+            List<HDB_Officer.OfficerRegistration> regsToRemove = new ArrayList<>();
+            for (HDB_Officer.OfficerRegistration reg : officer.getOfficerRegistrations()) {
+                if (reg.getProject().equals(project)) {
+                    regsToRemove.add(reg);
+                }
             }
+            officer.getOfficerRegistrations().removeAll(regsToRemove);
         }
-        officerList.removeAll(officersToRemove);
         System.out.println("---------------------------------------------------");
         System.out.println("Successfully deleted.");
     }
 
     // Approve or reject an officer's registration.
     public void handleOfficerRegistration(Project project, HDB_Officer officer) {
-        if (!project.equals(officer.officerProject)) {
+        // Find the pending registration entry for the given project
+        HDB_Officer.OfficerRegistration reg = officer.getRegistrationForProject(project);
+        if (reg == null) {
             System.out.println("Error: Officer " + officer.get_firstname() + " " + officer.get_lastname() +
                     " did not register for Project " + project.getId() + ".");
             return;
         }
         if (!officer.isApplicationPeriodOverlapping(project)) {
-            officer.registrationStatus = "REJECTED";
+            reg.setStatus("REJECTED");
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() +
                     "'s registration rejected. Officer is already assigned to another project during this application period.");
             return;
         }
-        if (officer.hasAppliedAsApplicant()) {
-            officer.registrationStatus = "REJECTED";
+        if (officer.hasAppliedAsApplicant() &&
+            officer.getApplication().getProject().equals(project)) {
+            reg.setStatus("REJECTED");
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() +
-                    "'s registration rejected. Officer has already applied as an applicant.");
+                    "'s registration rejected. Officer has already applied as an applicant for this project.");
             return;
         }
+    
         if (project.addOfficer(officer)) {
-            officer.registrationStatus = "APPROVED";
-            officer.officerProject = project;
+            reg.setStatus("APPROVED");
             System.out.println("Officer " + officer.get_firstname() + " " + officer.get_lastname() +
                     "'s registration approved and assigned to Project " + project.getId() + ".");
         } else {
-            officer.registrationStatus = "REJECTED";
+            reg.setStatus("REJECTED");
             System.out.println("Maximum number of officers already assigned to Project " + project.getId() +
                     ". Officer's registration rejected.");
         }
     }
 
-    // View officer registrations under the manager.
     public void viewOfficerRegistration() {
         System.out.println("\n============================================================");
         System.out.println("                    OFFICER REGISTRATION");
         System.out.println("============================================================");
-        boolean hasOfficers = false;
-        for (Project project : this.managerProjects) {
-            if (!project.assignedOfficers.isEmpty()) {
-                hasOfficers = true;
-                break;
+        
+        boolean hasRegistrations = false;
+        // First, check if any officer has a registration for a project managed by this manager
+        for (HDB_Officer officer : BTOsystem.officers) {
+            for (HDB_Officer.OfficerRegistration reg : officer.getOfficerRegistrations()) {
+                if (reg.getProject() != null && reg.getProject().getManager() == this) {
+                    hasRegistrations = true;
+                    break;
+                }
             }
+            if (hasRegistrations) break;
         }
-        if (hasOfficers) {
+        
+        if (hasRegistrations) {
             System.out.printf("%-10s %-20s %-15s %-25s%n", "ID", "Name", "Status", "Project ID");
             System.out.println("------------------------------------------------------------");
+            // Iterate over all officers and their registration entries
             for (HDB_Officer officer : BTOsystem.officers) {
-                Project assignedProject = officer.officerProject;
-                if (assignedProject != null && assignedProject.getManager() == this) {
-                    System.out.printf("%-10s %-20s %-15s %-20s%n",
+                for (HDB_Officer.OfficerRegistration reg : officer.getOfficerRegistrations()) {
+                    if (reg.getProject() != null && reg.getProject().getManager() == this) {
+                        System.out.printf("%-10s %-20s %-15s %-20s%n",
                             officer.getOfficerId(),
                             officer.get_firstname() + " " + officer.get_lastname(),
-                            officer.registrationStatus,
-                            assignedProject.getId());
+                            reg.getStatus(),
+                            reg.getProject().getId());
+                    }
                 }
             }
         } else {
             System.out.println("No officers available.");
         }
-    }
+    }    
 
     public void handleBTOapplication(Project project, BTOapplication application, String flatType) {
         if (!project.getFlatTypes().contains(flatType)) {
@@ -865,7 +935,13 @@ public class HDB_Manager extends User implements Input {
             System.out.println("Error: Withdrawal was not requested.");
             return;
         }
-        if (officer.registrationStatus.equals("WITHDRAWN")) {
+        // Here, remove the registration entry corresponding to the project
+        HDB_Officer.OfficerRegistration reg = officer.getRegistrationForProject(project);
+        if (reg == null) {
+            System.out.println("Officer is not registered for this project.");
+            return;
+        }
+        if (reg.getStatus().equals("WITHDRAWN")) {
             System.out.println("Officer's registration has already been withdrawn.");
             return;
         }
@@ -874,8 +950,9 @@ public class HDB_Manager extends User implements Input {
             String input = Input.getStringInput(sc).toLowerCase();
             if (input.equals("yes") || input.equals("no")) {
                 if (input.equals("yes")) {
-                    officer.registrationStatus = "WITHDRAWN";
-                    officer.officerProject = null; // Clear the assignment so the officer can apply again
+                    reg.setStatus("WITHDRAWN");
+                    // Remove the registration entry so the officer can apply again
+                    officer.getOfficerRegistrations().remove(reg);
                     System.out.println("Withdrawal request approved.");
                 } else {
                     System.out.println("Withdrawal request rejected.");
@@ -1105,9 +1182,7 @@ public class HDB_Manager extends User implements Input {
             return;
         }
         System.out.println("Select a project to view its pending enquiries:");
-        for (int i = 0; i < projectsWithEnquiries.size(); i++) {
-            System.out.printf("[%d] %s%n", i, projectsWithEnquiries.get(i).getProjectName());
-        }
+        printProjectTable(projectsWithEnquiries);
         int projChoice = -1;
         try {
             System.out.print("Enter project index: ");
@@ -1164,13 +1239,7 @@ public class HDB_Manager extends User implements Input {
             return;
         }
         System.out.println("\nPending general enquiries:");
-        for (int i = 0; i < generalEnquiries.size(); i++) {
-            Enquiry e = generalEnquiries.get(i);
-            User creator = e.getCreatedByUser();
-            System.out.println((i + 1) + ". From: " + creator.get_firstname() + " " +
-                    creator.get_lastname() + " | ID: " + e.getId());
-            System.out.println("   Enquiry: " + e.getEnquiry());
-        }
+        printApplicationTableForEnquiries(generalEnquiries); // reusing a helper for enquiries
         int enquiryChoice;
         try {
             System.out.print("Select an enquiry to reply to (or enter -1 to cancel): ");
@@ -1193,5 +1262,62 @@ public class HDB_Manager extends User implements Input {
         System.out.print("Enter your reply: ");
         String reply = Input.getStringInput(sc);
         reply_enquiry(selectedEnquiry, reply);
+    }
+
+    // New helper method to print a table of projects for selection
+    private void printProjectTable(List<Project> projects) {
+        System.out.printf("%-5s %-10s %-25s %-15s %-12s %-12s%n", "Idx", "ID", "Project Name", "Neighbourhood", "Open Date", "Close Date");
+        System.out.println("--------------------------------------------------------------------------------");
+        for (int i = 0; i < projects.size(); i++) {
+            Project p = projects.get(i);
+            System.out.printf("%-5d %-10d %-25s %-15s %-12s %-12s%n",
+                    i,
+                    p.getId(),
+                    p.getProjectName(),
+                    p.getneighbourhood(),
+                    p.getOpenDate(),
+                    p.getCloseDate());
+        }
+    }
+
+    // New helper method to print a table of officers for selection
+    private void printOfficerTable(List<HDB_Officer> officers) {
+        System.out.printf("%-5s %-10s %-25s%n", "Idx", "OfficerID", "Name");
+        System.out.println("-----------------------------------------------------");
+        for (int i = 0; i < officers.size(); i++) {
+            HDB_Officer o = officers.get(i);
+            System.out.printf("%-5d %-10d %-25s%n",
+                    i,
+                    o.getOfficerId(),
+                    o.get_firstname() + " " + o.get_lastname());
+        }
+    }
+
+    // New helper method to print a table of applications for selection
+    private void printApplicationTable(List<BTOapplication> applications) {
+        System.out.printf("%-5s %-10s %-25s %-15s %-10s%n", "Idx", "AppID", "Applicant Name", "Status", "ProjectID");
+        System.out.println("-----------------------------------------------------------------------");
+        for (int i = 0; i < applications.size(); i++) {
+            BTOapplication app = applications.get(i);
+            System.out.printf("%-5d %-10d %-25s %-15s %-10d%n",
+                    i,
+                    app.getId(),
+                    app.getApplicant().get_firstname() + " " + app.getApplicant().get_lastname(),
+                    app.getStatus(),
+                    app.getProject().getId());
+        }
+    }
+    
+    // New helper method to print enquiries in a table format (for general enquiries)
+    private void printApplicationTableForEnquiries(List<Enquiry> enquiries) {
+        System.out.printf("%-5s %-10s %-25s%n", "Idx", "EnqID", "Enquiry Preview");
+        System.out.println("-----------------------------------------------------");
+        for (int i = 0; i < enquiries.size(); i++) {
+            Enquiry enq = enquiries.get(i);
+            System.out.printf("%-5d %-10d %-25s%n",
+                    i,
+                    enq.getId(),
+                    truncateText(enq.getEnquiry(), 25));
+        }
     }
 }
