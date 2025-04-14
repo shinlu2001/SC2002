@@ -5,7 +5,13 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-public class HDB_Officer extends Applicant {
+import SC2002.Project.boundary.applicantProjectDisplayer;
+import SC2002.Project.control.PasswordChanger;
+import SC2002.Project.control.applicant.EnquiryService;
+import SC2002.Project.control.applicant.WithdrawApplicationService;
+import SC2002.Project.control.applicant.applyBTOServiceApplicant;
+
+public class HDB_Officer extends ApplicantBase {
     private String type = "OFFICER";
     protected static int nextId = -1;
     private int officer_id;
@@ -17,7 +23,7 @@ public class HDB_Officer extends Applicant {
     // Inner class to encapsulate each registration.
     public static class OfficerRegistration {
         private Project project;
-        private String status; // e.g., "PENDING", "APPROVED"
+        private String status="PENDING"; // e.g., "PENDING", "APPROVED"
         
         public OfficerRegistration(Project project, String status) {
             this.project = project;
@@ -45,7 +51,6 @@ public class HDB_Officer extends Applicant {
     public int getOfficerId() {
         return officer_id;
     }
-    
     // Getter for the list of officer registrations.
     public List<OfficerRegistration> getOfficerRegistrations() {
         return officerRegistrations;
@@ -77,32 +82,33 @@ public class HDB_Officer extends Applicant {
         return false;
     }
     
-    @Override
-    protected int view_eligible_listings() {
-        System.out.println("\n================================================================================================================");
-        System.out.println("                                                  ELIGIBLE PROJECTS");
-        System.out.println("================================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-                "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
-        System.err.println("----------------------------------------------------------------------------------------------------------------");
-        List<Project> list = BTOsystem.projects;
-        int count = 0;
-        for (Project p : list) {
-            // Exclude project if officer is already registered for it.
-            if (p.isVisible() && !isRegisteredForProject(p)) {
-                String str = viewEligibleProjectsApplicant(p);
-                if (!str.isBlank()) {
-                    count++;
-                }
-                System.out.print(str);
-            }
-        }
-        System.err.println("----------------------------------------------------------------------------------------------------------------");
-        return count;
-    }
+    // @Override
+    // protected int view_eligible_listings() {
+    //     System.out.println("\n================================================================================================================");
+    //     System.out.println("                                                  ELIGIBLE PROJECTS");
+    //     System.out.println("================================================================================================================");
+    //     System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+    //             "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
+    //     System.err.println("----------------------------------------------------------------------------------------------------------------");
+    //     List<Project> list = BTOsystem.projects;
+    //     int count = 0;
+    //     for (Project p : list) {
+    //         // Exclude project if officer is already registered for it.
+    //         if (p.isVisible() && !isRegisteredForProject(p)) {
+    //             String str = viewEligibleProjectsApplicant(p);
+    //             if (!str.isBlank()) {
+    //                 count++;
+    //             }
+    //             System.out.print(str);
+    //         }
+    //     }
+    //     System.err.println("----------------------------------------------------------------------------------------------------------------");
+    //     return count;
+    // }
     
     @Override
     public void start_menu(Scanner scanner) {
+        applicantProjectDisplayer projectDisplayer = new applicantProjectDisplayer(this);
         int choice = 0;
         do {
             try {
@@ -116,37 +122,8 @@ public class HDB_Officer extends Applicant {
                 switch (choice) {
                     case 1: // Apply for a project (as an applicant)
                         try {
-                            if (application != null) {
-                                System.out.println("You already have an active application. You may not create a new one.");
-                            } else {
-                                System.out.println("Apply for a project");
-                                int count = view_eligible_listings();
-                                if (count == 0) {
-                                    System.out.println("You are not eligible to apply for any project.");
-                                    break;
-                                }
-                                System.out.println("Enter ProjectID: ");
-                                int id = Input.getIntInput(scanner);
-                                Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
-                                if (p == null || !p.isVisible()) {
-                                    System.out.println("No such project.");
-                                } else {
-                                    if (isRegisteredForProject(p)) {
-                                        System.out.println("You are already registered as an officer for this project and cannot apply as an applicant.");
-                                        break;
-                                    }
-                                    System.out.println("Enter room type (2-Room, 3-Room, etc): ");
-                                    String roomtype = Input.getStringInput(scanner);
-                                    if (!getEligibility(roomtype)) {
-                                        System.out.println("Not eligible for this project and room type.");
-                                    } else {
-                                        BTOapplication b = new BTOapplication(this, p, roomtype);
-                                        BTOsystem.applications.add(b);
-                                        System.out.println("Application submitted!");
-                                        application = b;
-                                    }
-                                }
-                            }
+                            applyBTOServiceApplicant applyer = new applyBTOServiceApplicant(this);
+                            applyer.applyProject(scanner, this, projectDisplayer);
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
@@ -164,7 +141,7 @@ public class HDB_Officer extends Applicant {
                         break;
                     case 3: // View only eligible listings
                         try {
-                            int countElig = view_eligible_listings();
+                            int countElig = projectDisplayer.view_eligible_listings();
                             if (countElig == 0) {
                                 System.out.println("No eligible projects found.");
                             }
@@ -173,24 +150,25 @@ public class HDB_Officer extends Applicant {
                         }
                         break;
                     case 4: // View all listings
-                        viewListingsOfficer();
+                        projectDisplayer.view_listings();
                         break;
                     case 5: // Withdraw application
                         try {
-                            System.out.println("Withdraw application");
-                            if (application != null) {
-                                application.get_details();
-                                System.out.print("Confirm withdrawal? (Enter NRIC to confirm): ");
-                                String confirm = Input.getStringInput(scanner);
-                                if (confirm.equals(get_nric())) {
-                                    application.withdraw();
-                                    System.out.println("Withdrawal submitted.");
-                                } else {
-                                    System.out.println("Wrong NRIC, withdrawal unsuccessful.");
-                                }
-                            } else {
-                                System.out.println("Nothing to withdraw.");
-                            }
+                            // System.out.println("Withdraw application");
+                            // if (application != null) {
+                            //     application.get_details();
+                            //     System.out.print("Confirm withdrawal? (Enter NRIC to confirm): ");
+                            //     String confirm = Input.getStringInput(scanner);
+                            //     if (confirm.equals(get_nric())) {
+                            //         application.withdraw();
+                            //         System.out.println("Withdrawal submitted.");
+                            //     } else {
+                            //         System.out.println("Wrong NRIC, withdrawal unsuccessful.");
+                            //     }
+                            // } else {
+                            //     System.out.println("Nothing to withdraw.");
+                            // }
+                            WithdrawApplicationService.withdraw(scanner, application, this);
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
@@ -204,7 +182,7 @@ public class HDB_Officer extends Applicant {
                         break;
                     case 7: // Manage own enquiries
                         try {
-                            manage_own_enquiry(scanner);
+                            new EnquiryService(this, projectDisplayer).manage_enquiry(scanner);
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
@@ -219,21 +197,22 @@ public class HDB_Officer extends Applicant {
                         break;
                     case 9: // Change account password
                         try {
-                            System.out.println("Change your password");
-                            System.out.print("Enter current password: ");
-                            String oldpass = Input.getStringInput(scanner);
-                            System.out.print("Enter new password: ");
-                            String new_pass1 = Input.getStringInput(scanner);
-                            System.out.print("Enter new password again to confirm: ");
-                            String new_pass2 = Input.getStringInput(scanner);
-                            if (!verify_password(oldpass)) {
-                                System.out.println("Current password is wrong. Password change unsuccessful.");
-                            } else if (!new_pass1.equals(new_pass2)) {
-                                System.out.println("New passwords do not match.");
-                            } else {
-                                change_password(new_pass2);
-                                System.out.println("Password changed successfully.");
-                            }
+                            // System.out.println("Change your password");
+                            // System.out.print("Enter current password: ");
+                            // String oldpass = Input.getStringInput(scanner);
+                            // System.out.print("Enter new password: ");
+                            // String new_pass1 = Input.getStringInput(scanner);
+                            // System.out.print("Enter new password again to confirm: ");
+                            // String new_pass2 = Input.getStringInput(scanner);
+                            // if (!verify_password(oldpass)) {
+                            //     System.out.println("Current password is wrong. Password change unsuccessful.");
+                            // } else if (!new_pass1.equals(new_pass2)) {
+                            //     System.out.println("New passwords do not match.");
+                            // } else {
+                            //     change_password(new_pass2);
+                            //     System.out.println("Password changed successfully.");
+                            // }
+                            new PasswordChanger(this);
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }
@@ -362,9 +341,9 @@ public class HDB_Officer extends Applicant {
         enquiry.setResponse(response);
     }
     
-    private void manage_own_enquiry(Scanner sc) {
-        super.manage_enquiry(sc); // Use Applicant’s enquiry management for own enquiries.
-    }
+    // private void manage_own_enquiry(Scanner sc) {
+    //     super.manage_enquiry(sc); // Use Applicant’s enquiry management for own enquiries.
+    // }
     
     private void manage_other_enquiry(Scanner scanner) {
         List<Enquiry> filteredEnquiries = new ArrayList<>();
@@ -394,7 +373,7 @@ public class HDB_Officer extends Applicant {
         }
         for (Enquiry en : filteredEnquiries) {
             System.out.printf("ID: %d, Question: %s%s%n",
-                    en.getId(), truncateText(en.getEnquiry(), 30), (en.getStaff() != null ? " (Replied)" : ""));
+                    en.getId(), Input.truncateText(en.getEnquiry(), 30), (en.getStaff() != null ? " (Replied)" : ""));
         }
         System.out.print("Enter enquiry index to reply (or -1 to cancel): ");
         int idx = Input.getIntInput(scanner);
@@ -455,14 +434,16 @@ public class HDB_Officer extends Applicant {
     
     // Force register and approve a project.
     public void forceRegisterAndApprove(Project project) {
-        for (OfficerRegistration reg : officerRegistrations) {
-            if (reg.getProject().equals(project) && reg.getStatus().equals("PENDING")) {
-                reg.setStatus("APPROVED");
-                project.addOfficer(this); // This may update fields in the project if needed.
-                System.out.println("Officer registration for " + project.getProjectName() + " is now approved.");
-                break;
-            }
-        }
+        // for (OfficerRegistration reg : officerRegistrations) {
+        //     System.out.println(reg);
+        //     if (reg.getProject().equals(project) && reg.getStatus().equals("PENDING")) {
+        //         reg.setStatus("APPROVED");
+        officerRegistrations.add(new OfficerRegistration(project, "APPROVED"));
+        project.addOfficer(this); // This may update fields in the project if needed.
+            //     System.out.println("Officer registration for " + project.getProjectName() + " is now approved.");
+            //     break;
+            // }
+    // }
     }
     
     public void processFlatBooking(String applicantNRIC, String chosenFlatType) {
@@ -560,21 +541,21 @@ public class HDB_Officer extends Applicant {
         return withdrawalRequested;
     }
     
-    private void viewListingsOfficer() {
-        System.out.println("\n===================================================================================================================");
-        System.out.println("                                                  ALL PROJECTS");
-        System.out.println("===================================================================================================================");
-        System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
-                "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
-        System.err.println("-------------------------------------------------------------------------------------------------------------------");
+    // private void viewListingsOfficer() {
+    //     System.out.println("\n===================================================================================================================");
+    //     System.out.println("                                                  ALL PROJECTS");
+    //     System.out.println("===================================================================================================================");
+    //     System.out.printf("%-5s %-20s %-15s %-15s %-10s %-15s %-15s %-10s %n",
+    //             "ID", "Project Name", "Neighbourhood", "Flat Types", "Price", "Open Date", "Close Date", "Eligibilty");
+    //     System.err.println("-------------------------------------------------------------------------------------------------------------------");
     
-        List<Project> list = BTOsystem.projects;
-        for (Project p : list) {
-            // Display the project if it is visible or if the officer is registered for it.
-            if (p.isVisible() || isRegisteredForProject(p)) {
-                System.out.print(viewProjectsApplicant(p));
-            }
-        }
-        System.err.println("-------------------------------------------------------------------------------------------------------------------");
-    }
+    //     List<Project> list = BTOsystem.projects;
+    // for (Project p : list) {
+    //     // Display the project if it is visible or if the officer is registered for it.
+    //     if (p.isVisible() || officer.isRegisteredForProject(p)) {
+    //         System.out.print(viewProjectsApplicant(p, officer));
+    //     }
+    // }
+    //     System.err.println("-------------------------------------------------------------------------------------------------------------------");
+    // }
 }

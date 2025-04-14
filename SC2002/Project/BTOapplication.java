@@ -14,7 +14,7 @@ public class BTOapplication {
     protected static int nextId = -1;   // auto-incrementing ID
     private int applicationId;    
     // References to the applicant and project
-    private Applicant applicant;
+    private ApplicantBase applicant;
     private Project project;    // protected or???
     private HDB_Manager manager;
 
@@ -31,7 +31,7 @@ public class BTOapplication {
      * @param project   the project being applied for
      * @param flatType  the flat type chosen (e.g., "2-Room" or "3-Room")
      */
-    public BTOapplication(Applicant applicant, Project project, String flatType) {
+    public BTOapplication(ApplicantBase applicant, Project project, String flatType) {
         applicationId = ++nextId;
         this.applicant = applicant;
         this.project = project;
@@ -88,7 +88,7 @@ public class BTOapplication {
         return applicationId;
     }
 
-    public Applicant getApplicant() {
+    public ApplicantBase getApplicant() {
         return applicant;
     }
 

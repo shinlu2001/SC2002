@@ -1040,7 +1040,7 @@ public class HDB_Manager extends User implements Input {
         }
         System.out.printf("%-20s %-5s %-15s %-10s %-15s%n", "Applicant Name", "Age", "Marital Status", "Flat", "Project");
         for (BTOapplication app : apps) {
-            Applicant applicant = app.getApplicant();
+            ApplicantBase applicant = app.getApplicant();
             String fullName = applicant.get_firstname() + " " + applicant.get_lastname();
             int age = applicant.get_age();
             String marital = applicant.get_maritalstatus();
@@ -1124,13 +1124,13 @@ public class HDB_Manager extends User implements Input {
                     enquiry.getId(),
                     (enquiry.getProject() != null ? enquiry.getProject().getProjectName() : "General Enquiry"),
                     creatorName,
-                    truncateText(enquiry.getEnquiry(), 30),
+                    Input.truncateText(enquiry.getEnquiry(), 30),
                     enquiry.getResponse().isEmpty() ? "Pending" : "Answered");
             if (enquiry.getflatType() != null && !enquiry.getflatType().isEmpty()) {
                 System.out.println("   Flat Type: " + enquiry.getflatType());
             }
             if (!enquiry.getResponse().isEmpty()) {
-                System.out.println("   Response: " + truncateText(enquiry.getResponse(), 50));
+                System.out.println("   Response: " + Input.truncateText(enquiry.getResponse(), 50));
                 if (enquiry.getStaff() != null) {
                     System.out.println("   Replied by: " + enquiry.getStaff().get_firstname() + " " +
                             enquiry.getStaff().get_lastname());
@@ -1199,7 +1199,7 @@ public class HDB_Manager extends User implements Input {
         Project selectedProject = projectsWithEnquiries.get(projChoice);
         System.out.println("Pending enquiries for " + selectedProject.getProjectName() + ":");
         for (Enquiry e : selectedProject.getEnquiries()) {
-            System.out.printf("ID: %d, Question: %s%s%n", e.getId(), truncateText(e.getEnquiry(), 30),
+            System.out.printf("ID: %d, Question: %s%s%n", e.getId(), Input.truncateText(e.getEnquiry(), 30),
                     (e.getStaff() != null ? " (Replied)" : ""));
         }
         int enquiryChoice;
@@ -1317,7 +1317,7 @@ public class HDB_Manager extends User implements Input {
             System.out.printf("%-5d %-10d %-25s%n",
                     i,
                     enq.getId(),
-                    truncateText(enq.getEnquiry(), 25));
+                    Input.truncateText(enq.getEnquiry(), 25));
         }
     }
 }

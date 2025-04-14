@@ -8,13 +8,13 @@ import java.util.function.Function;
 
 public class BTOsystem implements Input {
     public static final Project officerProject = null;
-    protected static List<Applicant> applicants = new ArrayList<>();
-    protected static List<HDB_Officer> officers = new ArrayList<>();
-    protected static List<HDB_Manager> managers = new ArrayList<>();
-    protected static List<Project> projects = new ArrayList<>();
-    protected static List<Enquiry> enquiries = new ArrayList<>();
-    protected static List<Flat> flats = new ArrayList<>();
-    protected static List<BTOapplication> applications = new ArrayList<>();
+    public static List<Applicant> applicants = new ArrayList<>();
+    public static List<HDB_Officer> officers = new ArrayList<>();
+    public static List<HDB_Manager> managers = new ArrayList<>();
+    public static List<Project> projects = new ArrayList<>();
+    public static List<Enquiry> enquiries = new ArrayList<>();
+    public static List<Flat> flats = new ArrayList<>();
+    public static List<BTOapplication> applications = new ArrayList<>();
 
     static Menu menu = new Menu();
 
@@ -102,7 +102,7 @@ public class BTOsystem implements Input {
             } else {
                 System.out.print("Password: ");
                 String password = Input.getStringInput(sc);
-                if (user.verify_password(password)) {
+                if (user.verifyPassword(password)) {
                     System.out.println("--------------------------------");
                     user.start_menu(sc);
                 } else {

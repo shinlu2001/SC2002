@@ -57,23 +57,15 @@ public abstract class User {
         System.out.println("Age: "+ age);
         System.out.println("Marital status: " + marital_status);   
     }
-    public void change_password(String newpass) {
-        this.password = newpass;
+
+    public void setPassword(String pass) {
+        this.password = pass;
     }
-    public boolean verify_password(String password) {
-        if (this.password.equals(password)) {
-            return true;
-        } else {
-            return false;
-        }
+
+    public boolean verifyPassword(String pass) {
+        return pass.equals(password);
     }
+    
     public abstract void start_menu(Scanner scanner);
     public void makeEnquiry() {}
-    public String truncateText(String text, int maxLength) {
-        if (text == null) return "N/A";
-        if (text.length() <= maxLength) {
-            return text;
-        }
-        return text.substring(0, maxLength - 3) + "...";
-    }
 }
