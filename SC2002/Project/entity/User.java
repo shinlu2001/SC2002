@@ -1,12 +1,5 @@
 package SC2002.Project.entity;
 
-import java.util.Scanner;
-import SC2002.Project.util.Input;
-
-/**
- * Abstract base class for all users.
- * All input should use Input.getStringInput(Scanner) and Input.getIntInput(Scanner)
- */
 public abstract class User {
     private String nric;
     private String firstname;
@@ -38,13 +31,6 @@ public abstract class User {
         System.out.println("Marital status: " + maritalStatus);   
     }
     
-    public void setPassword(String pass) {
-        this.password = pass;
-    }
-    
-    public boolean verifyPassword(String pass) {
-        return password.equals(pass);
-    }
-    
-    // No start_menu() here; UI is handled separately.
+    public void setPassword(String pass) { this.password = pass; }
+    public boolean verifyPassword(String pass) { return pass.equals(password); }
 }

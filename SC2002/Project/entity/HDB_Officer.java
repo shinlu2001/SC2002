@@ -58,5 +58,9 @@ public class HDB_Officer extends ApplicantBase {
         System.out.println("Officer ID: " + officerID);
     }
     
-    // UI logic removed.
+    // New method needed for CSV load
+    public void forceRegisterAndApprove(Project project) {
+        OfficerRegistration reg = new OfficerRegistration(project, "APPROVED");
+        officerRegistrations.add(reg);
+    }
 }

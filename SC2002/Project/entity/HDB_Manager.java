@@ -24,6 +24,4 @@ public class HDB_Manager extends User {
         System.out.println("Account type: " + type);
         System.out.println("Manager ID: " + managerID);
     }
-    
-    // UI logic removed.
 }
