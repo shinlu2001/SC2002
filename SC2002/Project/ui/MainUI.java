@@ -295,7 +295,7 @@ public class MainUI {
                     man.getManagerProjects().add(p);
                     break;
                 }
-            }
+            }            
             // Process officer registrations
             String[] project_officer = row[12].replace("\"", "").split(",");
             for (String name : project_officer) {

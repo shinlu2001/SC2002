@@ -3,11 +3,10 @@ package SC2002.Project.control.applicant;
 import java.util.Scanner;
 import SC2002.Project.entity.ApplicantBase;
 import SC2002.Project.entity.BTOapplication;
+import SC2002.Project.entity.Project;
 import SC2002.Project.util.Input;
+import SC2002.Project.ui.MainUI;
 
-/**
- * Provides functionality for an applicant (or officer using applicant mode) to submit a BTO application.
- */
 public class applyBTOServiceApplicant {
     private ApplicantBase applicant;
 
@@ -16,20 +15,51 @@ public class applyBTOServiceApplicant {
     }
 
     /**
-     * Simulates the process of applying for a BTO project.
+     * Allows the applicant to choose a project from the database and apply.
      *
      * @param sc the Scanner instance for input.
-     * @param applicant the applicant applying for the project.
-     * @param projectDisplayer an object used for displaying projects (not implemented fully here).
+     * @param applicant the applicant applying for a project.
+     * @param projectDisplayer (Optional) can be used to show project details.
      */
     public void applyProject(Scanner sc, ApplicantBase applicant, Object projectDisplayer) {
-        System.out.print("Enter the Project Name you wish to apply for: ");
-        String projectName = Input.getStringInput(sc);
-        // In a full implementation, you would locate the project.
-        System.out.println("Simulated: Applying to project '" + projectName + "'.");
-        // Create a dummy application:
-        // BTOapplication application = new BTOapplication(applicant, foundProject, "2-Room");
-        // applicant.setApplication(application);
-        System.out.println("Application submitted successfully (simulation).");
+        // Check that there is at least one project available
+        if (MainUI.projects.isEmpty()) {
+            System.out.println("No projects available in the database.");
+            return;
+        }
+        
+        // Display available projects with ID and project name
+        System.out.println("Available Projects:");
+        for (Project p : MainUI.projects) {
+            System.out.println("ID: " + p.getId() + " - " + p.getProjectName());
+        }
+        
+        System.out.print("Enter the project ID you want to apply for: ");
+        int projId = Input.getIntInput(sc);
+        Project selectedProject = null;
+        for (Project p : MainUI.projects) {
+            if (p.getId() == projId) {
+                selectedProject = p;
+                break;
+            }
+        }
+        if (selectedProject == null) {
+            System.out.println("Project not found.");
+            return;
+        }
+        
+        // Ask for the flat type the applicant wishes to apply for
+        System.out.print("Enter flat type (e.g., 2-Room or 3-Room): ");
+        String flatType = Input.getStringInput(sc);
+        if (!applicant.isEligible(flatType)) {
+            System.out.println("You are not eligible to apply for this flat type.");
+            return;
+        }
+        
+        // Create a BTOapplication with the selected project and flat type
+        BTOapplication application = new BTOapplication(applicant, selectedProject, flatType);
+        applicant.setApplication(application);
+        MainUI.applications.add(application);
+        System.out.println("Application submitted successfully to project " + selectedProject.getProjectName());
     }
 }
