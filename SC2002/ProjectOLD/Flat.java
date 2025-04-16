@@ -1,4 +1,4 @@
-package SC2002.Project;
+package SC2002.ProjectOLD;
 /**
  * Represents an individual flat unit.
  */

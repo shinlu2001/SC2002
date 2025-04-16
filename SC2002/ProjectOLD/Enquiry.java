@@ -1,4 +1,4 @@
-package SC2002.Project;
+package SC2002.ProjectOLD;
 public class Enquiry {
     protected static int nextId = -1;
     private String content;
