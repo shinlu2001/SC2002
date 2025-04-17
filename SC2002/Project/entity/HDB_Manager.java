@@ -1,27 +1,24 @@
+// SC2002/Project/entity/HDB_Manager.java
 package SC2002.Project.entity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+
+import SC2002.Project.entity.enums.MaritalStatus;
+
+import java.util.HashSet;
+import java.util.Scanner;
 
 public class HDB_Manager extends User {
-    protected static int nextId = -1;
-    private final int managerID;
-    private String type = "MANAGER";
-    protected List<Project> managerProjects = new ArrayList<>();
-    
-    public HDB_Manager(String nric, String firstname, String lastname, String maritalStatus, int age) {
-        super(nric, firstname, lastname, maritalStatus, age);
-        this.managerID = ++nextId;
+    private final Set<Project> managed = new HashSet<>();
+
+    public HDB_Manager(String n,String f,String l,MaritalStatus ms,int age){
+        super(n,f,l,ms,age);
     }
-    
-    public int getManagerID() { return managerID; }
-    public List<Project> getManagerProjects() { return managerProjects; }
-    public void addProject(Project project) { managerProjects.add(project); }
-    
     @Override
-    public void printDetails() {
-        super.printDetails();
-        System.out.println("Account type: " + type);
-        System.out.println("Manager ID: " + managerID);
+    public void start_menu(Scanner sc) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'start_menu'");
     }
+
+    // TODO: manager‑specific behaviours
 }

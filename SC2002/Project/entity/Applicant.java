@@ -1,21 +1,16 @@
 package SC2002.Project.entity;
 
-public class Applicant extends ApplicantBase {
-    protected static int nextId = -1;
-    private int applicantID;
-    private String type = "APPLICANT";
-    
-    public Applicant(String nric, String firstname, String lastname, String maritalStatus, int age) {
-        super(nric, firstname, lastname, maritalStatus, age);
-        this.applicantID = ++nextId;
+import java.util.Scanner;
+
+import SC2002.Project.entity.enums.MaritalStatus;
+
+public class Applicant extends User {
+    public Applicant(String nric,String fn,String ln,MaritalStatus ms,int age){
+        super(nric,fn,ln,ms,age);
     }
-    
-    @Override
-    public void printDetails() {
-        super.printDetails();
-        System.out.println("Account type: " + type);
-        System.out.println("ApplicantID: " + applicantID);
+
+    public void start_menu(Scanner sc) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'start_menu'");
     }
-    
-    // Removed start_menu() to separate UI.
 }

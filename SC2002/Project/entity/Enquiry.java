@@ -1,42 +1,22 @@
+// SC2002/Project/entity/Enquiry.java
 package SC2002.Project.entity;
 
+import java.util.Optional;
+import SC2002.Project.util.IdGenerator;
+import SC2002.Project.entity.HDB_Manager;
+
 public class Enquiry {
-    protected static int nextId = -1;
-    private String content;
-    private String response = "";
-    private Project project = null;
-    private User createdBy;
-    private User repliedBy = null;
-    private String flatType = null;
-    private int enId;
-    
-    public Enquiry(User user, String content) {
-        this.createdBy = user;
-        this.content = content;
-        this.enId = ++nextId;
+    private final int id = IdGenerator.nextEnquiryId();
+    private final Applicant asker;
+    private final Project project;          // nullable for general enquiry
+    private final Optional<String> flatType;
+    private String question;
+    private String reply=null;
+    private HDB_Officer repliedBy=null;
+
+    public Enquiry(Applicant asker, Project project, Optional<String> flatType, String q){
+        this.asker=asker; this.project=project; this.flatType=flatType; this.question=q;
     }
-    
-    public void setEnquiry(String r) { content = r; }
-    public String getFlatType() { return flatType; }
-    public int getId() { return enId; }
-    public void setFlatType(String r) { flatType = r; }
-    public String getResponse() { return response; }
-    public String getEnquiry() { return content; }
-    public void setResponse(String r) { response = r; }
-    public void setStaffReply(User staff) { repliedBy = staff; }
-    public User getStaff() { return repliedBy; }
-    public User getCreatedByUser() { return createdBy; }
-    public void setProject(Project p) { project = p; }
-    public Project getProject() { return project; }
-    public void display() {
-        System.out.println("Enquiry: " + content);
-        System.out.println("Project: " + (project != null ? project.getProjectName() : null));
-        System.out.println("Flat Type: " + flatType);
-        if (repliedBy == null) {
-            System.out.println("No reply to this enquiry yet.");
-        } else {
-            System.out.println("Response: " + response);
-            System.out.println("Replied by: " + repliedBy.getFirstName());
-        }
-    }
+    public int getId(){ return id; }
+    public void answer(HDB_Officer o,String resp){ this.repliedBy=o; this.reply=resp; }
 }

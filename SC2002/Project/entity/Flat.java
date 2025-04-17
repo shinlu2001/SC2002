@@ -1,25 +1,21 @@
+// SC2002/Project/entity/Flat.java
 package SC2002.Project.entity;
 
+import SC2002.Project.entity.enums.FlatType;
+import SC2002.Project.util.IdGenerator;
+
 public class Flat {
-    private static int nextId = -1;
-    private Project project;
-    private int flatID;
-    private String flatType;
-    private double price;
-    private boolean isBooked;
-    
-    public Flat(Project p, String flatType, double price) {
-        this.flatID = ++nextId;
-        this.flatType = flatType;
-        this.price = price;
-        this.isBooked = false;
-        this.project = p;
+    private final int id = IdGenerator.nextFlatId();
+    private final Project project;
+    private final FlatType type;
+    private final double price;
+    private boolean booked=false;
+
+    public Flat(Project prj, FlatType type, double price){
+        this.project=prj; this.type=type; this.price=price;
     }
-    
-    public int getFlatID() { return flatID; }
-    public String getFlatType() { return flatType; }
-    public double getPrice() { return price; }
-    public boolean isBooked() { return isBooked; }
-    public void setBooked(boolean booked) { isBooked = booked; }
-    public Project getProject() { return project; }
+    public int getId(){ return id; }
+    public double getPrice(){ return price; }
+    public boolean isBooked(){ return booked; }
+    public void setBooked(boolean b){ booked=b; }
 }
