@@ -7,4 +7,9 @@ public class HDB_Officer extends Applicant {
     public HDB_Officer(String n,String f,String l,MaritalStatus ms,int age){
         super(n,f,l,ms,age);
     }
+
+    public void setCurrentRegistration(Registration reg) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setCurrentRegistration'");
+    }
 }

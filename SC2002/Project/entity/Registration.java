@@ -58,7 +58,7 @@ public class Registration {
         return String.format(
             "Registration[id=%d, officer=%s, project=%s, status=%s, date=%s]",
             id, officer.getFirstname() + " " + officer.getLastname(),
-            project.getProjectName(), status, requestDate
+            project.getName(), status, requestDate
         );
     }
 }
