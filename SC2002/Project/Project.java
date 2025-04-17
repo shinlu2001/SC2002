@@ -138,6 +138,7 @@ public class Project {
             if (newAvailableUnits >= 0 && newAvailableUnits <= totalUnits.get(index)) {
                 availableUnits.set(index, newAvailableUnits);
             } else {
+                // THIS EXECUTE WHEN APPLICATION WITHDRAWEL APPROVED?
                 System.out.println("Error: Available units must be between 0 and total units.");
             }
         } else {
