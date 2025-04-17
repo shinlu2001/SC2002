@@ -6,7 +6,6 @@ import SC2002.Project.entity.Enquiry;
 import SC2002.Project.entity.HDB_Officer;
 import SC2002.Project.entity.Project;
 import SC2002.Project.entity.enums.RegistrationStatus;
-
 import java.util.List;
 
 public class OfficerController {

@@ -14,5 +14,5 @@ public class Applicant extends User {
     public Optional<BTOApplication> getActiveApplication(){ return Optional.ofNullable(active); }
     public void setActiveApplication(BTOApplication app){ this.active = app; }
 
-    public void start_menu(java.util.Scanner sc){ /* unused: handled by ApplicantUI */ }
+    public static void start_menu(java.util.Scanner sc){ /* unused: handled by ApplicantUI */ }
 }

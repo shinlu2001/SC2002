@@ -1,49 +1,35 @@
-// SC2002/Project/boundary/util/MenuPrinter.java
 package SC2002.Project.boundary.util;
 
 import SC2002.Project.boundary.Menu;
+import SC2002.Project.entity.enums.*;
 
-public class MenuPrinter {
-    private final Menu menu;
+/**
+ * Convenience façade: all methods are static and simply forward to {@link Menu}.
+ */
+public final class MenuPrinter {
 
-    public MenuPrinter(Menu menu) {
-        this.menu = menu;
+    public static void printWelcomeMenu()     { Menu.printMenu(Menu.getWelcomeMenu()); }
+    public static void printLoginError()      { Menu.printMenu(Menu.getLoginError()); }
+    public static void printRoleSelection()   { Menu.printMenu(Menu.getRoleMenu()); }
+    public static void printApplicantMenu()   { Menu.printMenu(Menu.getApplicantMenu()); }
+    public static void printOfficerMenu()     { Menu.printMenu(Menu.getOfficerMenu()); }
+    public static void printManagerMenu()     { Menu.printMenu(Menu.getManagerMenu()); }
+    public static void printEnquiryMenu()     { Menu.printMenu(Menu.getEnquiryMenu()); }
+    public static void printReportMenu()      { Menu.printMenu(Menu.getReportMenu()); }
+    public static void printEditProjectMenu() { Menu.printMenu(Menu.getEditProjectMenu()); }
+    
+    public static void printRoleMenu(LoginResult res) {
+        if (res  == LoginResult.SUCCESS_APPLICANT) {
+            MenuPrinter.printApplicantMenu();
+        }
+        if (res  == LoginResult.SUCCESS_OFFICER) {
+            MenuPrinter.printOfficerMenu();
+        }
+        if (res  == LoginResult.SUCCESS_MANAGER) {
+            MenuPrinter.printManagerMenu();
+        }
     }
 
-    public void printWelcomeMenu() {
-        menu.printMenu(menu.getWelcomeMenu());
-    }
-
-    public void printLoginError() {
-        menu.printMenu(menu.getLoginError());
-    }
-
-    public void printRoleMenu() {
-        menu.printMenu(menu.getRoleMenu());
-    }
-
-    public void printApplicantMenu() {
-        menu.printMenu(menu.getApplicantMenu());
-    }
-
-    public void printOfficerMenu() {
-        menu.printMenu(menu.getOfficerMenu());
-    }
-
-    public void printManagerMenu() {
-        menu.printMenu(menu.getManagerMenu());
-    }
-
-    public void printEnquiryMenu() {
-        menu.printMenu(menu.getEnquiryMenu());
-    }
-
-    public void printReportMenu() {
-        menu.printMenu(menu.getReportMenu());
-    }
-
-    /** new: for the manager’s edit‑project submenu */
-    public void printEditProjectMenu() {
-        menu.printMenu(menu.getEditProjectMenu());
-    }
+    // no instances allowed
+    private MenuPrinter() { }
 }

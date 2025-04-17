@@ -57,7 +57,7 @@ public class Registration {
     public String toString() {
         return String.format(
             "Registration[id=%d, officer=%s, project=%s, status=%s, date=%s]",
-            id, officer.getFirstname() + " " + officer.getLastname(),
+            id, officer.getFirstName() + " " + officer.getLastName(),
             project.getName(), status, requestDate
         );
     }

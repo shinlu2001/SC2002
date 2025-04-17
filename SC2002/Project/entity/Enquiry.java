@@ -19,4 +19,12 @@ public class Enquiry {
     }
     public int getId(){ return id; }
     public void answer(HDB_Officer o,String resp){ this.repliedBy=o; this.reply=resp; }
+    public User getAskedBy() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAskedBy'");
+    }
+    public Object getProject() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProject'");
+    }
 }

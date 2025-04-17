@@ -26,11 +26,11 @@ public abstract class User {
         return nric;
     }
 
-    public String getFirstname() {
+    public String getFirstName() {
         return firstName;
     }
 
-    public String getLastname() {
+    public String getLastName() {
         return lastName;
     }
 

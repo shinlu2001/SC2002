@@ -36,7 +36,7 @@ public class ProjectController {
                                 open, close, visible, officerSlots);
         p.setManager(manager);
         manager.addProject(p);
-        ds.projects.add(p);
+        ds.getProjects().add(p);
         return p;
     }
 
@@ -50,7 +50,7 @@ public class ProjectController {
     }
 
     public List<Project> listAll() {
-        return List.copyOf(ds.projects);
+        return List.copyOf(ds.getProjects());
     }
 
     /* ------------------------------------------------------------------
