@@ -5,48 +5,84 @@ import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.*;
+
 import SC2002.Project.entity.*;
-import SC2002.Project.entity.enums.*;
+import SC2002.Project.entity.enums.MaritalStatus;
 
 public final class CSVReader {
     private CSVReader() {}
 
+    private static final Path BASE = Paths.get("SC2002/Project/files");
+
     public static void loadAll() {
         DataStore ds = DataStore.getInstance();
-        Path base = Paths.get("SC2002/Project/files");
-        try {
-            // === users ===
-            Files.lines(base.resolve("ApplicantList.csv")).skip(1).forEach(l -> {
-                String[] t = l.split(",");
-                ds.users.add(new Applicant(t[1], t[0], "", MaritalStatus.valueOf(t[3].toUpperCase()), Integer.parseInt(t[2])));
-            });
-            Files.lines(base.resolve("OfficerList.csv")).skip(1).forEach(l -> {
-                String[] t = l.split(",");
-                ds.users.add(new HDB_Officer(t[1], t[0], "", MaritalStatus.valueOf(t[3].toUpperCase()), Integer.parseInt(t[2])));
-            });
-            Files.lines(base.resolve("ManagerList.csv")).skip(1).forEach(l -> {
-                String[] t = l.split(",");
-                ds.users.add(new HDB_Manager(t[1], t[0], "", MaritalStatus.valueOf(t[3].toUpperCase()), Integer.parseInt(t[2])));
-            });
+        readUsers("ApplicantList.csv", "APPLICANT", ds);
+        readUsers("OfficerList.csv",  "OFFICER",   ds);
+        readUsers("ManagerList.csv",  "MANAGER",   ds);
+        readProjects(ds);
+    }
 
-            // === projects (trimmed) ===
-            Files.lines(base.resolve("ProjectList.csv")).skip(1).forEach(l -> {
-                String[] t = l.split(",");
-                List<String> flatTypes = List.of("2-ROOM","3-ROOM");
-                List<Integer> totals   = List.of(Integer.parseInt(t[3]), Integer.parseInt(t[4]));
-                Project p = new Project(
-                        t[0],                       // name
-                        t[1],                       // neighbourhood
-                        flatTypes,
-                        totals,
-                        LocalDate.parse(t[5]),
-                        LocalDate.parse(t[6]),
-                        Boolean.parseBoolean(t[7]),
-                        Integer.parseInt(t[8]));
-                ds.projects.add(p);
-            });
+    /* -------- helpers -------- */
+
+    private static void readUsers(String file, String role, DataStore ds) {
+        Path p = BASE.resolve(file);
+        try (BufferedReader br = Files.newBufferedReader(p)) {
+            br.readLine();                            // skip header
+            String line;
+            while ((line = br.readLine()) != null && !line.isBlank()) {
+                // remove potential BOM on first line
+                line = line.replace("\uFEFF", "");
+                String[] t = line.split(",", -1);     // keep empty columns
+                String fullName = t[0].trim();
+                String nric     = t[1].trim();
+                int age         = Integer.parseInt(t[2].trim());
+                MaritalStatus ms= MaritalStatus.valueOf(t[3].trim().toUpperCase());
+                String[] nameParts = fullName.split("\\s+",2);
+                String first = nameParts[0];
+                String last  = nameParts.length>1 ? nameParts[1] : "";
+
+                switch (role) {
+                    case "APPLICANT" -> ds.users.add(new Applicant(nric,first,last,ms,age));
+                    case "OFFICER"   -> ds.users.add(new HDB_Officer(nric,first,last,ms,age));
+                    case "MANAGER"   -> ds.users.add(new HDB_Manager(nric,first,last,ms,age));
+                }
+            }
         } catch (IOException e) {
-            System.err.println("CSV load error: " + e.getMessage());
+            System.err.println("Could not read " + file + ": " + e.getMessage());
+        }
+    }
+
+    private static void readProjects(DataStore ds) {
+        Path p = BASE.resolve("ProjectList.csv");
+        try (BufferedReader br = Files.newBufferedReader(p)) {
+            br.readLine();                            // skip header
+            String line;
+            while ((line = br.readLine()) != null && !line.isBlank()) {
+                line = line.replace("\uFEFF", "");
+                String[] t = line.split(",", -1);
+                String name         = t[0].trim();
+                String hood         = t[1].trim();
+                String type1        = t[2].trim().toUpperCase();
+                int    units1       = Integer.parseInt(t[3].trim());
+                String type2        = t[4].trim().toUpperCase();
+                int    units2       = Integer.parseInt(t[5].trim());
+                LocalDate open      = LocalDate.parse(t[6].trim());
+                LocalDate close     = LocalDate.parse(t[7].trim());
+                boolean visible     = true;
+                int officerSlots    = Integer.parseInt(t[9].trim());
+
+                Project prj = new Project(
+                        name,
+                        hood,
+                        List.of(type1,type2),
+                        List.of(units1,units2),
+                        open, close,
+                        visible,
+                        officerSlots);
+                ds.projects.add(prj);
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read ProjectList.csv: " + e.getMessage());
         }
     }
 }

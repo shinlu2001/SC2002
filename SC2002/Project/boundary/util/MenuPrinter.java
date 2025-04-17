@@ -1,13 +1,45 @@
-// SC2002/Project/boundary/util/MenuPrinter.java
 package SC2002.Project.boundary.util;
 
-/** Pretty console menu & banner rendering. */
-public final class MenuPrinter {
-    private MenuPrinter() {}
+import SC2002.Project.boundary.Menu;
 
-    public static void title(String text) {
-        System.out.println("\n==== " + text + " ====");
+public class MenuPrinter {
+    private final Menu menu;
+
+    public MenuPrinter(Menu menu) {
+        this.menu = menu;
     }
 
-    // TODO: other helpers (options list, error, success colouring)
+    public void printWelcome() {
+        menu.printMenu(menu.getWelcomeMenu());
+    }
+
+    public void printLoginError() {
+        menu.printMenu(menu.getLoginError());
+    }
+
+    public void printRoleSelection() {
+        menu.printMenu(menu.getRoleMenu());
+    }
+
+    public void printApplicant() {
+        menu.printMenu(menu.getApplicantMenu());
+    }
+
+    public void printOfficer() {
+        menu.printMenu(menu.getOfficerMenu());
+    }
+
+    public void printManager() {
+        menu.printMenu(menu.getManagerMenu());
+    }
+
+    public void printEnquiry() {
+        menu.printMenu(menu.getEnquiryMenu());
+    }
+
+    public void printReport() {
+        menu.printMenu(menu.getReportMenu());
+    }
+
+
 }

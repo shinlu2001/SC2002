@@ -3,7 +3,7 @@ package SC2002.Project.entity;
 
 import java.util.Optional;
 import SC2002.Project.util.IdGenerator;
-import SC2002.Project.entity.HDB_Manager;
+import SC2002.Project.entity.*;
 
 public class Enquiry {
     private final int id = IdGenerator.nextEnquiryId();

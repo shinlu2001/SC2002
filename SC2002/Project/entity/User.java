@@ -1,30 +1,63 @@
-// SC2002/Project/entity/User.java
 package SC2002.Project.entity;
 
-import java.util.Scanner;
-import SC2002.Project.entity.enums.MaritalStatus;   // <‑‑ add this
+import SC2002.Project.entity.enums.MaritalStatus;
 
+/**
+ * Represents a system user with basic identity and authentication.
+ */
 public abstract class User {
-    protected final String nric;
-    protected final String firstname;
-    protected final String lastname;
-    protected String password = "password";
-    protected int age;
-    protected MaritalStatus marital;
+    private String nric;
+    private String firstName;
+    private String lastName;
+    private String password = "password"; // Default password
+    private MaritalStatus maritalStatus;
+    private int age;
 
-    protected User(String nric,String fn,String ln,MaritalStatus ms,int age){
-        this.nric=nric; this.firstname=fn; this.lastname=ln;
-        this.marital=ms; this.age=age;
+    public User(String nric, String firstName, String lastName, MaritalStatus maritalStatus, int age) {
+        this.nric = nric;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.maritalStatus = maritalStatus;
+        this.age = age;
     }
 
-    public String get_nric()        { return nric; }
-    public String get_firstname()   { return firstname; }
-    public String get_lastname()    { return lastname; }
-    public int    get_age()         { return age; }
-    public String get_maritalstatus(){ return marital.name(); }
+    // Getters
+    public String getNric() {
+        return nric;
+    }
 
-    public void changePassword(String newPwd){ password=newPwd; }
-    public boolean verify_password(String pwd){ return password.equals(pwd); }
+    public String getFirstname() {
+        return firstName;
+    }
 
-    public abstract void start_menu(Scanner sc);
+    public String getLastname() {
+        return lastName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public MaritalStatus getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    // Setters / Actions
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public boolean verifyPassword(String password) {
+        return this.password.equals(password);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("NRIC: %s%nFirst name: %s%nLast name: %s%nAge: %d%nMarital status: %s", 
+                             nric, firstName, lastName, age, maritalStatus);
+    }
 }
