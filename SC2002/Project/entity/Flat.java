@@ -18,4 +18,6 @@ public class Flat {
     public double getPrice(){ return price; }
     public boolean isBooked(){ return booked; }
     public void setBooked(boolean b){ booked=b; }
+    public FlatType getType() { return type; }
+    public Project getProject() { return project; }
 }

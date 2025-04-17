@@ -1,94 +1,63 @@
-// SC2002/Project/boundary/LoginUI.java
 package SC2002.Project.boundary;
 
 import java.util.Scanner;
 
-import SC2002.Project.control.AuthController;
-import SC2002.Project.entity.Applicant;
+import SC2002.Project.BTOSystem;
 import SC2002.Project.boundary.util.Input;
 import SC2002.Project.boundary.util.Input.InputExitException;
-
+import SC2002.Project.control.AuthController;
+import SC2002.Project.entity.*;
+import SC2002.Project.entity.enums.*;
 public class LoginUI {
-    private final Menu menu = new Menu();
-    private final AuthController auth = new AuthController();
+    private static final AuthController auth = new AuthController();
 
-    public void start(Scanner sc) {
+    public static void start(Scanner sc) {
+        String nric;
         while (true) {
-            menu.printMenu(menu.getWelcomeMenu());
-            int choice;
             try {
-                choice = Input.getIntInput(sc);
+                System.out.print("NRIC: ");
+                nric = Input.getStringInput(sc);
+                if (nric.matches("^[A-Za-z]\\d{7}[A-Za-z]$")) {
+                    break;  // valid NRIC
+                }
+                System.out.println("Invalid NRIC. Format must be: letter + 7 digits + letter (e.g. S1234567A).");
             } catch (InputExitException e) {
-                System.out.println("Operation cancelled. Exiting login.");
+                System.out.println("Login cancelled.");
                 return;
             }
+        }
 
-            switch (choice) {
-                case 1:
-                    handleLogin(sc);
-                    break;
-                case 2:
-                    handleRegistration(sc);
-                    break;
-                case 3:
-                    // TODO: fetch-from-excel flow
-                    break;
-                case 4:
-                    System.out.println("Goodbye!");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+        String pwd;
+        while (true) {
+            try {
+                System.out.print("Enter password: ");
+                pwd = Input.getStringInput(sc);
+                break;
+            } catch (InputExitException e) {
+                System.out.println("Login cancelled.");
+                return;
             }
         }
-    }
+            LoginResult res = auth.login(nric, pwd);
+            switch (res) {
+                case SUCCESS_APPLICANT -> {
+                    Applicant.start_menu(sc);
+                }
+                case SUCCESS_OFFICER -> {
+                    HDB_Officer.start_menu(sc);
+                }
+                case SUCCESS_MANAGER -> {
+                    HDB_Manager.start_menu(sc);
+                }
 
-    private void handleLogin(Scanner sc) {
-        try {
-            System.out.print("Enter NRIC: ");
-            String nric = Input.getStringInput(sc);
-
-            System.out.print("Enter password: ");
-            String pwd = Input.getStringInput(sc);
-
-            String role = auth.login(nric, pwd);
-            if (role == null) {
-                menu.printMenu(menu.getLoginError());
-            } else {
-                new MainMenuUI().start(sc);
+                case INVALID_PASSWORD -> {
+                    System.out.println("Incorrect password. Please try again\n");
+                    BTOSystem.MainMenu();
+                }
+                case USER_NOT_FOUND -> {
+                    System.out.println("Account does not exist. Please try again\n");
+                    BTOSystem.MainMenu();
+                }
             }
-        } catch (InputExitException e) {
-            System.out.println("Operation cancelled. Returning to main menu.");
-        }
-    }
-
-    private void handleRegistration(Scanner sc) {
-        try {
-            System.out.print("Full name: ");
-            String fullName = Input.getStringInput(sc);
-            String[] parts = fullName.split("\\s+", 2);
-            String first = parts[0];
-            String last  = parts.length > 1 ? parts[1] : "";
-
-            System.out.print("NRIC: ");
-            String nric = Input.getStringInput(sc);
-
-            System.out.print("Age: ");
-            int age = Input.getIntInput(sc);
-
-            System.out.print("Marital status (SINGLE/MARRIED): ");
-            String msRaw = Input.getStringInput(sc).toUpperCase();
-            var ms = SC2002.Project.entity.enums.MaritalStatus.valueOf(msRaw);
-
-            Applicant a = auth.registerApplicant(nric, first, last, ms, age);
-            if (a == null) {
-                System.out.println("NRIC already exists. Registration failed.");
-            } else {
-                System.out.println("Registration successful! Default password = \"password\"");
-            }
-        } catch (InputExitException e) {
-            System.out.println("Operation cancelled. Returning to main menu.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid marital status. Registration aborted.");
-        }
     }
 }

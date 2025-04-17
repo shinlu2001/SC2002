@@ -23,4 +23,14 @@ public class BTOApplication {
     public void reject(){ status=ApplicationStatus.REJECTED; }
     public void withdraw(){ withdrawalReq=true; status=ApplicationStatus.WITHDRAWN; }
     public void book(Flat f){ bookedFlat=f; status=ApplicationStatus.BOOKED; }
+
+    public User getApplicant() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getApplicant'");
+    }
+
+    public Project getProject() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getProject'");
+    }
 }
