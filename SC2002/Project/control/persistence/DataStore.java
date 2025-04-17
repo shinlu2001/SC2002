@@ -12,6 +12,8 @@ public final class DataStore {
     public final List<BTOApplication> applications = new ArrayList<>();
     public final List<Enquiry>        enquiries    = new ArrayList<>();
     public final List<Flat>           flats        = new ArrayList<>();
+    public final List<Registration> registrations = new ArrayList<>();
+
 
     private DataStore() {}
 

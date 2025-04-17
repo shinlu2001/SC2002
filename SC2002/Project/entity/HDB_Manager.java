@@ -14,7 +14,6 @@ public class HDB_Manager extends User {
     public HDB_Manager(String n,String f,String l,MaritalStatus ms,int age){
         super(n,f,l,ms,age);
     }
-    @Override
     public void start_menu(Scanner sc) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'start_menu'");

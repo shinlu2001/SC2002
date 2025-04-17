@@ -28,13 +28,13 @@ public final class CSVWriter {
         try (BufferedWriter bw = Files.newBufferedWriter(out)) {
             bw.write("Name,NRIC,Age,Marital Status,Password\n");
             for (User u : ds.users.stream().filter(clazz::isInstance).collect(Collectors.toList())) {
-                String fullName = u.getFirstname() + " " + u.getFirstname();
+                String fullName = u.getFirstname() + " " + u.getLastname();
                 bw.write(String.join(",",
-                        fullName,
-                        u.getNric(),
-                        String.valueOf(u.getAge()),
-                        u.getMaritalStatus(),
-                        "password") + "\n");
+                fullName,
+                u.getNric(),
+                String.valueOf(u.getAge()),
+                u.getMaritalStatus().toString(),
+                "password") + "\n");
             }
         } catch (IOException e) {
             System.err.println("Could not write " + outFile + ": " + e.getMessage());

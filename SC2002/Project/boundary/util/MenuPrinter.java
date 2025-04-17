@@ -1,3 +1,4 @@
+// SC2002/Project/boundary/util/MenuPrinter.java
 package SC2002.Project.boundary.util;
 
 import SC2002.Project.boundary.Menu;
@@ -9,7 +10,7 @@ public class MenuPrinter {
         this.menu = menu;
     }
 
-    public void printWelcome() {
+    public void printWelcomeMenu() {
         menu.printMenu(menu.getWelcomeMenu());
     }
 
@@ -17,29 +18,32 @@ public class MenuPrinter {
         menu.printMenu(menu.getLoginError());
     }
 
-    public void printRoleSelection() {
+    public void printRoleMenu() {
         menu.printMenu(menu.getRoleMenu());
     }
 
-    public void printApplicant() {
+    public void printApplicantMenu() {
         menu.printMenu(menu.getApplicantMenu());
     }
 
-    public void printOfficer() {
+    public void printOfficerMenu() {
         menu.printMenu(menu.getOfficerMenu());
     }
 
-    public void printManager() {
+    public void printManagerMenu() {
         menu.printMenu(menu.getManagerMenu());
     }
 
-    public void printEnquiry() {
+    public void printEnquiryMenu() {
         menu.printMenu(menu.getEnquiryMenu());
     }
 
-    public void printReport() {
+    public void printReportMenu() {
         menu.printMenu(menu.getReportMenu());
     }
 
-
+    /** new: for the manager’s edit‑project submenu */
+    public void printEditProjectMenu() {
+        menu.printMenu(menu.getEditProjectMenu());
+    }
 }

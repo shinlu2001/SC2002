@@ -57,7 +57,6 @@ public abstract class User {
 
     @Override
     public String toString() {
-        return String.format("NRIC: %s%nFirst name: %s%nLast name: %s%nAge: %d%nMarital status: %s", 
-                             nric, firstName, lastName, age, maritalStatus);
+        return String.format("NRIC: %s%nFirst name: %s%nLast name: %s%nAge: %d%nMarital status: %s", nric, firstName, lastName, age, maritalStatus);
     }
 }

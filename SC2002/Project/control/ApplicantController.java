@@ -1,66 +1,93 @@
 // SC2002/Project/control/ApplicantController.java
 package SC2002.Project.control;
 
-import java.time.LocalDate;
+import SC2002.Project.entity.Applicant;
+import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.Enquiry;
+import SC2002.Project.entity.Project;
+
 import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
 
-import SC2002.Project.control.persistence.DataStore;
-import SC2002.Project.entity.*;
-import SC2002.Project.entity.enums.*;
+public class ApplicantController {
+    private final Applicant applicant;
 
-/** Pure business logic for an Applicant (no console I/O). */
-public final class ApplicantController {
-
-    private static final ApplicantController INSTANCE = new ApplicantController();
-    private final DataStore ds = DataStore.getInstance();
-    private ApplicantController() {}
-    public static ApplicantController getInstance() { return INSTANCE; }
-
-    /* ────────────────────────── domain rules ────────────────────────── */
-
-    /** Return the list of projects this applicant can *see* today. */
-    public List<Project> eligibleProjects(Applicant a) {
-        LocalDate today = LocalDate.now();
-        return ds.projects.stream()
-                .filter(Project::isVisible)
-                .filter(p -> p.isOpen(today))
-                .filter(p -> canApply(a, p))
-                .toList();
+    public ApplicantController(Applicant applicant) {
+        // TODO
+        this.applicant = applicant;
     }
 
-    /** Can the applicant apply for `flatType` in project p? */
-    public boolean canApply(Applicant a, Project p, FlatType flatType) {
-        if (a.get_maritalstatus().equals("SINGLE")) {
-            return a.get_age() >= 35 && flatType == FlatType.TWO_ROOM;
-        }
-        return a.get_age() >= 21;                    // married
+    /** 1. Apply for a project */
+    public boolean applyForProject(int projectId, String flatType) {
+        // TODO
+        return false;
     }
 
-    /** Overload just for project‑level eligibility (any flat). */
-    private boolean canApply(Applicant a, Project p) {
-        if (a.get_maritalstatus().equals("SINGLE"))
-            return a.get_age() >= 35;
-        return a.get_age() >= 21;
+    /** 2. Manage active application: view details */
+    public BTOApplication viewCurrentApplication() {
+        // TODO
+        return null;
     }
 
-    /** Creates an application if allowed; returns Optional of the new application. */
-    public Optional<BTOApplication> apply(Applicant a, int projectId, FlatType type) {
-        if (a.getActiveApplication().isPresent()) return Optional.empty();
-
-        Project p = ds.projects.stream().filter(prj -> prj.getId() == projectId).findFirst().orElse(null);
-        if (p == null || !p.isVisible())            return Optional.empty();
-        if (!canApply(a, p, type))                  return Optional.empty();
-
-        BTOApplication app = new BTOApplication(a, p, type);
-        ds.applications.add(app);
-        a.setActiveApplication(app);
-        return Optional.of(app);
+    /** 2b. Manage active application: book if status==SUCCESSFUL */
+    public boolean requestBookingForCurrentApplication() {
+        // TODO
+        return false;
     }
 
-    /** Withdraw the active application (if any). */
-    public boolean withdraw(Applicant a) {
-        return a.getActiveApplication().map(app -> { app.withdraw(); return true; }).orElse(false);
+    /** 3. View only eligible listings */
+    public List<Project> listEligibleProjects() {
+        // TODO
+        return null;
+    }
+
+    /** 4. View all listings */
+    public List<Project> listAllVisibleProjects() {
+        // TODO
+        return null;
+    }
+
+    /** 5. Withdraw application */
+    public boolean withdrawApplication() {
+        // TODO
+        return false;
+    }
+
+    /** 6a. Make general enquiry */
+    public void submitGeneralEnquiry(String content) {
+        // TODO
+    }
+
+    /** 6b. Make project-related enquiry */
+    public void submitProjectEnquiry(int projectId, String content, String flatType) {
+        // TODO
+    }
+
+    /** 6c. View all enquiries */
+    public List<Enquiry> listEnquiries() {
+        // TODO
+        return null;
+    }
+
+    /** 6d. Edit an enquiry (if not replied) */
+    public boolean editEnquiry(int enquiryId, String newContent) {
+        // TODO
+        return false;
+    }
+
+    /** 6e. Delete an enquiry (if not replied) */
+    public boolean deleteEnquiry(int enquiryId) {
+        // TODO
+        return false;
+    }
+
+    /** 7. View account details */
+    public Applicant getApplicant() {
+        return applicant;
+    }
+
+    /** 8. Change account password */
+    public boolean changePassword(String oldPwd, String newPwd) {
+        // TODO
+        return false;
     }
 }
