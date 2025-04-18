@@ -26,13 +26,13 @@ public class ApplicantUI {
                 int choice = Input.getIntInput(sc);
                 switch (choice) {
                     case 1 -> applyForProject(sc, applicant, applicantController, projectController);
-                    case 2 -> manageActiveApplication(applicant);
-                    case 3 -> viewEligibleListings(applicant, applicantController);
-                    case 4 -> viewAllListings(projectController, applicantController, applicant);
+                    case 2 -> viewActiveApplication(applicant); // done
+                    case 3 -> viewEligibleListings(applicant, applicantController); // done
+                    case 4 -> viewAllListings(projectController, applicantController, applicant); // done
                     case 5 -> withdrawApplication(sc, applicant, applicantController);
                     case 6 -> EnquiryUI.start(sc, applicant);
-                    case 7 -> viewAccountDetails(applicant);
-                    case 8 -> AuthUI.changePassword(sc, applicant);
+                    case 7 -> viewAccountDetails(applicant); // done
+                    case 8 -> AuthUI.changePassword(sc, applicant); // done
                     case 9 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
@@ -52,6 +52,11 @@ public class ApplicantUI {
             System.out.println("You are not eligible for any current projects.");
             return;
         }
+
+        if (ctrl.hasActiveApplication()) {
+            return;
+        }
+        
         System.out.println("\nEligible Projects for Application:");
         MenuPrinter.printProjectTableEligible(eligible, applicant, ctrl);
 
@@ -81,7 +86,7 @@ public class ApplicantUI {
         }
     }
 
-    private static void manageActiveApplication(Applicant applicant) {
+    private static void viewActiveApplication(Applicant applicant) {
         Optional<BTOApplication> oa = applicant.getCurrentApplication();
         if (oa.isEmpty()) {
             System.out.println("You have no active application.");

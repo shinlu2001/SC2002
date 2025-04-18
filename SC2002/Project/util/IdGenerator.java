@@ -47,6 +47,10 @@ public final class IdGenerator {
         return nextOfficerId++;
     }
 
+    public static int nextApplicantId() {
+        return nextApplicantId++;
+    }   
+
     // Reset all counters (useful for testing)
     public static void resetAll() {
         nextProjectId = 1;

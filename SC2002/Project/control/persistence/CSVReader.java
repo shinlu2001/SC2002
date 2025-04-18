@@ -10,17 +10,21 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
- * Loads data from CSV files into in-memory DataStore.
+ * Loads data from CSV files into in-memory DataStore
  */
 public final class CSVReader {
     private CSVReader() {}
 
     private static final Path BASE = Paths.get("SC2002/Project/files");
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("d/M/yyyy");
+    /** Track project names to avoid duplicates */
+    private static final Set<String> PROJECT_NAMES = new HashSet<>();
 
     public static void loadAll() {
         DataStore ds = DataStore.getInstance();
@@ -28,7 +32,6 @@ public final class CSVReader {
         readUsers("OfficerList.csv",   "OFFICER",   ds);
         readUsers("ManagerList.csv",   "MANAGER",   ds);
         readProjects(ds);
-        // TODO: readFlats, readApplications, readEnquiries…
     }
 
     private static void readUsers(String file, String role, DataStore ds) {
@@ -47,24 +50,24 @@ public final class CSVReader {
                 String lastName  = parts.length > 1 ? parts[1] : "";
 
                 if (ds.findUserByNric(nric).isPresent()) {
-                    System.err.println("Duplicate NRIC "+ nric +", skipping");
+                    System.err.println("Duplicate NRIC " + nric + ", skipping");
                     continue;
                 }
 
                 switch (role) {
-                    case "APPLICANT":
-                        ds.getUsers().add(new Applicant(nric, firstName, lastName, ms, age));
-                        break;
-                    case "OFFICER":
-                        ds.getUsers().add(new HDB_Officer(nric, firstName, lastName, ms, age));
-                        break;
-                    case "MANAGER":
-                        ds.getUsers().add(new HDB_Manager(nric, firstName, lastName, ms, age));
-                        break;
+                    case "APPLICANT" -> ds.getUsers().add(
+                        new Applicant(nric, firstName, lastName, ms, age)
+                    );
+                    case "OFFICER"   -> ds.getUsers().add(
+                        new HDB_Officer(nric, firstName, lastName, ms, age)
+                    );
+                    case "MANAGER"   -> ds.getUsers().add(
+                        new HDB_Manager(nric, firstName, lastName, ms, age)
+                    );
                 }
             }
         } catch (IOException e) {
-            System.err.println("Could not read "+ file +": "+ e.getMessage());
+            System.err.println("Could not read " + file + ": " + e.getMessage());
         }
     }
 
@@ -74,9 +77,15 @@ public final class CSVReader {
             br.readLine(); // header
             String line;
             while ((line = br.readLine()) != null && !line.isBlank()) {
-                String[] t = line.replace("\uFEFF","").split(",", -1);
+                String[] t = line.replace("\uFEFF", "").split(",", -1);
 
-                String name          = t[0].trim();
+                String name = t[0].trim();
+                // skip duplicates by project name
+                if (!PROJECT_NAMES.add(name)) {
+                    System.err.println("Duplicate project name '" + name + "', skipping");
+                    continue;
+                }
+
                 String neighbourhood = t[1].trim();
                 String type1         = t[2].trim().toUpperCase();
                 int units1           = Integer.parseInt(t[3].trim());
@@ -106,8 +115,8 @@ public final class CSVReader {
 
                 // link manager
                 Optional<HDB_Manager> mgrOpt = ds.findUserByNric(mgrNric)
-                                                .filter(u -> u instanceof HDB_Officer == false)
-                                                .map(u -> (HDB_Manager)u);
+                        .filter(u -> !(u instanceof HDB_Officer))
+                        .map(u -> (HDB_Manager)u);
                 mgrOpt.ifPresent(m -> {
                     prj.setManager(m);
                     m.addManagedProject(prj);
@@ -117,7 +126,7 @@ public final class CSVReader {
 
                 // initial approved officers (col 12)
                 if (t.length > 12 && !t[12].isBlank()) {
-                    String raw = t[12].replace("\"","").trim();
+                    String raw = t[12].replace("\"", "").trim();
                     for (String offName : raw.split("\\s*[,;]\\s*")) {
                         ds.findUserByNric(offName)
                           .filter(u -> u instanceof HDB_Officer)
@@ -135,14 +144,14 @@ public final class CSVReader {
 
                 // explicit registration column (13–15)
                 if (t.length > 15) {
-                    String offNric = t[13].trim();
-                    String projIdStr = t[14].trim();
-                    String rs = t[15].trim().toUpperCase();
+                    String offNric  = t[13].trim();
+                    String projIdStr= t[14].trim();
+                    String rs       = t[15].trim().toUpperCase();
                     try {
                         int pid = Integer.parseInt(projIdStr);
                         Optional<HDB_Officer> offOpt = ds.findUserByNric(offNric)
-                                                        .filter(u -> u instanceof HDB_Officer)
-                                                        .map(u -> (HDB_Officer)u);
+                                .filter(u -> u instanceof HDB_Officer)
+                                .map(u -> (HDB_Officer)u);
                         Optional<Project> pOpt = ds.findProjectById(pid);
 
                         if (offOpt.isPresent() && pOpt.isPresent()) {
@@ -158,12 +167,12 @@ public final class CSVReader {
                             offOpt.get().addRegistration(reg);
                         }
                     } catch (NumberFormatException ex) {
-                        System.err.println("Invalid Project ID in registration: "+ projIdStr);
+                        System.err.println("Invalid Project ID in registration: " + projIdStr);
                     }
                 }
             }
         } catch (IOException e) {
-            System.err.println("Could not read ProjectList.csv: "+ e.getMessage());
+            System.err.println("Could not read ProjectList.csv: " + e.getMessage());
         }
     }
 }

@@ -128,7 +128,7 @@ public class BTOApplication {
     @Override
     public String toString() {
         return String.format(
-            "Application ID: %d | Applicant: %s %s | Project: %s | Room: %s | Status: %s%s%s",
+            "Application ID: %d | Applicant Name: %s %s | Project Name: %s | Room: %s | Status: %s%s%s",
             id,
             applicant.getFirstName(),
             applicant.getLastName(),

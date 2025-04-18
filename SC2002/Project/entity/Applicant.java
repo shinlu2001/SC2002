@@ -2,6 +2,7 @@ package SC2002.Project.entity;
 
 import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.MaritalStatus;
+import SC2002.Project.util.IdGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,12 +12,24 @@ import java.util.Optional;
  * Represents an applicant user in the BTO system.
  */
 public class Applicant extends User {
+    private final int id;  // unique applicant ID
     private BTOApplication currentApplication; // may be null
     private final List<BTOApplication> applicationHistory;
 
+    /**
+     * Constructs a new Applicant and assigns a unique ID.
+     */
     public Applicant(String nric, String firstName, String lastName, MaritalStatus maritalStatus, int age) {
         super(nric, firstName, lastName, maritalStatus, age);
+        this.id = IdGenerator.nextApplicantId();
         this.applicationHistory = new ArrayList<>();
+    }
+
+    /**
+     * @return this applicant's unique ID.
+     */
+    public int getId() {
+        return id;
     }
 
     /**
@@ -101,12 +114,13 @@ public class Applicant extends User {
     @Override
     public String toString() {
         return String.format(
-            "Applicant %s %s | NRIC: %s | Age: %d | Marital: %s",
+            "Name: %s %s | NRIC: %s | Age: %d | Marital: %s | Applicant ID: %d",
             getFirstName(),
             getLastName(),
             getNric(),
             getAge(),
-            getMaritalStatus()
+            getMaritalStatus(),
+            id
         );
     }
 }

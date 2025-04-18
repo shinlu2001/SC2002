@@ -18,14 +18,14 @@ public class LoginUI {
         // NRIC
         String nric;
         while (true) {
-            System.out.print("NRIC: ");
+            System.out.print("Please enter your NRIC: ");
             nric = Input.getStringInput(sc);
             if (nric.matches("^[A-Za-z]\\d{7}[A-Za-z]$")) break;
             System.out.println("Invalid NRIC format.");
         }
 
         // Password
-        System.out.print("Enter password: ");
+        System.out.print("Please enter your password: ");
         String pwd = Input.getStringInput(sc);
 
         // Authenticate

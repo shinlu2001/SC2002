@@ -1,41 +1,96 @@
-// SC2002/Project/control/ApplicationController.java
 package SC2002.Project.control;
 
+import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.Applicant;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.Project;
 import SC2002.Project.entity.enums.ApplicationStatus;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * Centralized controller for creating and querying BTO applications.
+ */
 public class ApplicationController {
-    /** Create a new application */
-    public BTOApplication createApplication(Applicant a, Project p, String flatType) {
-        // TODO
-        return null;
+
+    private final DataStore dataStore = DataStore.getInstance();
+
+    /**
+     * Create a new application for an applicant on a project with a flat type.
+     * @return the newly created BTOApplication, or null if creation failed.
+     */
+    public BTOApplication createApplication(Applicant applicant, Project project, String flatType) {
+        // Delegate eligibility, uniqueness, etc., to the BTOApplication constructor and domain logic
+        BTOApplication application = new BTOApplication(applicant, project, flatType);
+        dataStore.getApplications().add(application);
+        applicant.setCurrentApplication(application);
+        return application;
     }
 
-    /** Find by ID */
+    /**
+     * Find an application by its unique ID.
+     */
     public BTOApplication findById(int id) {
-        // TODO
-        return null;
+        return dataStore.getApplications().stream()
+                .filter(app -> app.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
-    /** List applications for a given project */
+    /**
+     * List all applications submitted for a given project.
+     */
     public List<BTOApplication> listApplicationsForProject(int projectId) {
-        // TODO
-        return null;
+        return dataStore.getApplications().stream()
+                .filter(app -> app.getProject().getId() == projectId)
+                .collect(Collectors.toList());
     }
 
-    /** List applications by applicant */
+    /**
+     * List all applications submitted by a given applicant.
+     */
     public List<BTOApplication> listApplicationsByApplicant(int applicantId) {
-        // TODO
-        return null;
+        return dataStore.getApplications().stream()
+                .filter(app -> app.getApplicant().getId() == applicantId)
+                .collect(Collectors.toList());
     }
 
-    /** Change status (PENDING→SUCCESSFUL→BOOKED or PENDING→UNSUCCESSFUL) */
-    public boolean changeStatus(int applicationId, ApplicationStatus status) {
-        // TODO
+    /**
+     * Change the status of an existing application.
+     * Supports transitions: PENDING→SUCCESS, PENDING→REJECTED, SUCCESS→BOOKED.
+     * @return true if the transition was performed; false otherwise.
+     */
+    public boolean changeStatus(int applicationId, ApplicationStatus newStatus) {
+        BTOApplication app = findById(applicationId);
+        if (app == null) {
+            return false;
+        }
+        ApplicationStatus current = app.getStatus();
+        switch (newStatus) {
+            case SUCCESS -> {
+                if (current == ApplicationStatus.PENDING) {
+                    app.approve();
+                    return true;
+                }
+            }
+            case REJECTED -> {
+                if (current == ApplicationStatus.PENDING) {
+                    app.reject();
+                    // Clean up applicant reference if needed
+                    app.getApplicant().clearCurrentApplicationReference();
+                    return true;
+                }
+            }
+            case BOOKED -> {
+                if (current == ApplicationStatus.SUCCESS) {
+                    app.requestBooking();
+                    return true;
+                }
+            }
+            default -> {
+            }
+        }
+        // Unsupported transition
         return false;
     }
 }

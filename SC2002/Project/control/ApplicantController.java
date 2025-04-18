@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for applicant-specific operations:
+ * eligibility checks, application creation, viewing, booking, and withdrawal.
+ */
 public class ApplicantController {
     private final DataStore dataStore = DataStore.getInstance();
     private final Applicant applicant;
@@ -18,12 +22,16 @@ public class ApplicantController {
         this.applicant = applicant;
     }
 
-    /* ────────── Existing methods ────────── */
-
+    /**
+     * @return the Applicant this controller manages
+     */
     public Applicant getApplicant() {
         return applicant;
     }
 
+    /**
+     * Eligibility rule: SINGLE >=35 only for 2-ROOM, MARRIED >=21 for any.
+     */
     public boolean isEligibleForRoomType(String roomType) {
         MaritalStatus ms = applicant.getMaritalStatus();
         int age = applicant.getAge();
@@ -35,16 +43,33 @@ public class ApplicantController {
         return false;
     }
 
-    public boolean createApplication(Project project, String roomType) {
+    /**
+     * Checks if an active application exists (PENDING, SUCCESS, or BOOKED).
+     * Prints error and returns true if so.
+     */
+    public boolean hasActiveApplication() {
         Optional<BTOApplication> current = applicant.getCurrentApplication();
         if (current.isPresent()) {
             ApplicationStatus st = current.get().getStatus();
             if (st == ApplicationStatus.PENDING
              || st == ApplicationStatus.SUCCESS
-             || st == ApplicationStatus.BOOKED) {
-                System.out.println("Error: You already have an active application (Status: " + st + ").");
-                return false;
+             || st == ApplicationStatus.BOOKED) {       
+                String projName = current.get().getProject().getName();         
+                System.out.println("You may not apply for another project as you already have an active application for "
+                                    + projName + " (Status: " + st + ").");
+                return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Submits a new BTO application if no active one exists.
+     * @return true if submitted, false otherwise.
+     */
+    public boolean createApplication(Project project, String roomType) {
+        if (hasActiveApplication()) {
+            return false;
         }
         if (!isEligibleForRoomType(roomType)) {
             System.out.println("Error: Not eligible for room type.");
@@ -61,7 +86,14 @@ public class ApplicantController {
         return true;
     }
 
+    /**
+     * Finds the project by ID and delegates to createApplication().
+     * Includes active-application guard.
+     */
     public boolean applyForProject(int projectId, String flatType) {
+        if (hasActiveApplication()) {
+            return false;
+        }
         Project p = dataStore.getProjects().stream()
                              .filter(x -> x.getId() == projectId)
                              .findFirst()
@@ -73,10 +105,16 @@ public class ApplicantController {
         return createApplication(p, flatType);
     }
 
+    /**
+     * @return optional current application
+     */
     public Optional<BTOApplication> viewCurrentApplication() {
         return applicant.getCurrentApplication();
     }
 
+    /**
+     * Requests booking if application status is SUCCESS.
+     */
     public boolean requestBookingForCurrentApplication() {
         Optional<BTOApplication> opt = applicant.getCurrentApplication();
         if (opt.isPresent() && opt.get().getStatus() == ApplicationStatus.SUCCESS) {
@@ -88,6 +126,9 @@ public class ApplicantController {
         return false;
     }
 
+    /**
+     * Requests withdrawal if status allows it (not BOOKED/REJECTED/WITHDRAWN).
+     */
     public boolean requestWithdrawal() {
         Optional<BTOApplication> opt = applicant.getCurrentApplication();
         if (opt.isEmpty()) {
@@ -111,6 +152,9 @@ public class ApplicantController {
         return true;
     }
 
+    /**
+     * Lists all visible projects for which the applicant is eligible.
+     */
     public List<Project> listEligibleProjects() {
         return dataStore.getProjects().stream()
                         .filter(Project::isVisible)
@@ -118,30 +162,29 @@ public class ApplicantController {
                         .collect(Collectors.toList());
     }
 
+    /**
+     * Lists all visible projects in the system.
+     */
     public List<Project> listAllVisibleProjects() {
         return dataStore.getProjects().stream()
                         .filter(Project::isVisible)
                         .collect(Collectors.toList());
     }
 
-    /* ────────── New “UI‐friendly” overloads to match your ApplicantUI ────────── */
+    /* ────────── UI‐Friendly Overloads for ApplicantUI ────────── */
 
-    /** Called by UI: get all projects this applicant is eligible for */
     public List<Project> getEligibleProjects(Applicant ignored) {
         return listEligibleProjects();
     }
 
-    /** Called by UI: check eligibility for a given flat type */
     public boolean isEligibleForRoomType(Applicant ignored, String roomType) {
         return isEligibleForRoomType(roomType);
     }
 
-    /** Called by UI: wrap createApplication(...) */
     public boolean createApplication(Applicant ignored, Project project, String roomType) {
         return createApplication(project, roomType);
     }
 
-    /** Called by UI: wrap requestWithdrawal() */
     public boolean requestWithdrawal(Applicant ignored) {
         return requestWithdrawal();
     }

@@ -1,14 +1,21 @@
 package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
-import SC2002.Project.entity.*;
+import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.HDB_Manager;
+import SC2002.Project.entity.Project;
 import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.Visibility;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for manager-specific operations: approving/rejecting applications,
+ * handling withdrawals, and managing visibility of managed projects.
+ */
 public class ManagerController {
     private final DataStore dataStore = DataStore.getInstance();
+    private final ApplicationController appController = new ApplicationController();
     private final HDB_Manager manager;
 
     public ManagerController(HDB_Manager manager) {
@@ -17,17 +24,27 @@ public class ManagerController {
 
     // ---- Approve / Reject BTO Applications ----
 
+    /**
+     * Lists all pending applications for projects managed by this manager.
+     */
     public List<BTOApplication> getPendingApplications() {
-        return dataStore.getApplications().stream()
+        return manager.getManagedProjects().stream()
+            .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
             .filter(app -> app.getStatus() == ApplicationStatus.PENDING)
-            .filter(app -> manager.getManagedProjects().contains(app.getProject()))
             .collect(Collectors.toList());
     }
 
+    /**
+     * Finds a pending application by ID, ensuring it's for a project this manager manages.
+     */
     public BTOApplication findManagedApplicationById(int appId) {
-        return getPendingApplications().stream()
-            .filter(a -> a.getId() == appId)
-            .findFirst().orElse(null);
+        BTOApplication app = appController.findById(appId);
+        if (app != null
+         && app.getStatus() == ApplicationStatus.PENDING
+         && manager.getManagedProjects().contains(app.getProject())) {
+            return app;
+        }
+        return null;
     }
 
     public boolean approveApplication(BTOApplication app) {
@@ -36,8 +53,7 @@ public class ManagerController {
          || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        app.approve();
-        return true;
+        return appController.changeStatus(app.getId(), ApplicationStatus.SUCCESS);
     }
 
     public boolean rejectApplication(BTOApplication app) {
@@ -46,17 +62,22 @@ public class ManagerController {
          || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        app.reject();
-        app.getApplicant().clearCurrentApplicationReference();
-        return true;
+        boolean result = appController.changeStatus(app.getId(), ApplicationStatus.REJECTED);
+        if (result) {
+            app.getApplicant().clearCurrentApplicationReference();
+        }
+        return result;
     }
 
     // ---- Handle Withdrawal Requests ----
 
+    /**
+     * Lists all withdrawal requests for projects managed by this manager.
+     */
     public List<BTOApplication> getWithdrawalRequests() {
-        return dataStore.getApplications().stream()
+        return manager.getManagedProjects().stream()
+            .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
             .filter(BTOApplication::isWithdrawalRequested)
-            .filter(app -> manager.getManagedProjects().contains(app.getProject()))
             .collect(Collectors.toList());
     }
 
@@ -67,9 +88,11 @@ public class ManagerController {
          || app.getStatus() == ApplicationStatus.BOOKED) {
             return false;
         }
-        app.confirmWithdrawal();
-        app.getApplicant().finalizeWithdrawal();
-        return true;
+        boolean ok = appController.changeStatus(app.getId(), ApplicationStatus.WITHDRAWN);
+        if (ok) {
+            app.getApplicant().finalizeWithdrawal();
+        }
+        return ok;
     }
 
     public boolean rejectWithdrawalRequest(BTOApplication app) {
@@ -82,21 +105,24 @@ public class ManagerController {
         return true;
     }
 
-    // ---- (Stubs for other features TODO) ----
+    // ---- Project Visibility & Listing ----
 
+    /** List all projects in the system */
     public List<Project> listAllProjects() {
         return dataStore.getProjects();
     }
 
+    /** List projects managed by this manager */
     public List<Project> listMyProjects() {
         return manager.getManagedProjects();
     }
 
+    /** Toggle visibility on/off for a managed project */
     public boolean toggleProjectVisibility(Project p, boolean on) {
         if (p == null || !manager.getManagedProjects().contains(p)) return false;
         p.setVisibility(on ? Visibility.ON : Visibility.OFF);
         return true;
     }
 
-    // …plus stubs for Create/Edit/Delete projects, handle officer regs, generate reports, etc.
+    // …plus stubs for other features: Create/Edit/Delete projects, handle officer regs, generate reports…
 }
