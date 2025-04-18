@@ -95,7 +95,7 @@ public final class CSVReader {
                 double price2        = Double.parseDouble(t[7].trim());
                 LocalDate openDate   = LocalDate.parse(t[8].trim(), DF);
                 LocalDate closeDate  = LocalDate.parse(t[9].trim(), DF);
-                String mgrNric       = t[10].trim();
+                String mgrName       = t[10].trim();
                 int slotCount        = Integer.parseInt(t[11].trim());
 
                 // create Project with generated ID:
@@ -113,14 +113,16 @@ public final class CSVReader {
                     slotCount
                 );
 
-                // link manager
-                Optional<HDB_Manager> mgrOpt = ds.findUserByNric(mgrNric)
-                        .filter(u -> !(u instanceof HDB_Officer))
-                        .map(u -> (HDB_Manager)u);
-                mgrOpt.ifPresent(m -> {
-                    prj.setManager(m);
-                    m.addManagedProject(prj);
-                });
+                // link manager using name lookup
+                Optional<HDB_Manager> mgrOpt = ds.findManagerByName(mgrName);
+                if (mgrOpt.isEmpty()) {
+                    System.err.println("Manager with name '" + mgrName + "' not found for project '" + name + "', skipping manager assignment.");
+                } else {
+                    mgrOpt.ifPresent(m -> {
+                        prj.setManager(m);
+                        m.addManagedProject(prj);
+                    });
+                }
 
                 ds.getProjects().add(prj);
 

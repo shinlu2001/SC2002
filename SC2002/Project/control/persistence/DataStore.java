@@ -4,6 +4,7 @@ package SC2002.Project.control.persistence;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.Enquiry;
 import SC2002.Project.entity.Flat;
+import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.Project;
 import SC2002.Project.entity.Registration;
 import SC2002.Project.entity.User;
@@ -105,6 +106,15 @@ public final class DataStore {
         return projects.stream()
                        .filter(p -> p.getId() == id)
                        .findFirst();
+    }
+
+    /** Find a manager by first name (case-insensitive). */
+    public Optional<HDB_Manager> findManagerByName(String firstName) {
+        return users.stream()
+                    .filter(u -> u instanceof HDB_Manager)
+                    .map(u -> (HDB_Manager) u)
+                    .filter(m -> m.getFirstName().equalsIgnoreCase(firstName))
+                    .findFirst();
     }
 
     /** All applications for a given applicant NRIC. */
