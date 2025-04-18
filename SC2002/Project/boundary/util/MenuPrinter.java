@@ -99,7 +99,7 @@ public final class MenuPrinter {
     }
 
     /**
-     * Prints **all** flat‑type rows, marking “Yes”/“No” for eligibility.
+     * Prints **all** flat‑type rows, showing detailed eligibility reasons.
      */
     public static void printProjectTableAll(List<Project> projects,
                                             Applicant applicant,
@@ -121,6 +121,10 @@ public final class MenuPrinter {
 
         for (Project p : projects) {
             boolean first = true;
+            
+            // Get eligibility reason for this project (applies to all flat types)
+            String projectEligibility = ctrl.getEligibilityReason(p);
+            
             for (int i = 0; i < p.getFlatTypes().size(); i++) {
                 String ft    = p.getFlatTypes().get(i);
                 String info  = String.format("%s:(%d/%d)",
@@ -128,7 +132,14 @@ public final class MenuPrinter {
                                              p.getAvailableUnits().get(i),
                                              p.getTotalUnits().get(i));
                 double price = p.getPrices().get(i);
-                String elig  = ctrl.isEligibleForRoomType(ft) ? "Yes" : "No";
+                
+                // Determine eligibility display - either project-level or flat-type level reason
+                String eligDisplay;
+                if (!projectEligibility.equals("Eligible")) {
+                    eligDisplay = projectEligibility; // Project-level ineligibility (registered, not open, etc.)
+                } else {
+                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Age/Marital Status";
+                }
 
                 if (first) {
                     System.out.printf(
@@ -147,7 +158,7 @@ public final class MenuPrinter {
                         price,
                         p.getOpenDate(),
                         p.getCloseDate(),
-                        elig
+                        eligDisplay
                     );
                     first = false;
                 } else {
@@ -163,7 +174,7 @@ public final class MenuPrinter {
                         "", "", "", info,
                         price,
                         "", "",
-                        elig
+                        eligDisplay
                     );
                 }
             }

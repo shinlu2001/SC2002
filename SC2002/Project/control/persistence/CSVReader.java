@@ -161,7 +161,10 @@ public final class CSVReader {
                 // initial approved officers (col 12) - Names in quotes, potentially separated by ; or ,
                 if (t.length > 12 && !t[12].isBlank()) {
                     String rawOfficerNames = t[12].replace("\"", "").trim(); // Remove quotes
-                    for (String offName : rawOfficerNames.split("\\s*[,;]\\s*")) { // Split by comma or semicolon with optional spaces
+                    
+                    // Enhanced split to handle various delimiter patterns with better robustness
+                    // This will split on commas or semicolons with any amount of surrounding whitespace
+                    for (String offName : rawOfficerNames.split("\\s*[,;]\\s*")) {
                         if (offName.isBlank()) continue; // Skip empty entries if any
 
                         // Find officer by first name (assuming names in CSV are first names)
@@ -182,6 +185,7 @@ public final class CSVReader {
                                 ds.getRegistrations().add(reg);
                                 off.addRegistration(reg);
                                 prj.addAssignedOfficer(off); // Add to project's list
+                                off.addAssignedProject(prj); // Add to officer's assigned projects list
                                 System.out.println("DEBUG: Assigned Officer " + off.getFirstName() + " to Project " + prj.getName() + " from column 12."); // Debug print
                             }
                         } else {

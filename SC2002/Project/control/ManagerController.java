@@ -4,7 +4,9 @@ import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.Project;
+import SC2002.Project.entity.Registration;
 import SC2002.Project.entity.enums.ApplicationStatus;
+import SC2002.Project.entity.enums.RegistrationStatus;
 import SC2002.Project.entity.enums.Visibility;
 import java.time.LocalDate;
 import java.util.List;
@@ -12,12 +14,13 @@ import java.util.stream.Collectors;
 
 /**
  * Controller for manager-specific operations: approving/rejecting applications,
- * handling withdrawals, and managing visibility of managed projects.
+ * handling withdrawals, managing visibility of managed projects, and handling officer registrations.
  */
 public class ManagerController {
     private final DataStore dataStore = DataStore.getInstance();
     private final ApplicationController appController = new ApplicationController();
     private final ProjectController projectController = new ProjectController();
+    public final RegistrationController registrationController = new RegistrationController();
     private final HDB_Manager manager;
 
     public ManagerController(HDB_Manager manager) {
@@ -209,7 +212,107 @@ public class ManagerController {
         return p != null && p.getManager().equals(this.manager);
     }
 
+    // ---- Officer Registration Management ----
+
+    /**
+     * Lists all PENDING registration requests for projects managed by this manager.
+     */
+    public List<Registration> getPendingOfficerRegistrations() {
+        return manager.getManagedProjects().stream()
+            .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
+            .filter(reg -> reg.getStatus() == RegistrationStatus.PENDING)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Finds a PENDING registration by ID, ensuring it's for a project this manager manages.
+     */
+    public Registration findManagedPendingRegistrationById(int regId) {
+        Registration reg = registrationController.findById(regId);
+        if (reg != null && 
+            reg.getStatus() == RegistrationStatus.PENDING &&
+            manager.getManagedProjects().contains(reg.getProject())) {
+            return reg;
+        }
+        return null;
+    }
+
+    /**
+     * Approves a pending officer registration.
+     * Delegates checks (slots, overlap) and status change to RegistrationController.
+     * @param registration The registration to approve.
+     * @return true if successfully approved, false otherwise.
+     */
+    public boolean approveOfficerRegistration(Registration registration) {
+        if (registration == null || 
+            registration.getStatus() != RegistrationStatus.PENDING ||
+            !manager.getManagedProjects().contains(registration.getProject())) {
+            System.out.println("Error: Registration not found, not pending, or not for a managed project.");
+            return false;
+        }
+        // Delegate the actual approval logic (including overlap/slot checks) to RegistrationController
+        return registrationController.changeStatus(registration.getId(), RegistrationStatus.APPROVED);
+    }
+
+    /**
+     * Rejects a pending officer registration.
+     * Delegates status change to RegistrationController.
+     * @param registration The registration to reject.
+     * @return true if successfully rejected, false otherwise.
+     */
+    public boolean rejectOfficerRegistration(Registration registration) {
+        if (registration == null || 
+            registration.getStatus() != RegistrationStatus.PENDING ||
+            !manager.getManagedProjects().contains(registration.getProject())) {
+            System.out.println("Error: Registration not found, not pending, or not for a managed project.");
+            return false;
+        }
+        // Delegate the actual rejection logic to RegistrationController
+        return registrationController.changeStatus(registration.getId(), RegistrationStatus.REJECTED);
+    }
+
+    /**
+     * Lists all registrations with withdrawal requests for projects managed by this manager.
+     */
+    public List<Registration> getOfficerWithdrawalRequests() {
+        return manager.getManagedProjects().stream()
+            .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
+            .filter(Registration::isWithdrawalRequested)
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * Approve a registration withdrawal request.
+     * @param registration The registration to approve withdrawal for.
+     * @return true if successfully withdrawn, false otherwise.
+     */
+    public boolean approveRegistrationWithdrawal(Registration registration) {
+        if (registration == null || 
+            !registration.isWithdrawalRequested() ||
+            !manager.getManagedProjects().contains(registration.getProject())) {
+            System.out.println("Error: Registration not found, no withdrawal requested, or not for a managed project.");
+            return false;
+        }
+        // Delegate the actual withdrawal logic to RegistrationController
+        return registrationController.managerApproveWithdrawal(registration.getId());
+    }
+    
+    /**
+     * Reject a registration withdrawal request.
+     * @param registration The registration to reject withdrawal for.
+     * @return true if successfully rejected, false otherwise.
+     */
+    public boolean rejectRegistrationWithdrawal(Registration registration) {
+        if (registration == null || 
+            !registration.isWithdrawalRequested() ||
+            !manager.getManagedProjects().contains(registration.getProject())) {
+            System.out.println("Error: Registration not found, no withdrawal requested, or not for a managed project.");
+            return false;
+        }
+        // Delegate the actual rejection logic to RegistrationController
+        return registrationController.managerRejectWithdrawal(registration.getId());
+    }
+
     // …plus stubs for other features: handle officer regs, generate reports…
-    // TODO: Implement methods for officer registration management (view, handle approval/rejection, handle withdrawal)
     // TODO: Implement methods for enquiry management (view all, handle project-specific)
 }

@@ -235,4 +235,16 @@ public class Project {
             System.err.println("Warning: cannot increment units for " + flatType + " in project " + name);
         }
     }
+
+    /**
+     * Checks if this project's application period overlaps with another project's period.
+     * Overlap occurs if one starts before the other ends.
+     * @param other The other project to compare against.
+     * @return true if the periods overlap, false otherwise.
+     */
+    public boolean overlapsWith(Project other) {
+        if (other == null) return false;
+        // No overlap if this project ends before the other starts OR this project starts after the other ends.
+        return !(this.closeDate.isBefore(other.openDate) || this.openDate.isAfter(other.closeDate));
+    }
 }

@@ -2,11 +2,13 @@
 package SC2002.Project.control.persistence;
 
 import SC2002.Project.entity.*;
+import SC2002.Project.entity.enums.RegistrationStatus;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class CSVWriter {
     private CSVWriter() {}
@@ -19,7 +21,7 @@ public final class CSVWriter {
         writeUsers(ds, HDB_Officer.class,  "OfficerListNew.csv");
         writeUsers(ds, HDB_Manager.class,  "ManagerListNew.csv");
         writeProjects(ds, "ProjectListNew.csv");
-        // …add writeApplications, writeEnquiries, etc.
+        // No need to save registrations separately - officer assignments are in projects
     }
 
     private static void writeUsers(DataStore ds,
@@ -76,8 +78,15 @@ public final class CSVWriter {
                 String closeDate = p.getCloseDate() != null ? p.getCloseDate().format(java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy")) : "";
                 String managerName = p.getManager() != null ? p.getManager().getFirstName() : "";
                 String officerSlot = String.valueOf(p.getOfficerSlotLimit());
-                // Officer names (first names, comma separated)
-                String officers = p.getAssignedOfficers().stream().map(o -> o.getFirstName()).reduce((a, b) -> a + "," + b).orElse("");
+                
+                // Get all assigned officers - ensure we only include approved registrations
+                String officers = ds.getRegistrations().stream()
+                    .filter(reg -> reg.getProject().equals(p) && 
+                                  reg.getStatus() == RegistrationStatus.APPROVED)
+                    .map(reg -> reg.getOfficer().getFirstName())
+                    .distinct() // Ensure no duplicates
+                    .collect(Collectors.joining(","));
+                
                 String line = String.join(",",
                     p.getName(),
                     p.getNeighbourhood(),
@@ -92,6 +101,32 @@ public final class CSVWriter {
                     managerName,
                     officerSlot,
                     '"' + officers + '"'
+                );
+                bw.write(line);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Could not write " + filename + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Save all registrations to RegistrationsNew.csv
+     */
+    private static void writeRegistrations(DataStore ds, String filename) {
+        Path out = BASE.resolve(filename);
+        try (BufferedWriter bw = Files.newBufferedWriter(out)) {
+            // Write header
+            bw.write("Registration ID,Officer NRIC,Project ID,Status,WithdrawalRequested");
+            bw.newLine();
+            
+            for (Registration reg : ds.getRegistrations()) {
+                String line = String.join(",",
+                    String.valueOf(reg.getId()),
+                    reg.getOfficer().getNric(),
+                    String.valueOf(reg.getProject().getId()),
+                    reg.getStatus().name(),
+                    String.valueOf(reg.isWithdrawalRequested())
                 );
                 bw.write(line);
                 bw.newLine();

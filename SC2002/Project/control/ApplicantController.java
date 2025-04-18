@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class ApplicantController {
     private final DataStore dataStore = DataStore.getInstance();
     private final Applicant applicant;
+    private final RegistrationController registrationController = new RegistrationController();
 
     public ApplicantController(Applicant applicant) {
         this.applicant = applicant;
@@ -61,12 +62,27 @@ public class ApplicantController {
 
     /**
      * Submits a new BTO application if no active one exists.
+     * Includes checks for officer registration conflicts.
      * @return true if submitted, false otherwise.
      */
     public boolean createApplication(Project project, String roomType) {
         if (hasActiveApplication()) {
             return false;
         }
+
+        // Check if the applicant is an officer and is registered for this project
+        if (applicant instanceof HDB_Officer officer) {
+            boolean isRegistered = dataStore.getRegistrations().stream()
+                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
+                                 reg.getProject().equals(project) &&
+                                 (reg.getStatus() == RegistrationStatus.PENDING || reg.getStatus() == RegistrationStatus.APPROVED));
+            if (isRegistered) {
+                System.out.println("Error: Cannot apply for project '" + project.getName() + 
+                                   "' as you have a pending or approved officer registration for it.");
+                return false;
+            }
+        }
+
         // Check Project Visibility and Open Status
         if (!project.isVisible()) {
             System.out.println("Error: Project is not currently visible.");
@@ -177,14 +193,90 @@ public class ApplicantController {
     }
 
     /**
-     * Lists all visible projects for which the applicant is eligible.
+     * Lists all visible projects for which the applicant is eligible,
+     * excluding projects the applicant (if an officer) is registered for.
      */
-
     public List<Project> listEligibleProjects() {
-        return dataStore.getProjects().stream()
+        List<Project> potentiallyEligible = dataStore.getProjects().stream()
                         .filter(Project::isVisible)
+                        .filter(Project::isOpen) // Also check if open
                         .filter(p -> p.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType))
-                        .collect(Collectors.toList());
+                        .toList();
+
+        // Only filter out registered projects if the applicant is an officer
+        if (applicant instanceof HDB_Officer officer) {
+            List<Integer> registeredProjectIds = dataStore.getRegistrations().stream()
+                .filter(reg -> reg.getOfficer().equals(officer) && 
+                               (reg.getStatus() == RegistrationStatus.PENDING || 
+                                reg.getStatus() == RegistrationStatus.APPROVED))
+                .map(reg -> reg.getProject().getId())
+                .toList();
+            
+            return potentiallyEligible.stream()
+                .filter(p -> !registeredProjectIds.contains(p.getId()))
+                .collect(Collectors.toList());
+        } else {
+            // Not an officer, return all potentially eligible projects
+            return potentiallyEligible;
+        }
+    }
+
+    /**
+     * Check if an applicant is eligible to apply for a given project.
+     * For officers, also checks registration status.
+     */
+    public boolean isEligibleForProject(Project project) {
+        // Basic eligibility: visible, open, and has eligible flat types
+        boolean basicEligible = project.isVisible() && 
+                                project.isOpen() && 
+                                project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType);
+        
+        // If not even basically eligible, no need to check officer restrictions
+        if (!basicEligible) return false;
+        
+        // Officers have additional restrictions - can't apply if registered
+        if (applicant instanceof HDB_Officer officer) {
+            boolean isRegistered = dataStore.getRegistrations().stream()
+                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
+                                 reg.getProject().equals(project) &&
+                                 (reg.getStatus() == RegistrationStatus.PENDING || 
+                                  reg.getStatus() == RegistrationStatus.APPROVED));
+            
+            return !isRegistered; // Not eligible if registered
+        }
+        
+        // Regular applicants just need the basic eligibility
+        return true;
+    }
+
+    /**
+     * Get a descriptive eligibility reason for a project
+     */
+    public String getEligibilityReason(Project project) {
+        if (!project.isVisible()) {
+            return "Not Visible";
+        }
+        if (!project.isOpen()) {
+            return "Not Open";
+        }
+        
+        if (applicant instanceof HDB_Officer officer) {
+            boolean isRegistered = dataStore.getRegistrations().stream()
+                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
+                                 reg.getProject().equals(project) &&
+                                 (reg.getStatus() == RegistrationStatus.PENDING || 
+                                  reg.getStatus() == RegistrationStatus.APPROVED));
+            
+            if (isRegistered) {
+                return "Officer Registered";
+            }
+        }
+        
+        if (!project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType)) {
+            return "Age/Marital Status";
+        }
+        
+        return "Eligible";
     }
 
     /**

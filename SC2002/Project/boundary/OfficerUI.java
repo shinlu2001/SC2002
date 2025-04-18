@@ -4,6 +4,7 @@ import SC2002.Project.boundary.util.Input;
 import SC2002.Project.boundary.util.MenuPrinter;
 import SC2002.Project.control.*;
 import SC2002.Project.entity.*;
+import SC2002.Project.entity.enums.RegistrationStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class OfficerUI {
                     
                     // Officer Specific Features (Cases 10-14)
                     case 10 -> registerForProject(sc, officer, registrationController, projectController);
-                    case 11 -> checkRegistrationStatus(officer, registrationController);
+                    case 11 -> checkRegistrationStatus(sc, officer, registrationController);
                     case 12 -> viewProjectDetails(sc, projectController);
                     case 13 -> processFlatBooking(sc, officerController);
                     case 14 -> viewAssignedApplications(officerController, applicationController);
@@ -159,35 +160,40 @@ public class OfficerUI {
         EnquiryUI.viewEnquiries(sc, officer, actionableEnquiries, false); // Use false to prevent immediate selection prompt
 
         try {
-            System.out.print("Enter Enquiry ID to respond (or -1 to cancel): ");
-            int enquiryId = Input.getIntInput(sc);
-            if (enquiryId == -1) {
-                System.out.println("Cancelled.");
+            System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
                 return;
             }
-
-            Optional<Enquiry> selectedEnquiryOpt = actionableEnquiries.stream()
-                    .filter(e -> e.getId() == enquiryId)
-                    .findFirst();
-
-            if (selectedEnquiryOpt.isEmpty()) {
-                System.out.println("Invalid Enquiry ID or enquiry not actionable by you.");
-                return;
+            
+            try {
+                int enquiryId = Integer.parseInt(input);
+                
+                Optional<Enquiry> selectedEnquiryOpt = actionableEnquiries.stream()
+                        .filter(e -> e.getId() == enquiryId)
+                        .findFirst();
+    
+                if (selectedEnquiryOpt.isEmpty()) {
+                    System.out.println("Invalid Enquiry ID or enquiry not actionable by you.");
+                    return;
+                }
+    
+                Enquiry selectedEnquiry = selectedEnquiryOpt.get();
+                System.out.println("\nSelected Enquiry:");
+                EnquiryUI.viewSingleEnquiry(selectedEnquiry); // Display full details
+    
+                System.out.print("Enter your response: ");
+                String response = Input.getStringInput(sc);
+    
+                if (enquiryCtrl.respondToEnquiry(officer, enquiryId, response)) {
+                    System.out.println("Response submitted successfully!");
+                } else {
+                    System.out.println("Failed to submit response. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid enquiry ID number.");
             }
-
-            Enquiry selectedEnquiry = selectedEnquiryOpt.get();
-            System.out.println("\nSelected Enquiry:");
-            EnquiryUI.viewSingleEnquiry(selectedEnquiry); // Display full details
-
-            System.out.print("Enter your response: ");
-            String response = Input.getStringInput(sc);
-
-            if (enquiryCtrl.respondToEnquiry(officer, enquiryId, response)) {
-                System.out.println("Response submitted successfully!");
-            } else {
-                System.out.println("Failed to submit response. Please try again.");
-            }
-
         } catch (Input.InputExitException e) {
             System.out.println("Response process cancelled.");
         } catch (Exception e) {
@@ -235,23 +241,88 @@ public class OfficerUI {
         }
     }
 
-    private static void checkRegistrationStatus(HDB_Officer officer, RegistrationController regCtrl) {
+    private static void checkRegistrationStatus(Scanner sc, HDB_Officer officer, RegistrationController regCtrl) {
         List<Registration> officerRegistrations = regCtrl.listForOfficer(officer.getOfficerId());
+
+        if (officerRegistrations.isEmpty()) {
+            System.out.println("\nYou have not registered for any projects.");
+            return;
+        }
 
         System.out.println("\nYour Project Registration Statuses:");
         System.out.println("-----------------------------------");
-        if (officerRegistrations.isEmpty()) {
-            System.out.println("You have not registered for any projects.");
-        } else {
-            System.out.printf("%-10s %-20s %-15s%n", "Reg ID", "Project Name", "Status");
-            System.out.println("-".repeat(50));
-            for (Registration reg : officerRegistrations) {
-                System.out.printf("%-10d %-20s %-15s%n",
-                                  reg.getId(),
-                                  reg.getProject().getName(),
-                                  reg.getStatus());
+        System.out.printf("%-10s %-20s %-20s%n", "Reg ID", "Project Name", "Status");
+        System.out.println("-".repeat(55));
+        for (Registration reg : officerRegistrations) {
+            String statusDisplay = reg.getStatus().toString();
+            if (reg.isWithdrawalRequested()) {
+                statusDisplay += " (Withdrawal Requested)";
             }
-            System.out.println("-".repeat(50));
+            System.out.printf("%-10d %-20s %-20s%n",
+                              reg.getId(),
+                              reg.getProject().getName(),
+                              statusDisplay);
+        }
+        System.out.println("-".repeat(55));
+        
+        // Add option to request withdrawal for registrations
+        try {
+            System.out.print("Enter Registration ID to request withdrawal (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
+                return;
+            }
+            
+            try {
+                int regId = Integer.parseInt(input);
+                
+                Registration selectedReg = officerRegistrations.stream()
+                    .filter(reg -> reg.getId() == regId)
+                    .findFirst()
+                    .orElse(null);
+                    
+                if (selectedReg == null) {
+                    System.out.println("Invalid Registration ID or not your registration.");
+                    return;
+                }
+                
+                // Check if already processing a withdrawal request
+                if (selectedReg.isWithdrawalRequested()) {
+                    System.out.println("Withdrawal already requested. Awaiting manager approval.");
+                    return;
+                }
+                
+                // Check if registration is in a state that can't be withdrawn
+                if (selectedReg.getStatus() != RegistrationStatus.PENDING && 
+                    selectedReg.getStatus() != RegistrationStatus.APPROVED) {
+                    System.out.println("Cannot request withdrawal for a registration with status: " + selectedReg.getStatus());
+                    return;
+                }
+                
+                System.out.println("\nSelected Registration:");
+                System.out.println("Project: " + selectedReg.getProject().getName());
+                System.out.println("Status: " + selectedReg.getStatus());
+                
+                System.out.print("Are you sure you want to request withdrawal of this registration? (yes/no): ");
+                String confirmation = Input.getStringInput(sc).toLowerCase();
+                
+                if (confirmation.equals("yes")) {
+                    boolean success = regCtrl.requestWithdrawalForApproval(regId, officer);
+                    if (success) {
+                        System.out.println("Withdrawal request submitted for manager approval.");
+                    } else {
+                        System.out.println("Failed to request withdrawal. The registration may not be in a valid state.");
+                    }
+                } else {
+                    System.out.println("Withdrawal request cancelled.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid registration ID number.");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error during registration withdrawal request: " + e.getMessage());
         }
     }
 

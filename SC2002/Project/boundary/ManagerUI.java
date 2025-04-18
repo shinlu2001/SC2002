@@ -39,10 +39,10 @@ public class ManagerUI {
                     case 4 -> viewAllProjects(managerController);
                     case 5 -> viewOwnProjects(managerController);
                     
-                    // Officer Registration Management (Cases 6-8) - TODO: Implement later
-                    case 6 -> System.out.println("View Officer Registrations - Not yet implemented."); // viewOfficerRegistrations(managerController);
-                    case 7 -> System.out.println("Handle Officer Registration - Not yet implemented."); // handleOfficerRegistration(sc, managerController);
-                    case 8 -> System.out.println("Handle Officer Withdrawal - Not yet implemented."); // handleOfficerWithdrawal(sc, managerController);
+                    // Officer Registration Management (Cases 6-8)
+                    case 6 -> viewOfficerRegistrations(managerController);
+                    case 7 -> handleOfficerRegistration(sc, managerController);
+                    case 8 -> handleOfficerWithdrawal(sc, managerController);
                     
                     // BTO Application Management (Cases 9-10)
                     case 9 -> handleBTOApplications(sc, managerController);
@@ -398,28 +398,37 @@ public class ManagerUI {
         printApplicationList(pendingApps);
 
         try {
-            System.out.print("Enter Application ID to approve/reject: ");
-            int appId = Input.getIntInput(sc);
-
-            BTOApplication selectedApp = controller.findManagedApplicationById(appId);
-            if (selectedApp == null || selectedApp.getStatus() != ApplicationStatus.PENDING) {
-                System.out.println("Invalid Application ID or application is not pending.");
+            System.out.print("Enter Application ID to approve/reject (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
                 return;
             }
             
-            System.out.println("\nSelected Application:");
-            System.out.println(selectedApp);
-            System.out.print("Approve or Reject? (approve/reject): ");
-            String decision = Input.getStringInput(sc).toLowerCase();
-
-            if (decision.equals("approve")) {
-                controller.approveApplication(selectedApp);
-            } else if (decision.equals("reject")) {
-                controller.rejectApplication(selectedApp);
-            } else {
-                System.out.println("Invalid decision. No action taken.");
+            try {
+                int appId = Integer.parseInt(input);
+                
+                BTOApplication selectedApp = controller.findManagedApplicationById(appId);
+                if (selectedApp == null || selectedApp.getStatus() != ApplicationStatus.PENDING) {
+                    System.out.println("Invalid Application ID or application is not pending.");
+                    return;
+                }
+                
+                System.out.println("\nSelected Application:");
+                System.out.println(selectedApp);
+                System.out.print("Approve or Reject? (approve/reject): ");
+                String decision = Input.getStringInput(sc).toLowerCase();
+    
+                if (decision.equals("approve")) {
+                    controller.approveApplication(selectedApp);
+                } else if (decision.equals("reject")) {
+                    controller.rejectApplication(selectedApp);
+                } else {
+                    System.out.println("Invalid decision. No action taken.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid application ID number.");
             }
-
         } catch (Input.InputExitException e) {
             System.out.println("Handling cancelled.");
         } catch (Exception e) {
@@ -439,32 +448,41 @@ public class ManagerUI {
         printApplicationList(withdrawalRequests);
 
         try {
-            System.out.print("Enter Application ID to confirm/reject withdrawal: ");
-            int appId = Input.getIntInput(sc);
+            System.out.print("Enter Application ID to confirm/reject withdrawal (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
             
-            BTOApplication selectedApp = controller.findManagedApplicationById(appId);
-             if (selectedApp == null || !selectedApp.isWithdrawalRequested()) {
-                System.out.println("Invalid Application ID or no withdrawal requested.");
+            if (input.equalsIgnoreCase("back")) {
                 return;
             }
-
-            System.out.println("\nSelected Application for Withdrawal:");
-            System.out.println(selectedApp);
-            System.out.print("Confirm or Reject Withdrawal? (confirm/reject): ");
-            String decision = Input.getStringInput(sc).toLowerCase();
-
-            if (decision.equals("confirm")) {
-                 if (selectedApp.getStatus() == ApplicationStatus.BOOKED){
-                     System.out.println("Error: Cannot confirm withdrawal for a BOOKED application. Officer must cancel booking first.");
-                 } else {
-                     controller.confirmWithdrawal(selectedApp);
-                 }
-            } else if (decision.equals("reject")) {
-                controller.rejectWithdrawalRequest(selectedApp);
-            } else {
-                System.out.println("Invalid decision. No action taken.");
+            
+            try {
+                int appId = Integer.parseInt(input);
+                
+                BTOApplication selectedApp = controller.findManagedApplicationById(appId);
+                if (selectedApp == null || !selectedApp.isWithdrawalRequested()) {
+                    System.out.println("Invalid Application ID or no withdrawal requested.");
+                    return;
+                }
+    
+                System.out.println("\nSelected Application for Withdrawal:");
+                System.out.println(selectedApp);
+                System.out.print("Confirm or Reject Withdrawal? (confirm/reject): ");
+                String decision = Input.getStringInput(sc).toLowerCase();
+    
+                if (decision.equals("confirm")) {
+                    if (selectedApp.getStatus() == ApplicationStatus.BOOKED){
+                        System.out.println("Error: Cannot confirm withdrawal for a BOOKED application. Officer must cancel booking first.");
+                    } else {
+                        controller.confirmWithdrawal(selectedApp);
+                    }
+                } else if (decision.equals("reject")) {
+                    controller.rejectWithdrawalRequest(selectedApp);
+                } else {
+                    System.out.println("Invalid decision. No action taken.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid application ID number.");
             }
-
         } catch (Input.InputExitException e) {
             System.out.println("Handling cancelled.");
         } catch (Exception e) {
@@ -484,25 +502,255 @@ public class ManagerUI {
         }
     }
     
+    /**
+     * Format table for displaying applications with standardized column widths
+     */
     private static void printApplicationList(List<BTOApplication> applications) {
         if (applications == null || applications.isEmpty()) {
             System.out.println("No applications to display.");
             return;
         }
-        System.out.printf("%-10s %-20s %-15s %-15s %-10s %s%n", 
+        // Updated column widths for consistent formatting
+        System.out.printf("%-8s %-20s %-20s %-10s %-15s %-20s%n", 
                           "App ID", "Applicant Name", "Project", "Flat Type", "Status", "Details");
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(95)); // Adjusted width for the separator line
+        
         for (BTOApplication app : applications) {
             Applicant applicant = app.getApplicant();
-            System.out.printf("%-10d %-20s %-15s %-15s %-10s %s%n",
+            // Truncate long text to maintain column width
+            String projectName = Input.truncateText(app.getProject().getName(), 18);
+            String statusText = app.getStatus().toString();
+            String details = (app.isWithdrawalRequested() ? "Withdrawal Req" : "");
+            
+            if (app.getBookedFlat() != null) {
+                details += (details.isEmpty() ? "" : ", ") + "Booked: " + app.getBookedFlat().getId();
+            }
+            
+            System.out.printf("%-8d %-20s %-20s %-10s %-15s %-20s%n",
                               app.getId(),
                               applicant.getFirstName() + " " + applicant.getLastName(),
-                              app.getProject().getName(),
+                              projectName,
                               app.getRoomType(),
-                              app.getStatus(),
-                              (app.isWithdrawalRequested() ? "(Withdrawal Req)" : "") +
-                              (app.getBookedFlat() != null ? "(Booked Flat: " + app.getBookedFlat().getId() + ")" : ""));
+                              statusText,
+                              details);
+        }
+        System.out.println("-".repeat(95)); // Adjusted width for the separator line
+    }
+
+    // --- Officer Registration Management Methods ---
+    
+    /**
+     * View pending officer registration requests for the manager's projects.
+     */
+    private static void viewOfficerRegistrations(ManagerController controller) {
+        System.out.println("\n=== Pending Officer Registration Requests ===");
+        List<Registration> pendingRegs = controller.getPendingOfficerRegistrations();
+        
+        if (pendingRegs.isEmpty()) {
+            System.out.println("No pending officer registration requests for your projects.");
+            return;
+        }
+        
+        System.out.println("Pending Officer Registration Requests:");
+        // Standardized column widths for better display formatting
+        System.out.printf("%-8s %-20s %-25s %-15s %-20s%n", 
+                          "Reg ID", "Officer Name", "Project", "Status", "Project Dates");
+        System.out.println("-".repeat(90));
+        
+        for (Registration reg : pendingRegs) {
+            HDB_Officer officer = reg.getOfficer();
+            Project project = reg.getProject();
+            
+            // Truncate project name to maintain column alignment
+            String projectName = Input.truncateText(project.getName(), 23);
+            
+            System.out.printf("%-8d %-20s %-25s %-15s %-20s%n",
+                          reg.getId(),
+                          officer.getFirstName() + " " + officer.getLastName(),
+                          projectName,
+                          reg.getStatus(),
+                          project.getOpenDate() + " to " + project.getCloseDate());
         }
         System.out.println("-".repeat(90));
+    }
+    
+    /**
+     * Handle (approve/reject) pending officer registration requests.
+     */
+    private static void handleOfficerRegistration(Scanner sc, ManagerController controller) {
+        List<Registration> pendingRegs = controller.getPendingOfficerRegistrations();
+        
+        if (pendingRegs.isEmpty()) {
+            System.out.println("No pending officer registration requests to handle.");
+            return;
+        }
+        
+        System.out.println("\n=== Handle Officer Registration Requests ===");
+        // Standardized column widths for better display formatting
+        System.out.printf("%-8s %-20s %-25s %-15s %-20s%n", 
+                          "Reg ID", "Officer Name", "Project", "Status", "Project Dates");
+        System.out.println("-".repeat(90));
+        
+        for (Registration reg : pendingRegs) {
+            HDB_Officer officer = reg.getOfficer();
+            Project project = reg.getProject();
+            
+            // Truncate long project names to maintain table formatting
+            String projectName = Input.truncateText(project.getName(), 23);
+            
+            System.out.printf("%-8d %-20s %-25s %-15s %-20s%n",
+                          reg.getId(),
+                          officer.getFirstName() + " " + officer.getLastName(),
+                          projectName,
+                          reg.getStatus(),
+                          project.getOpenDate() + " to " + project.getCloseDate());
+        }
+        System.out.println("-".repeat(90));
+        
+        try {
+            System.out.print("Enter Registration ID to approve/reject (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
+                return;
+            }
+            
+            try {
+                int regId = Integer.parseInt(input);
+                
+                Registration selectedReg = controller.findManagedPendingRegistrationById(regId);
+                if (selectedReg == null) {
+                    System.out.println("Invalid Registration ID or registration not pending for your project.");
+                    return;
+                }
+                
+                System.out.println("\nSelected Registration:");
+                System.out.println("Officer: " + selectedReg.getOfficer().getFirstName() + " " + selectedReg.getOfficer().getLastName());
+                System.out.println("Project: " + selectedReg.getProject().getName());
+                System.out.println("Status: " + selectedReg.getStatus());
+                
+                System.out.print("Approve or Reject? (approve/reject): ");
+                String decision = Input.getStringInput(sc).toLowerCase();
+                
+                boolean success = false;
+                if (decision.equals("approve")) {
+                    success = controller.approveOfficerRegistration(selectedReg);
+                    if (success) {
+                        System.out.println("Registration approved successfully.");
+                    }
+                } else if (decision.equals("reject")) {
+                    success = controller.rejectOfficerRegistration(selectedReg);
+                    if (success) {
+                        System.out.println("Registration rejected successfully.");
+                    }
+                } else {
+                    System.out.println("Invalid decision. No action taken.");
+                }
+                
+                if (!success && (decision.equals("approve") || decision.equals("reject"))) {
+                    System.out.println("Action failed. Please check constraints (officer slots, overlaps).");
+                }
+                
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid registration ID number.");
+            }
+            
+        } catch (Input.InputExitException e) {
+            System.out.println("Operation cancelled.");
+        } catch (Exception e) {
+            System.err.println("Error handling officer registration: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Handle officer registration withdrawals (both PENDING and APPROVED).
+     * Allows managers to review and approve/reject withdrawal requests.
+     */
+    private static void handleOfficerWithdrawal(Scanner sc, ManagerController controller) {
+        List<Registration> withdrawalRequests = controller.getOfficerWithdrawalRequests();
+        
+        if (withdrawalRequests.isEmpty()) {
+            System.out.println("No pending officer registration withdrawal requests to handle.");
+            return;
+        }
+        
+        System.out.println("\n=== Handle Officer Registration Withdrawal Requests ===");
+        // Standardized column widths for better display formatting
+        System.out.printf("%-8s %-20s %-25s %-20s%n", 
+                          "Reg ID", "Officer Name", "Project", "Status");
+        System.out.println("-".repeat(75));
+        
+        for (Registration reg : withdrawalRequests) {
+            HDB_Officer officer = reg.getOfficer();
+            Project project = reg.getProject();
+            
+            // Truncate project name to maintain column alignment
+            String projectName = Input.truncateText(project.getName(), 23);
+            
+            System.out.printf("%-8d %-20s %-25s %-20s%n",
+                          reg.getId(),
+                          officer.getFirstName() + " " + officer.getLastName(),
+                          projectName,
+                          reg.getStatus() + " (Withdrawal Req)");
+        }
+        System.out.println("-".repeat(75));
+        
+        try {
+            System.out.print("Enter Registration ID to handle withdrawal request (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
+                return;
+            }
+            
+            try {
+                int regId = Integer.parseInt(input);
+                
+                Registration selectedReg = withdrawalRequests.stream()
+                    .filter(reg -> reg.getId() == regId)
+                    .findFirst()
+                    .orElse(null);
+                    
+                if (selectedReg == null) {
+                    System.out.println("Invalid Registration ID or not a withdrawal request for your project.");
+                    return;
+                }
+                
+                System.out.println("\nSelected Registration Withdrawal Request:");
+                System.out.println("Officer: " + selectedReg.getOfficer().getFirstName() + " " + selectedReg.getOfficer().getLastName());
+                System.out.println("Project: " + selectedReg.getProject().getName());
+                System.out.println("Current Status: " + selectedReg.getStatus());
+                
+                System.out.print("Approve or Reject withdrawal request? (approve/reject): ");
+                String decision = Input.getStringInput(sc).toLowerCase();
+                
+                boolean success = false;
+                if (decision.equals("approve")) {
+                    success = controller.approveRegistrationWithdrawal(selectedReg);
+                    if (success) {
+                        System.out.println("Registration withdrawal approved successfully. Officer removed from project.");
+                    }
+                } else if (decision.equals("reject")) {
+                    success = controller.rejectRegistrationWithdrawal(selectedReg);
+                    if (success) {
+                        System.out.println("Registration withdrawal rejected. Officer remains assigned to the project.");
+                    }
+                } else {
+                    System.out.println("Invalid decision. No action taken.");
+                }
+                
+                if (!success && (decision.equals("approve") || decision.equals("reject"))) {
+                    System.out.println("Action failed. The registration may not be in a valid state.");
+                }
+                
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid registration ID number.");
+            }
+            
+        } catch (Input.InputExitException e) {
+            System.out.println("Operation cancelled.");
+        } catch (Exception e) {
+            System.err.println("Error handling officer withdrawal request: " + e.getMessage());
+        }
     }
 }
