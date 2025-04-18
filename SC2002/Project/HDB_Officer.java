@@ -212,7 +212,7 @@ public class HDB_Officer extends ApplicantBase {
                             //     change_password(new_pass2);
                             //     System.out.println("Password changed successfully.");
                             // }
-                            new PasswordChanger(this);
+                            new PasswordChanger(this).changePassword(scanner);;
                         } catch (Input.InputExitException e) {
                             System.out.println("Operation cancelled. Returning to Officer menu.");
                         }

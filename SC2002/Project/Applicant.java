@@ -110,7 +110,7 @@ public class Applicant extends ApplicantBase {
                             
                         case CHANGE_PASSWORD:
                             try {
-                                new PasswordChanger(this);
+                                new PasswordChanger(this).changePassword(sc);;
                             } catch (Input.InputExitException e) {
                                 System.out.println("Operation cancelled. Returning to Applicant menu.");
                             }

@@ -348,6 +348,7 @@ public class HDB_Manager extends User implements Input {
         List<String> flatTypes = new ArrayList<>();
         List<Integer> totalUnits = new ArrayList<>();
         List<Integer> availableUnits = new ArrayList<>();
+        List<Flat> flats = new ArrayList<>();
         boolean addMoreFlats = true;
         while (addMoreFlats) {
             System.out.print("Enter Flat Type (e.g., 2-Room, 3-Room, 4-Room): ");
@@ -379,9 +380,14 @@ public class HDB_Manager extends User implements Input {
                     System.out.println("Error: Please enter a valid number.");
                 }
             }
+            
             // HELPZ
             // assign price attribute to FLAT's PRICE
-
+            for (int i=0;i<units;i++) {
+                Flat f = new Flat(null, flatType, price);
+                flats.add(f);
+            }
+            
             flatTypes.add(flatType);
             totalUnits.add(units);
             availableUnits.add(units); // Initially, available units equal total units.
@@ -463,9 +469,11 @@ public class HDB_Manager extends User implements Input {
         // Create the project.
         Project project = new Project(projectName, neighbourhood, flatTypes, totalUnits,
                 openDate, closeDate, false, totalOfficerSlots);
+        project.addFlatUnits(flats);
         project.setManager(this);
         managerProjects.add(project);
         BTOsystem.projects.add(project);
+        
         System.out.println("---------------------------------------------------");
         System.out.println(projectName + " successfully created with ID: " + project.getId());
         return project;
@@ -706,8 +714,10 @@ public class HDB_Manager extends User implements Input {
                                         if (newPrice >= 0) {
                                             // HELPZ
                                             // Update price of selected unit
-
-
+                                            List<Flat> flats = project.getAllFlats();
+                                            for (int i=0;i<flats.size();i++) {
+                                                flats.get(i).setPrice(newPrice);
+                                            }
                                             // // Update both total and available units
                                             // p.updateFlatTypeUnits(currentType, newUnits);
                                             System.out.println(currentTypeForPrice + " updated successfully.");

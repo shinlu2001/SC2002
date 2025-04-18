@@ -31,6 +31,10 @@ public class Flat {
         return price;
     }
 
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
     public boolean isBooked() {
         return isBooked;
     }
@@ -41,5 +45,8 @@ public class Flat {
 
     public Project getProject() {
         return project;
+    }
+    public void setProject(Project p) {
+        this.project = p;
     }
 }

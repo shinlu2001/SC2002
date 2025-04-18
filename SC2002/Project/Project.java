@@ -18,6 +18,7 @@ public class Project {
     private static int maxOfficerSlots = 10;
     private int totalOfficerSlots;
     private boolean visibility;
+    private List<Flat> flats;
     // enquiries related to project
     private List<Enquiry> enquiries = new ArrayList<>();
 
@@ -107,6 +108,17 @@ public class Project {
 
     public void setFlatTypes(List<String> flatTypes) {
         this.flatTypes = new ArrayList<>(flatTypes);
+    }
+
+    public void addFlatUnits(List<Flat> flat) { // actual flat objects
+        for (int i=0;i<flat.size();i++) {
+            flat.get(i).setProject(this);
+        }
+        this.flats = flat;
+    }
+    
+    public List<Flat> getAllFlats() {
+        return flats;
     }
     
     public void setTotalUnits(List<Integer> totalUnits) {
