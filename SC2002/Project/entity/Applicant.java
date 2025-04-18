@@ -15,7 +15,7 @@ public class Applicant extends User {
     private final int id;  // unique applicant ID
     private BTOApplication currentApplication; // may be null
     private final List<BTOApplication> applicationHistory;
-
+    private List<Enquiry> applicantEnquiries = new ArrayList<>();
     /**
      * Constructs a new Applicant and assigns a unique ID.
      */
@@ -107,6 +107,10 @@ public class Applicant extends User {
 
     public int getAge() {
         return super.getAge();
+    }
+
+    public List<Enquiry> getEnquiries() {
+        return applicantEnquiries;
     }
 
     public MaritalStatus getMaritalStatus() {

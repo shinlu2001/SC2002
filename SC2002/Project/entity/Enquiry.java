@@ -11,7 +11,7 @@ import SC2002.Project.entity.*;
 public class Enquiry {
     private final int id;
     private String content;
-    private String response;
+    private String response="";
     private Project project;  // null for general enquiries
     private String flatType;  // null for general enquiries
     private User creator;

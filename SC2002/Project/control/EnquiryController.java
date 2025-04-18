@@ -3,6 +3,7 @@ package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.*;
+import SC2002.Project.boundary.*;
 import java.util.List;
 import java.util.stream.Collectors; // Added import
 
@@ -18,17 +19,18 @@ public class EnquiryController {
         this.projectController = new ProjectController();
     }
 
-    public boolean createGeneralEnquiry(User user, String content) {
+    public boolean createGeneralEnquiry(User user, String content, ApplicantController applicantController) {
         if (content == null || content.trim().isEmpty()) {
             return false;
         }
 
         Enquiry enquiry = new Enquiry(user, content);
+        applicantController.addEnquiry(enquiry); // stores enquiry for each applicant
         dataStore.getEnquiries().add(enquiry);
         return true;
     }
 
-    public boolean createProjectEnquiry(User user, Project project, String content, String flatType) {
+    public boolean createProjectEnquiry(User user, Project project, String content, String flatType, ApplicantController applicantController) {
         if (content == null || content.trim().isEmpty() || project == null) {
             return false;
         }
@@ -41,8 +43,9 @@ public class EnquiryController {
         Enquiry enquiry = new Enquiry(user, content);
         enquiry.setProject(project);
         enquiry.setFlatType(flatType);
-        
+        applicantController.addEnquiry(enquiry);
         dataStore.getEnquiries().add(enquiry);
+        
         project.addEnquiry(enquiry);
         return true;
     }
@@ -57,14 +60,12 @@ public class EnquiryController {
         return projectController.findById(projectId);
     }
 
-    public List<Enquiry> getUserEnquiries(User user) {
-        return dataStore.getEnquiries().stream()
-                .filter(e -> e.getCreator().equals(user))
-                .collect(Collectors.toList());
+    public List<Enquiry> getUserEnquiries(Applicant user) {
+        return user.getEnquiries();
     }
 
-    public List<Enquiry> getEditableEnquiries(User user) {
-        return dataStore.getEnquiries().stream()
+    public List<Enquiry> getEditableEnquiries(Applicant user) {
+        return user.getEnquiries().stream()
                 .filter(e -> e.getCreator().equals(user) && !e.isAnswered())
                 .collect(Collectors.toList());
     }
@@ -83,12 +84,12 @@ public class EnquiryController {
         return true;
     }
 
-    public boolean deleteEnquiry(User user, int enquiryId) {
+    public boolean deleteEnquiry(User user, int enquiryId, ApplicantController applicantController) {
         Enquiry enquiry = findEnquiryById(enquiryId);
         if (enquiry == null || !enquiry.getCreator().equals(user)) {
             return false;
         }
-
+        applicantController.deleteEnquiry(enquiry);
         dataStore.getEnquiries().remove(enquiry);
         if (enquiry.getProject() != null) {
             enquiry.getProject().getEnquiries().remove(enquiry);
@@ -111,7 +112,7 @@ public class EnquiryController {
         return true;
     }
 
-    private Enquiry findEnquiryById(int enquiryId) {
+    public Enquiry findEnquiryById(int enquiryId) {
         return dataStore.getEnquiries().stream()
                 .filter(e -> e.getId() == enquiryId)
                 .findFirst()

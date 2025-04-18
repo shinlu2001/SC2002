@@ -5,7 +5,9 @@ import SC2002.Project.entity.Applicant;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.Project;
 import SC2002.Project.entity.enums.ApplicationStatus;
-import SC2002.Project.entity.enums.MaritalStatus;
+import SC2002.Project.entity.*;
+// import SC2002.Project.boundary.*;
+import SC2002.Project.entity.enums.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +30,6 @@ public class ApplicantController {
     public Applicant getApplicant() {
         return applicant;
     }
-
     /**
      * Eligibility rule: SINGLE >=35 only for 2-ROOM, MARRIED >=21 for any.
      */
@@ -152,9 +153,21 @@ public class ApplicantController {
         return true;
     }
 
+    
+    // enquiry matters
+    
+    public void addEnquiry(Enquiry en) {
+        applicant.getEnquiries().add(en);
+    }
+
+    public void deleteEnquiry(Enquiry en) {
+        applicant.getEnquiries().remove(en);
+    }
+
     /**
      * Lists all visible projects for which the applicant is eligible.
      */
+
     public List<Project> listEligibleProjects() {
         return dataStore.getProjects().stream()
                         .filter(Project::isVisible)
