@@ -1,18 +1,14 @@
 package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
-import SC2002.Project.entity.Applicant;
-import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.HDB_Officer;
 import SC2002.Project.entity.Project;
-import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.Visibility;
 import SC2002.Project.util.IdGenerator;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Handles creation, mutation, and queries of Project objects.
@@ -41,6 +37,17 @@ public class ProjectController {
                                  int officerSlots,
                                  HDB_Manager manager)
     {
+        // Check for overlapping project management periods for the same manager
+        for (Project existingProject : manager.getManagedProjects()) {
+            LocalDate existingOpen = existingProject.getOpenDate();
+            LocalDate existingClose = existingProject.getCloseDate();
+            // Check if the new project's period overlaps with an existing one
+            if (!(close.isBefore(existingOpen) || open.isAfter(existingClose))) {
+                 System.out.println("Error: Failed to create " + name + ". You can only manage one project within an application period.");
+                 return null; // Indicate failure due to overlap
+            }
+        }
+
         int id = IdGenerator.nextProjectId();
         Project p = new Project(
             id,
@@ -97,7 +104,59 @@ public class ProjectController {
         return false;
     }
 
-    // TODO: implement the rest of the edit methods (units, prices, dates, slots)
+    public boolean updateFlatTypeUnits(int projectId, String flatType, int newUnits) {
+        Project p = findById(projectId);
+        if (p != null) {
+            return p.updateFlatTypeUnits(flatType, newUnits);
+        }
+        return false;
+    }
+
+    public boolean addFlatType(int projectId, String flatType, int units, double price) {
+        Project p = findById(projectId);
+        if (p != null) {
+            return p.addFlatType(flatType, units, price);
+        }
+        return false;
+    }
+
+    public boolean removeFlatType(int projectId, String flatType) {
+        Project p = findById(projectId);
+        if (p != null) {
+            int index = p.getFlatTypes().indexOf(flatType);
+            if (index != -1) {
+                int currentUnits = p.getTotalUnits().get(index);
+                return p.removeFlatType(flatType, currentUnits);
+            }
+        }
+        return false;
+    }
+
+    public boolean updateFlatPrice(int projectId, String flatType, double newPrice) {
+        Project p = findById(projectId);
+        if (p != null) {
+            return p.updateFlatPrice(flatType, newPrice);
+        }
+        return false;
+    }
+
+    public boolean setOpenDate(int projectId, LocalDate openDate) {
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setOpenDate(openDate);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setCloseDate(int projectId, LocalDate closeDate) {
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setCloseDate(closeDate);
+            return true;
+        }
+        return false;
+    }
 
     public boolean setVisibility(int projectId, Visibility state) {
         Project p = findById(projectId);
@@ -111,6 +170,10 @@ public class ProjectController {
     public boolean setOfficerSlotLimit(int projectId, int newLimit) {
         Project p = findById(projectId);
         if (p != null) {
+            if (newLimit <= 0 || newLimit > Project.MAX_OFFICER_SLOTS) {
+                System.out.println("Error: Available officer slots must be between 1 and " + Project.MAX_OFFICER_SLOTS + ".");
+                return false;
+            }
             p.setOfficerSlotLimit(newLimit);
             return true;
         }
@@ -122,57 +185,84 @@ public class ProjectController {
        ------------------------------------------------------------------ */
 
     public boolean assignOfficer(int projectId, HDB_Officer officer) {
-        // TODO: check slot availability, date overlap, etc.
-        return false;
+        Project project = findById(projectId);
+        if (project == null || officer == null) {
+            System.out.println("Error: Project or Officer not found.");
+            return false;
+        }
+
+        // Check slot availability
+        if (project.getAssignedOfficers().size() >= project.getOfficerSlotLimit()) {
+            System.out.println("Error: No available officer slots for project " + project.getName() + ".");
+            return false;
+        }
+
+        // Check if officer is already assigned to this project
+        if (project.getAssignedOfficers().contains(officer)) {
+            System.out.println("Error: Officer " + officer.getNric() + " is already assigned to project " + project.getName() + ".");
+            return false;
+        }
+
+        // Check for overlapping assignment periods for the officer
+        LocalDate projectOpen = project.getOpenDate();
+        LocalDate projectClose = project.getCloseDate();
+        for (Project assignedProject : officer.getAssignedProjects()) {
+            LocalDate assignedOpen = assignedProject.getOpenDate();
+            LocalDate assignedClose = assignedProject.getCloseDate();
+            // Check if the new project's period overlaps with an existing one for this officer
+            if (!(projectClose.isBefore(assignedOpen) || projectOpen.isAfter(assignedClose))) {
+                 System.out.println("Error: Failed to assign officer " + officer.getNric() + " to " + project.getName() + ". Officer has an overlapping project assignment.");
+                 return false; // Indicate failure due to overlap
+            }
+        }
+
+        // Assign officer to project and vice versa
+        project.addAssignedOfficer(officer);
+        officer.addAssignedProject(project);
+        System.out.println("Successfully assigned officer " + officer.getNric() + " to project " + project.getName() + ".");
+        return true;
     }
 
     public boolean unassignOfficer(int projectId, HDB_Officer officer) {
-        // TODO
-        return false;
+        Project project = findById(projectId);
+        if (project == null || officer == null) {
+            System.out.println("Error: Project or Officer not found.");
+            return false;
+        }
+
+        // Check if the officer is actually assigned to this project
+        if (!project.getAssignedOfficers().contains(officer)) {
+            System.out.println("Error: Officer " + officer.getNric() + " is not assigned to project " + project.getName() + ".");
+            return false;
+        }
+
+        // Unassign officer from project and vice versa
+        project.removeAssignedOfficer(officer);
+        officer.removeAssignedProject(project);
+        System.out.println("Successfully unassigned officer " + officer.getNric() + " from project " + project.getName() + ".");
+        return true;
     }
 
     /* ------------------------------------------------------------------
        Filtering helpers for UI
        ------------------------------------------------------------------ */
 
-    public List<Project> filterByNeighbourhood(String hood) { /* TODO */ return null; }
-    public List<Project> filterByFlatType(String type)      { /* TODO */ return null; }
-    public List<Project> filterVisible()                    { /* TODO */ return null; }
-
-    public List<Project> getAllProjects() {
-        return new ArrayList<>(dataStore.getProjects());
+    public List<Project> filterByNeighbourhood(String hood) {
+        return dataStore.getProjects().stream()
+                        .filter(p -> p.getNeighbourhood().equalsIgnoreCase(hood))
+                        .collect(Collectors.toList());
     }
 
-    public Project getProjectById(int projectId) {
-        return findById(projectId);
+    public List<Project> filterByFlatType(String type) {
+        return dataStore.getProjects().stream()
+                        .filter(p -> p.getFlatTypes().stream().anyMatch(ft -> ft.equalsIgnoreCase(type)))
+                        .collect(Collectors.toList());
     }
 
-    /**
-     * Single applicants under 35 ineligible for any.
-     * Single >=35 only 2-ROOM; Married >=21 any.
-     */
-    public boolean isEligibleForRoomType(Applicant applicant, String roomType) {
-        // example simplified logic
-        return true;
-    }
-
-    /**
-     * Creates a BTO application if no active one.
-     * Fix: unwrap Optional<BTOApplication> before getStatus().
-     */
-    public boolean createApplication(Applicant applicant, Project project, String roomType) {
-        Optional<BTOApplication> currentOpt = applicant.getCurrentApplication();
-        if (currentOpt.isPresent()) {
-            ApplicationStatus st = currentOpt.get().getStatus();
-            if (st != ApplicationStatus.WITHDRAWN && st != ApplicationStatus.REJECTED) {
-                return false;
-            }
-        }
-
-        BTOApplication application = new BTOApplication(applicant, project, roomType);
-        dataStore.getApplications().add(application);
-        applicant.setCurrentApplication(application);
-        return true;
+    public List<Project> filterVisible() {
+        return dataStore.getProjects().stream()
+                        .filter(p -> p.getVisibility() == Visibility.ON)
+                        .collect(Collectors.toList());
     }
 
     /* ------------------------------------------------------------------
@@ -193,13 +283,11 @@ public class ProjectController {
         return false;
     }
 
-    public boolean deleteProject(int projectId) {
+    public boolean deleteProject(int projectId, HDB_Manager manager) {
         Project p = findById(projectId);
-        if (p != null) {
+        if (p != null && p.getManager().equals(manager)) {
+            manager.removeManagedProject(p);
             dataStore.getProjects().remove(p);
-            if (p.getManager() != null) {
-                p.getManager().removeManagedProject(p);
-            }
             return true;
         }
         return false;

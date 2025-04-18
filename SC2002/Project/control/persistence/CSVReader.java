@@ -137,7 +137,7 @@ public final class CSVReader {
                               reg.setStatus(RegistrationStatus.APPROVED);
                               ds.getRegistrations().add(reg);
                               off.addRegistration(reg);
-                              prj.addOfficer(off);
+                              prj.addAssignedOfficer(off);
                           });
                     }
                 }
@@ -159,7 +159,7 @@ public final class CSVReader {
                             Registration reg = new Registration(regId, offOpt.get(), pOpt.get());
                             if (rs.equals("APPROVED")) {
                                 reg.approve();
-                                pOpt.get().addOfficer(offOpt.get());
+                                pOpt.get().addAssignedOfficer(offOpt.get());
                             } else if (rs.equals("REJECTED")) {
                                 reg.reject();
                             }

@@ -32,6 +32,11 @@ public class Applicant extends User {
         return id;
     }
 
+    // Add specific getter for Applicant ID to avoid confusion with User ID if User gets one
+    public int getApplicantId() {
+        return id;
+    }
+
     /**
      * @return an Optional containing the active BTO application, or empty if none.
      */

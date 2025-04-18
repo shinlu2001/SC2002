@@ -9,6 +9,8 @@ import java.util.List;
  * Entity representing a BTO project.
  */
 public class Project {
+    public static final int MAX_OFFICER_SLOTS = 5; // Example limit
+
     private final int id;
     private String name;
     private String neighbourhood;
@@ -84,11 +86,11 @@ public class Project {
     public void setName(String name) { this.name = name; }
     public void setNeighbourhood(String neighbourhood) { this.neighbourhood = neighbourhood; }
     public void setFlatTypes(List<String> flatTypes) { this.flatTypes = new ArrayList<>(flatTypes); }
-    void setTotalUnits(List<Integer> totalUnits) { this.totalUnits = new ArrayList<>(totalUnits); }
-    void setAvailableUnits(List<Integer> availableUnits) { this.availableUnits = new ArrayList<>(availableUnits); }
-    void setPrices(List<Double> prices) { this.prices = new ArrayList<>(prices); }
-    void setOpenDate(LocalDate openDate) { this.openDate = openDate; }
-    void setCloseDate(LocalDate closeDate) { this.closeDate = closeDate; }
+    public void setTotalUnits(List<Integer> totalUnits) { this.totalUnits = new ArrayList<>(totalUnits); }
+    public void setAvailableUnits(List<Integer> availableUnits) { this.availableUnits = new ArrayList<>(availableUnits); }
+    public void setPrices(List<Double> prices) { this.prices = new ArrayList<>(prices); }
+    public void setOpenDate(LocalDate openDate) { this.openDate = openDate; }
+    public void setCloseDate(LocalDate closeDate) { this.closeDate = closeDate; }
     public void setVisibility(Visibility visibility) { this.visibility = visibility; }
     public void setManager(HDB_Manager manager) { this.manager = manager; }
     public void setOfficerSlotLimit(int officerSlotLimit) { this.officerSlotLimit = officerSlotLimit; }
@@ -98,14 +100,16 @@ public class Project {
     /**
      * Assigns a new HDB officer to this project.
      */
-    public void addOfficer(HDB_Officer officer) {
-        assignedOfficers.add(officer);
+    public void addAssignedOfficer(HDB_Officer officer) {
+        if (!assignedOfficers.contains(officer)) {
+            assignedOfficers.add(officer);
+        }
     }
 
     /**
      * Removes an HDB officer from this project.
      */
-    void removeOfficer(HDB_Officer officer) {
+    public void removeAssignedOfficer(HDB_Officer officer) {
         assignedOfficers.remove(officer);
     }
 
@@ -119,8 +123,63 @@ public class Project {
     /**
      * Removes an enquiry from this project.
      */
-    void removeEnquiry(Enquiry enquiry) {
+    public void removeEnquiry(Enquiry enquiry) {
         enquiries.remove(enquiry);
+    }
+
+    // ─────────── Flat Type/Unit/Price Mutators ───────────
+
+    public boolean updateFlatTypeUnits(String flatType, int newUnits) {
+        int index = flatTypes.indexOf(flatType.toUpperCase());
+        if (index != -1) {
+            // Adjust available units based on the change in total units
+            int oldTotalUnits = totalUnits.get(index);
+            int diff = newUnits - oldTotalUnits;
+            int currentAvailable = availableUnits.get(index);
+            availableUnits.set(index, Math.max(0, currentAvailable + diff)); // Ensure available doesn't go below 0
+            totalUnits.set(index, newUnits);
+            // Ensure available units do not exceed new total units
+            if (availableUnits.get(index) > newUnits) {
+                availableUnits.set(index, newUnits);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean addFlatType(String flatType, int units, double price) {
+        String upperFlatType = flatType.toUpperCase();
+        if (!flatTypes.contains(upperFlatType)) {
+            flatTypes.add(upperFlatType);
+            totalUnits.add(units);
+            availableUnits.add(units); // Initially, all units are available
+            prices.add(price);
+            return true;
+        }
+        return false; // Flat type already exists
+    }
+
+    public boolean removeFlatType(String flatType, int currentUnits /* Unused but kept for signature match */) {
+        int index = flatTypes.indexOf(flatType.toUpperCase());
+        if (index != -1) {
+            // Consider implications: What happens to applications for this flat type?
+            // For now, just remove it. Add checks if needed (e.g., cannot remove if applications exist).
+            flatTypes.remove(index);
+            totalUnits.remove(index);
+            availableUnits.remove(index);
+            prices.remove(index);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean updateFlatPrice(String flatType, double newPrice) {
+        int index = flatTypes.indexOf(flatType.toUpperCase());
+        if (index != -1) {
+            prices.set(index, newPrice);
+            return true;
+        }
+        return false;
     }
 
     // ─────────── Derived Helpers ───────────
@@ -138,7 +197,12 @@ public class Project {
      */
     public double getFlatPrice(String flatType) {
         int idx = this.flatTypes.indexOf(flatType.toUpperCase());
-        return idx >= 0 ? prices.get(idx) : 0.0;
+        // Check index validity before accessing the list
+        if (idx >= 0 && idx < prices.size()) {
+            Double price = prices.get(idx);
+            return price != null ? price : 0.0; // Handle potential null Double
+        }
+        return 0.0; // Return default if index is invalid
     }
 
     /**

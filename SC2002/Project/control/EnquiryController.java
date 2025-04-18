@@ -3,10 +3,8 @@ package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.*;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Collectors; // Added import
 
 /**
  * Controller class for managing enquiries in the system.
@@ -50,13 +48,13 @@ public class EnquiryController {
     }
 
     public List<Project> getVisibleProjects() {
-        return projectController.getAllProjects().stream()
+        return projectController.listAll().stream()
                 .filter(Project::isVisible)
                 .collect(Collectors.toList());
     }
 
     public Project getProjectById(int projectId) {
-        return projectController.getProjectById(projectId);
+        return projectController.findById(projectId);
     }
 
     public List<Enquiry> getUserEnquiries(User user) {

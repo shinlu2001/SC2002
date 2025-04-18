@@ -1,18 +1,17 @@
 // SC2002/Project/control/persistence/DataStore.java
 package SC2002.Project.control.persistence;
 
+import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.Enquiry;
+import SC2002.Project.entity.Flat;
+import SC2002.Project.entity.Project;
+import SC2002.Project.entity.Registration;
+import SC2002.Project.entity.User;
+import SC2002.Project.entity.enums.FlatType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import SC2002.Project.entity.User;
-import SC2002.Project.entity.enums.FlatType;
-import SC2002.Project.entity.Project;
-import SC2002.Project.entity.BTOApplication;
-import SC2002.Project.entity.Enquiry;
-import SC2002.Project.entity.Flat;
-import SC2002.Project.entity.Registration;
 
 public final class DataStore {
     private static final DataStore INSTANCE = new DataStore();
@@ -40,9 +39,19 @@ public final class DataStore {
         return projects;
     }
 
+    public void setProjects(List<Project> projects) {
+        this.projects.clear();
+        this.projects.addAll(projects);
+    }
+
     /** All BTO applications */
     public List<BTOApplication> getApplications() {
         return applications;
+    }
+
+    public void setApplications(List<BTOApplication> applications) {
+        this.applications.clear();
+        this.applications.addAll(applications);
     }
 
     /** All enquiries */
@@ -50,14 +59,29 @@ public final class DataStore {
         return enquiries;
     }
 
+    public void setEnquiries(List<Enquiry> enquiries) {
+        this.enquiries.clear();
+        this.enquiries.addAll(enquiries);
+    }
+
     /** All flats */
     public List<Flat> getFlats() {
         return flats;
     }
 
+    public void setFlats(List<Flat> flats) {
+        this.flats.clear();
+        this.flats.addAll(flats);
+    }
+
     /** All officer registrations */
     public List<Registration> getRegistrations() {
         return registrations;
+    }
+
+    public void setRegistrations(List<Registration> registrations) {
+        this.registrations.clear();
+        this.registrations.addAll(registrations);
     }
 
     // ───────── Convenience Finders ─────────

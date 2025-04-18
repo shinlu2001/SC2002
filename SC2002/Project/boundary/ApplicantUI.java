@@ -64,7 +64,7 @@ public class ApplicantUI {
         try {
             System.out.print("Project ID: ");
             int pid = Input.getIntInput(sc);
-            Project p = projCtrl.getProjectById(pid);
+            Project p = projCtrl.findById(pid);
             if (p == null || !eligible.contains(p)) {
                 System.out.println("Invalid Project ID or not eligible.");
                 return;
@@ -117,7 +117,7 @@ public class ApplicantUI {
     private static void viewAllListings(ProjectController projCtrl,
                                         ApplicantController ctrl,
                                         Applicant applicant) {
-        List<Project> all = projCtrl.getAllProjects()
+        List<Project> all = projCtrl.listAll()
                                             .stream()
                                             .filter(Project::isVisible)
                                             .toList();
