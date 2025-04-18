@@ -103,7 +103,7 @@ public class ApplicantUI {
         }
     }
 
-    private static void viewEligibleListings(Applicant applicant,
+    protected static void viewEligibleListings(Applicant applicant,
                                              ApplicantController ctrl) {
         List<Project> eligible = ctrl.listEligibleProjects();
         if (eligible.isEmpty()) {
@@ -114,7 +114,7 @@ public class ApplicantUI {
         MenuPrinter.printProjectTableEligible(eligible, applicant, ctrl);
     }
 
-    private static void viewAllListings(ProjectController projCtrl,
+    protected static void viewAllListings(ProjectController projCtrl,
                                         ApplicantController ctrl,
                                         Applicant applicant) {
         List<Project> all = projCtrl.listAll()
