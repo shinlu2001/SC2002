@@ -13,6 +13,7 @@ public abstract class User {
     private MaritalStatus maritalStatus;
     private int age;
 
+    // Reverted Constructor
     public User(String nric, String firstName, String lastName, MaritalStatus maritalStatus, int age) {
         this.nric = nric;
         this.firstName = firstName;
@@ -21,7 +22,7 @@ public abstract class User {
         this.age = age;
     }
 
-    // Getters
+    // --- Getters ---
     public String getNric() {
         return nric;
     }
@@ -46,7 +47,7 @@ public abstract class User {
         return age;
     }
 
-    // Setters / Actions
+    // --- Setters / Actions ---
     public void setPassword(String newPassword) {
         this.password = newPassword;
     }
@@ -57,6 +58,7 @@ public abstract class User {
 
     @Override
     public String toString() {
+        // Reverted toString
         return String.format("NRIC: %s%nFirst name: %s%nLast name: %s%nAge: %d%nMarital status: %s", nric, firstName, lastName, age, maritalStatus);
     }
 }

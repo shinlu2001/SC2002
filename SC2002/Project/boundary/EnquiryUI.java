@@ -1,15 +1,12 @@
 // SC2002/Project/boundary/EnquiryUI.java
 package SC2002.Project.boundary;
 
+import SC2002.Project.boundary.util.Input;
+import SC2002.Project.boundary.util.MenuPrinter;
 import SC2002.Project.control.ApplicantController;
-import SC2002.Project.control.ApplicationController;
 import SC2002.Project.control.EnquiryController;
 import SC2002.Project.control.ProjectController;
 import SC2002.Project.entity.*;
-import SC2002.ProjectOLD.BTOsystem;
-import SC2002.Project.boundary.util.Input;
-import SC2002.Project.boundary.util.MenuPrinter;
-
 import java.util.List;
 import java.util.Scanner;
 
@@ -104,7 +101,7 @@ public class EnquiryUI {
         }
     }
 
-    private static void viewEnquiries(Scanner sc, Applicant user, List<Enquiry> enquiries, boolean expand) {
+    static void viewEnquiries(Scanner sc, Applicant user, List<Enquiry> enquiries, boolean expand) {
         System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n",
                 "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
         System.out.println("====================================================================================================================");

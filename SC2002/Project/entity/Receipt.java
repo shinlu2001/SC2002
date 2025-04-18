@@ -18,9 +18,8 @@ public class Receipt {
         if (application == null || bookedFlat == null || application.getStatus() != ApplicationStatus.BOOKED) {
             throw new IllegalArgumentException("Receipt can only be generated for a successfully booked application with a valid flat.");
         }
-        // Assuming ID generation is simple for now
-        // this.id = IdGenerator.nextReceiptId(); // If needed
-        this.id = -1; // Placeholder
+        // Use IdGenerator to generate a unique receipt ID
+        this.id = IdGenerator.nextReceiptId();
         this.application = application;
         this.bookedFlat = bookedFlat;
         this.generationDate = LocalDateTime.now();
@@ -50,6 +49,9 @@ public class Receipt {
         Applicant applicant = application.getApplicant();
         Project project = application.getProject();
         
+        // Format the date/time to show only up to seconds (no decimal/nanoseconds)
+        String formattedDate = generationDate.toString().split("\\.")[0]; // Remove decimal portion
+        
         return String.format(
             "========== FLAT BOOKING RECEIPT ==========\n" +
             "Receipt ID: %d\n" +
@@ -64,7 +66,7 @@ public class Receipt {
             "Booked Flat Type: %s\n" +
             "Booking Price: $%.2f\n" +
             "==========================================",
-            id, generationDate.toString(),
+            id, formattedDate,
             applicant.getNric(),
             applicant.getFirstName(), applicant.getLastName(),
             project.getName(),

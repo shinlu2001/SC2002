@@ -44,7 +44,7 @@ public class ApplicantUI {
         }
     }
 
-    private static void applyForProject(Scanner sc,
+    public static void applyForProject(Scanner sc,
                                         Applicant applicant,
                                         ApplicantController ctrl,
                                         ProjectController projCtrl) {
@@ -87,7 +87,7 @@ public class ApplicantUI {
         }
     }
 
-    private static void viewActiveApplication(Applicant applicant) {
+    public static void viewActiveApplication(Applicant applicant) {
         Optional<BTOApplication> oa = applicant.getCurrentApplication();
         if (oa.isEmpty()) {
             System.out.println("You have no active application.");
@@ -129,7 +129,7 @@ public class ApplicantUI {
         MenuPrinter.printProjectTableAll(all, applicant, ctrl);
     }
 
-    private static void withdrawApplication(Scanner sc,
+    public static void withdrawApplication(Scanner sc,
                                             Applicant applicant,
                                             ApplicantController ctrl) {
         Optional<BTOApplication> oa = applicant.getCurrentApplication();
@@ -153,7 +153,7 @@ public class ApplicantUI {
         }
     }
 
-    private static void viewAccountDetails(Applicant applicant) {
+    public static void viewAccountDetails(Applicant applicant) {
         System.out.println("\nAccount Details:");
         System.out.println(applicant);
     }

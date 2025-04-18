@@ -37,13 +37,12 @@ public class ManagerController {
     }
 
     /**
-     * Finds a pending application by ID, ensuring it's for a project this manager manages.
+     * Finds an application by ID, ensuring it's for a project this manager manages.
+     * Use this generic version for looking up applications of any status.
      */
     public BTOApplication findManagedApplicationById(int appId) {
         BTOApplication app = appController.findById(appId);
-        if (app != null
-         && app.getStatus() == ApplicationStatus.PENDING
-         && manager.getManagedProjects().contains(app.getProject())) {
+        if (app != null && manager.getManagedProjects().contains(app.getProject())) {
             return app;
         }
         return null;

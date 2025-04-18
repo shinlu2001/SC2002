@@ -74,16 +74,16 @@ public class RegistrationUI {
             int age;
             while (true) {
                 try {
-                    System.out.print("Age: ");
-                    age = Input.getIntInput(sc);
-                    if (age < 0) {
-                        System.out.println("Invalid age. Please enter 0 or a positive number.");
-                        continue;
-                    }
-                    break;
+                    // Use the Input utility method with a range check
+                    age = Input.getIntInput(sc, "Age: ", 0, 150); // Assuming 150 is a reasonable max age
+                    // The Input.getIntInput method already handles the >= 0 check implicitly via the min parameter
+                    break; // Exit loop if input is valid
                 } catch (InputExitException e) {
                     System.out.println("Operation cancelled. Returning to previous menu.");
                     return;
+                } catch (NumberFormatException e) {
+                    // This catch might be redundant if Input.getIntInput handles it, but kept for safety
+                    System.out.println("Invalid input. Please enter a whole number.");
                 }
             }
             

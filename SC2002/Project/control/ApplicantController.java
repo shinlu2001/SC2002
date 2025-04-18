@@ -1,12 +1,7 @@
 package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
-import SC2002.Project.entity.Applicant;
-import SC2002.Project.entity.BTOApplication;
-import SC2002.Project.entity.Project;
-import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.*;
-// import SC2002.Project.boundary.*;
 import SC2002.Project.entity.enums.*;
 import java.util.List;
 import java.util.Optional;
@@ -72,14 +67,31 @@ public class ApplicantController {
         if (hasActiveApplication()) {
             return false;
         }
+        // Check Project Visibility and Open Status
+        if (!project.isVisible()) {
+            System.out.println("Error: Project is not currently visible.");
+            return false;
+        }
+        if (!project.isOpen()) {
+            System.out.println("Error: Project application period is not open (Open: " + project.getOpenDate() + ", Close: " + project.getCloseDate() + ").");
+            return false;
+        }
         if (!isEligibleForRoomType(roomType)) {
-            System.out.println("Error: Not eligible for room type.");
+            System.out.println("Error: Not eligible for room type based on age/marital status.");
             return false;
         }
         if (!project.getFlatTypes().contains(roomType.toUpperCase())) {
             System.out.println("Error: Room type not offered in that project.");
             return false;
         }
+        // Check flat availability
+        int idx = project.getFlatTypes().indexOf(roomType.toUpperCase());
+        if (idx == -1 || project.getAvailableUnits().get(idx) <= 0) {
+            System.out.println("Error: No available flats of this type in the selected project.");
+            return false;
+        }
+        // Decrement available units
+        project.decrementAvailableUnits(roomType);
         BTOApplication app = new BTOApplication(applicant, project, roomType);
         dataStore.getApplications().add(app);
         applicant.setCurrentApplication(app);

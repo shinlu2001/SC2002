@@ -3,9 +3,8 @@ package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.*;
-import SC2002.Project.boundary.*;
 import java.util.List;
-import java.util.stream.Collectors; // Added import
+import java.util.stream.Collectors;
 
 /**
  * Controller class for managing enquiries in the system.
@@ -99,16 +98,49 @@ public class EnquiryController {
 
     public boolean respondToEnquiry(User staff, int enquiryId, String response) {
         if (response == null || response.trim().isEmpty()) {
+            System.out.println("Error: Response cannot be empty.");
             return false;
         }
 
         Enquiry enquiry = findEnquiryById(enquiryId);
-        if (enquiry == null || enquiry.isAnswered()) {
+        if (enquiry == null) {
+            System.out.println("Error: Enquiry not found.");
+            return false;
+        }
+        if (enquiry.isAnswered()) {
+            System.out.println("Error: Enquiry has already been answered.");
+            return false;
+        }
+
+        // Check permissions based on user role and enquiry type
+        boolean permitted = false;
+        if (staff instanceof HDB_Manager) {
+            permitted = true; // Managers can answer any enquiry
+        } else if (staff instanceof HDB_Officer) {
+            Project project = enquiry.getProject();
+            if (project != null) {
+                // Officers can only answer enquiries for projects they are assigned to
+                if (project.getAssignedOfficers().contains((HDB_Officer) staff)) {
+                    permitted = true;
+                } else {
+                    System.out.println("Error: Officer is not assigned to this project.");
+                }
+            } else {
+                // Officers cannot answer general enquiries
+                System.out.println("Error: Officers cannot answer general enquiries.");
+            }
+        } else {
+            // Other user types (e.g., Applicant) cannot respond
+            System.out.println("Error: Only Managers or assigned Officers can respond to enquiries.");
+        }
+
+        if (!permitted) {
             return false;
         }
 
         enquiry.setResponse(response);
         enquiry.setRespondent(staff);
+        System.out.println("Enquiry ID " + enquiryId + " responded successfully.");
         return true;
     }
 

@@ -43,7 +43,17 @@ public final class CSVReader {
                 String[] cols = line.replace("\uFEFF", "").split(",", -1);
                 String fullName = cols[0].trim();
                 String nric     = cols[1].trim();
-                int age         = Integer.parseInt(cols[2].trim());
+                int age;
+                try {
+                    age = Integer.parseInt(cols[2].trim());
+                    if (age < 0) {
+                        System.err.println("Invalid age (" + age + ") for NRIC " + nric + ", skipping user.");
+                        continue;
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid age format for NRIC " + nric + ", skipping user.");
+                    continue;
+                }
                 MaritalStatus ms= MaritalStatus.valueOf(cols[3].trim().toUpperCase());
                 String[] parts  = fullName.split("\\s+", 2);
                 String firstName = parts[0];
@@ -73,9 +83,9 @@ public final class CSVReader {
 
     private static void readProjects(DataStore ds) {
         Path p = BASE.resolve("ProjectList.csv");
+        String line = null; // Declare line outside the try block
         try (BufferedReader br = Files.newBufferedReader(p)) {
             br.readLine(); // header
-            String line;
             while ((line = br.readLine()) != null && !line.isBlank()) {
                 String[] t = line.replace("\uFEFF", "").split(",", -1);
 
@@ -126,21 +136,57 @@ public final class CSVReader {
 
                 ds.getProjects().add(prj);
 
-                // initial approved officers (col 12)
+                // Initialize the available units to match the total units from the CSV
+                List<String> flatTypes = prj.getFlatTypes();
+                List<Integer> totalUnits = prj.getTotalUnits();
+                List<Double> prices = prj.getPrices();
+                
+                // Create Flat objects for each unit in each flat type
+                for (int i = 0; i < flatTypes.size(); i++) {
+                    String type = flatTypes.get(i);
+                    int numUnits = totalUnits.get(i);
+                    double price = prices.get(i);
+                    
+                    // Create Flat objects for this flat type
+                    for (int j = 0; j < numUnits; j++) {
+                        // Use the simpler Flat constructor with just the essential information
+                        Flat flat = new Flat(IdGenerator.nextFlatId(), prj, type, price);
+                        ds.getFlats().add(flat);
+                    }
+                    
+                    System.out.println("DEBUG: Created " + numUnits + " flats for Project " + prj.getName() + 
+                                      ", Type: " + type);
+                }
+
+                // initial approved officers (col 12) - Names in quotes, potentially separated by ; or ,
                 if (t.length > 12 && !t[12].isBlank()) {
-                    String raw = t[12].replace("\"", "").trim();
-                    for (String offName : raw.split("\\s*[,;]\\s*")) {
-                        ds.findUserByNric(offName)
-                          .filter(u -> u instanceof HDB_Officer)
-                          .map(u -> (HDB_Officer)u)
-                          .ifPresent(off -> {
-                              int regId = IdGenerator.nextRegistrationId();
-                              Registration reg = new Registration(regId, off, prj);
-                              reg.setStatus(RegistrationStatus.APPROVED);
-                              ds.getRegistrations().add(reg);
-                              off.addRegistration(reg);
-                              prj.addAssignedOfficer(off);
-                          });
+                    String rawOfficerNames = t[12].replace("\"", "").trim(); // Remove quotes
+                    for (String offName : rawOfficerNames.split("\\s*[,;]\\s*")) { // Split by comma or semicolon with optional spaces
+                        if (offName.isBlank()) continue; // Skip empty entries if any
+
+                        // Find officer by first name (assuming names in CSV are first names)
+                        Optional<HDB_Officer> foundOfficer = ds.getUsers().stream()
+                            .filter(u -> u instanceof HDB_Officer)
+                            .map(u -> (HDB_Officer) u)
+                            .filter(officer -> officer.getFirstName().equalsIgnoreCase(offName.trim()))
+                            .findFirst();
+
+                        if (foundOfficer.isPresent()) {
+                            HDB_Officer off = foundOfficer.get();
+                            // Check if already assigned (e.g., via explicit registration column)
+                            boolean alreadyAssigned = prj.getAssignedOfficers().contains(off);
+                            if (!alreadyAssigned) {
+                                int regId = IdGenerator.nextRegistrationId();
+                                Registration reg = new Registration(regId, off, prj);
+                                reg.setStatus(RegistrationStatus.APPROVED); // Directly approve based on CSV column
+                                ds.getRegistrations().add(reg);
+                                off.addRegistration(reg);
+                                prj.addAssignedOfficer(off); // Add to project's list
+                                System.out.println("DEBUG: Assigned Officer " + off.getFirstName() + " to Project " + prj.getName() + " from column 12."); // Debug print
+                            }
+                        } else {
+                             System.err.println("WARN: Officer with name '" + offName + "' not found for project '" + name + "' assignment.");
+                        }
                     }
                 }
 
@@ -175,6 +221,9 @@ public final class CSVReader {
             }
         } catch (IOException e) {
             System.err.println("Could not read ProjectList.csv: " + e.getMessage());
+        } catch (Exception e) { // Catch broader exceptions during parsing
+             System.err.println("Error processing line in ProjectList.csv: " + line + " - " + e.getMessage());
+             e.printStackTrace(); // Print stack trace for debugging
         }
     }
 }

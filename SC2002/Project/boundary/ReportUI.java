@@ -1,11 +1,10 @@
 // SC2002/Project/boundary/ReportUI.java
 package SC2002.Project.boundary;
 
-import SC2002.Project.control.ReportController;
-import SC2002.Project.entity.*;
 import SC2002.Project.boundary.util.Input;
 import SC2002.Project.boundary.util.MenuPrinter;
-
+import SC2002.Project.control.ReportController;
+import SC2002.Project.entity.*;
 import java.util.List;
 import java.util.Scanner;
 
@@ -101,7 +100,7 @@ public class ReportUI {
         System.out.println("=================");
         System.out.printf("%-5s %-20s %-5s %-10s %-15s %-15s %-10s%n",
             "ID", "Applicant Name", "Age", "Status", "Flat Type", "Project", "Status");
-        System.out.println("-------------------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------------------");
         
         for (BTOApplication app : applications) {
             Applicant applicant = (Applicant) app.getApplicant();
@@ -114,6 +113,6 @@ public class ReportUI {
                 app.getProject().getName(),
                 app.getStatus());
         }
-        System.out.println("-------------------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------------------");
     }
 }

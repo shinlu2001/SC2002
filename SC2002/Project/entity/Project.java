@@ -9,7 +9,7 @@ import java.util.List;
  * Entity representing a BTO project.
  */
 public class Project {
-    public static final int MAX_OFFICER_SLOTS = 5; // Example limit
+    public static final int MAX_OFFICER_SLOTS = 10; 
 
     private final int id;
     private String name;
@@ -215,7 +215,7 @@ public class Project {
     /**
      * Decrements available units for the specified flat type.
      */
-    void decrementAvailableUnits(String flatType) {
+    public void decrementAvailableUnits(String flatType) {
         int idx = this.flatTypes.indexOf(flatType.toUpperCase());
         if (idx != -1 && availableUnits.get(idx) > 0) {
             availableUnits.set(idx, availableUnits.get(idx) - 1);

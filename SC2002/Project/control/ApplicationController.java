@@ -57,7 +57,8 @@ public class ApplicationController {
 
     /**
      * Change the status of an existing application.
-     * Supports transitions: PENDING→SUCCESS, PENDING→REJECTED, SUCCESS→BOOKED.
+     * Supports transitions: PENDING→SUCCESS, PENDING→REJECTED, SUCCESS→BOOKED, 
+     * PENDING→WITHDRAWN, SUCCESS→WITHDRAWN
      * @return true if the transition was performed; false otherwise.
      */
     public boolean changeStatus(int applicationId, ApplicationStatus newStatus) {
@@ -84,6 +85,16 @@ public class ApplicationController {
             case BOOKED -> {
                 if (current == ApplicationStatus.SUCCESS) {
                     app.requestBooking();
+                    return true;
+                }
+            }
+            case WITHDRAWN -> {
+                // Allow withdrawal from PENDING or SUCCESS states
+                if (current == ApplicationStatus.PENDING || current == ApplicationStatus.SUCCESS) {
+                    app.confirmWithdrawal();
+                    // Clean up applicant reference to allow new applications
+                    app.getApplicant().clearCurrentApplicationReference();
+                    System.out.println("Application ID " + app.getId() + " withdrawn. Applicant can now apply for a new project.");
                     return true;
                 }
             }

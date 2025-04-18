@@ -4,11 +4,13 @@ package SC2002.Project.util;
 import java.util.regex.Pattern;
 
 public final class ValidationUtil {
-    private static final Pattern NRIC = Pattern.compile("[ST]\\d{7}[A-Z]");
+    // Updated regex to match spec: ^[A-Za-z]\d{7}[A-Za-z]$
+    private static final Pattern NRIC = Pattern.compile("^[A-Za-z]\\d{7}[A-Za-z]$");
 
     private ValidationUtil() {}
 
     public static boolean isValidNric(String nric) {
-        return NRIC.matcher(nric).matches();
+        if (nric == null) return false;
+        return NRIC.matcher(nric.toUpperCase()).matches(); // Ensure case-insensitivity for letters
     }
 }
