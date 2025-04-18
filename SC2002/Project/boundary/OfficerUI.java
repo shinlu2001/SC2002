@@ -251,19 +251,24 @@ public class OfficerUI {
 
         System.out.println("\nYour Project Registration Statuses:");
         System.out.println("-----------------------------------");
-        System.out.printf("%-10s %-20s %-20s%n", "Reg ID", "Project Name", "Status");
-        System.out.println("-".repeat(55));
+        System.out.printf("%-10s %-" + Menu.COL_NAME + "s %-20s%n", "Reg ID", "Project Name", "Status");
+        System.out.println("-".repeat(72)); // Updated separator length to match column widths
         for (Registration reg : officerRegistrations) {
             String statusDisplay = reg.getStatus().toString();
-            if (reg.isWithdrawalRequested()) {
+            // Only show "Withdrawal Requested" for PENDING, not for already WITHDRAWN ones
+            if (reg.isWithdrawalRequested() && reg.getStatus() != RegistrationStatus.WITHDRAWN) {
                 statusDisplay += " (Withdrawal Requested)";
             }
-            System.out.printf("%-10d %-20s %-20s%n",
+            
+            // Truncate project name if too long
+            String projectName = Input.truncateText(reg.getProject().getName(), Menu.COL_NAME - 2);
+            
+            System.out.printf("%-10d %-" + Menu.COL_NAME + "s %-20s%n",
                               reg.getId(),
-                              reg.getProject().getName(),
+                              projectName,
                               statusDisplay);
         }
-        System.out.println("-".repeat(55));
+        System.out.println("-".repeat(72)); // Updated separator length
         
         // Add option to request withdrawal for registrations
         try {
@@ -287,15 +292,27 @@ public class OfficerUI {
                     return;
                 }
                 
+                // Check if registration is already withdrawn
+                if (selectedReg.getStatus() == RegistrationStatus.WITHDRAWN) {
+                    System.out.println("Registration already withdrawn. No further action needed.");
+                    return;
+                }
+                
                 // Check if already processing a withdrawal request
                 if (selectedReg.isWithdrawalRequested()) {
                     System.out.println("Withdrawal already requested. Awaiting manager approval.");
                     return;
                 }
                 
+                // Check if registration is APPROVED - cannot withdraw if APPROVED
+                if (selectedReg.getStatus() == RegistrationStatus.APPROVED) {
+                    System.out.println("Cannot withdraw from an APPROVED project registration.");
+                    System.out.println("Once a registration is approved, you cannot withdraw from the project.");
+                    return;
+                }
+                
                 // Check if registration is in a state that can't be withdrawn
-                if (selectedReg.getStatus() != RegistrationStatus.PENDING && 
-                    selectedReg.getStatus() != RegistrationStatus.APPROVED) {
+                if (selectedReg.getStatus() != RegistrationStatus.PENDING) {
                     System.out.println("Cannot request withdrawal for a registration with status: " + selectedReg.getStatus());
                     return;
                 }
