@@ -21,6 +21,7 @@ public class ApplicantUI {
 
         while (!exit) {
             System.out.println("\nWelcome, " + applicant.getFirstName() + "!");
+            MenuPrinter.printRoleMenuHeader(0);
             MenuPrinter.printApplicantMenu();
             try {
                 int choice = Input.getIntInput(sc);

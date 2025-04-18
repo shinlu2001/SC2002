@@ -24,6 +24,7 @@ public class OfficerUI {
 
         while (!exit) {
             System.out.println("\nWelcome, Officer " + officer.getFirstName() + "!");
+            MenuPrinter.printRoleMenuHeader(1);
             MenuPrinter.printOfficerMenu();
             try {
                 int choice = Input.getIntInput(sc);

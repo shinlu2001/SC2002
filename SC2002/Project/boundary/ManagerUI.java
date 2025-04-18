@@ -24,6 +24,7 @@ public class ManagerUI {
 
         while (!exit) {
             System.out.println("\nWelcome, Manager " + user.getFirstName() + "!");
+            MenuPrinter.printRoleMenuHeader(2);
             MenuPrinter.printManagerMenu();
             try {
                 int choice = Input.getIntInput(sc);
