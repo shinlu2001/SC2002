@@ -90,5 +90,14 @@ public final class DataStore {
                            .collect(Collectors.toList());
     }
 
+    /** Find the first available Flat object matching this project/type. */
+    public Optional<Flat> findAvailableFlat(Project project, String wanted) {
+        return flats.stream()
+                    .filter(f -> f.getProject().equals(project))
+                    .filter(f -> f.getFlatType().equalsIgnoreCase(wanted))
+                    .filter(f -> !f.isBooked())
+                    .findFirst();
+    }
+
     // …add more helpers as needed…
 }

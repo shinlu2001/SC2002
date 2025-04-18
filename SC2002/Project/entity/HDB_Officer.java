@@ -1,24 +1,40 @@
 package SC2002.Project.entity;
 
 import SC2002.Project.entity.enums.MaritalStatus;
+import SC2002.Project.util.IdGenerator;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Represents an HDB Officer user (inherits Applicant capabilities).
+ */
 public class HDB_Officer extends Applicant {
-    private Registration currentRegistration;
+    private final int officerId;
+    private final List<Registration> registrations = new ArrayList<>();
 
-    public HDB_Officer(String n, String f, String l, MaritalStatus ms, int age) {
-        super(n, f, l, ms, age);
+    public HDB_Officer(String nric, String firstName, String lastName,
+                       MaritalStatus maritalStatus, int age) {
+        super(nric, firstName, lastName, maritalStatus, age);
+        this.officerId = IdGenerator.nextOfficerId();
     }
 
-    /**
-     * Called by CSVReader when loading initial officers for a project.
-     * You can also fetch via this getter in your controllers.
-     */
-    public void setCurrentRegistration(Registration reg) {
-        this.currentRegistration = reg;
+    public int getOfficerId() {
+        return officerId;
     }
 
-    /** Optional helper if you need to inspect the current registration later. */
-    public Registration getCurrentRegistration() {
-        return currentRegistration;
+    public List<Registration> getRegistrations() {
+        return registrations;
+    }
+
+    public void addRegistration(Registration reg) {
+        if (!registrations.contains(reg)) {
+            registrations.add(reg);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Officer %s %s | NRIC: %s | Age: %d | Marital: %s",
+            getFirstName(), getLastName(), getNric(), getAge(), getMaritalStatus());
     }
 }

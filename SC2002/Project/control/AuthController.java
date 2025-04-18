@@ -75,20 +75,22 @@ public class AuthController {
         return RegistrationResult.SUCCESS;
     }
     /**
-     * Attempt to change the password for the user with this NRIC.
-     * @param nric     the user's NRIC
-     * @param oldPwd   their current password
-     * @param newPwd   the desired new password
-     * @return true if oldPwd was correct and password was changed
+     * Changes the password for a given user after verifying the old password.
+     * @param user The user whose password needs changing.
+     * @param oldPassword The current password for verification.
+     * @param newPassword The desired new password.
+     * @return true if the password was successfully changed, false otherwise.
      */
-    
-    /** Returns true if oldPwd matched and newPwd was set. */
-    public boolean changePassword(String nric, String oldPwd, String newPwd) {
-        return ds.findUserByNric(nric)
-                .filter(u -> u.verifyPassword(oldPwd))
-                .map(u -> { u.setPassword(newPwd); return true; })
-                .orElse(false);
+    public boolean changePassword(User user, String oldPassword, String newPassword) {
+        if (user == null || oldPassword == null || newPassword == null || newPassword.isEmpty()) {
+            return false;
+        }
+        if (user.verifyPassword(oldPassword)) {
+            user.setPassword(newPassword); // Assuming User has setPassword
+            // Consider saving changes immediately or relying on periodic saves
+            // CSVWriter.saveUser(user); // Example: If immediate save is needed
+            return true;
+        }
+        return false;
     }
-
-    
 }

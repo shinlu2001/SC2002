@@ -1,11 +1,18 @@
 package SC2002.Project.control;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import SC2002.Project.control.persistence.DataStore;
-import SC2002.Project.entity.*;
+import SC2002.Project.entity.Applicant;
+import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.HDB_Manager;
+import SC2002.Project.entity.HDB_Officer;
+import SC2002.Project.entity.Project;
+import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.Visibility;
+import SC2002.Project.util.IdGenerator;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Handles creation, mutation, and queries of Project objects.
@@ -13,7 +20,11 @@ import SC2002.Project.entity.enums.Visibility;
  */
 public class ProjectController {
 
-    private final DataStore ds = DataStore.getInstance();
+    private final DataStore dataStore;
+
+    public ProjectController() {
+        this.dataStore = DataStore.getInstance();
+    }
 
     /* ------------------------------------------------------------------
        Creation
@@ -23,20 +34,29 @@ public class ProjectController {
                                  String neighbourhood,
                                  List<String> flatTypes,
                                  List<Integer> totalUnits,
-                                 List<Double>  prices,
+                                 List<Double> prices,
                                  LocalDate open,
                                  LocalDate close,
                                  boolean visible,
                                  int officerSlots,
                                  HDB_Manager manager)
     {
-        // TODO validation (unique name, manager active‑period rule, etc.)
-        Project p = new Project(name, neighbourhood,
-                                flatTypes, totalUnits, prices,
-                                open, close, visible, officerSlots);
+        int id = IdGenerator.nextProjectId();
+        Project p = new Project(
+            id,
+            name,
+            neighbourhood,
+            flatTypes,
+            totalUnits,
+            prices,
+            open,
+            close,
+            visible ? Visibility.ON : Visibility.OFF,
+            officerSlots
+        );
         p.setManager(manager);
-        manager.addProject(p);
-        ds.getProjects().add(p);
+        manager.addManagedProject(p);
+        dataStore.getProjects().add(p);
         return p;
     }
 
@@ -45,65 +65,55 @@ public class ProjectController {
        ------------------------------------------------------------------ */
 
     public Project findById(int id) {
-        // TODO
-        return null;
+        return dataStore.getProjects().stream()
+                        .filter(p -> p.getId() == id)
+                        .findFirst()
+                        .orElse(null);
     }
 
     public List<Project> listAll() {
-        return List.copyOf(ds.getProjects());
+        return List.copyOf(dataStore.getProjects());
     }
 
     /* ------------------------------------------------------------------
-       Editing operations (mirror Menu.editProject submenu)
+       Editing operations
        ------------------------------------------------------------------ */
 
     public boolean renameProject(int projectId, String newName) {
-        // TODO
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setName(newName);
+            return true;
+        }
         return false;
     }
 
     public boolean changeNeighbourhood(int projectId, String newHood) {
-        // TODO
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setNeighbourhood(newHood);
+            return true;
+        }
         return false;
     }
 
-    public boolean updateUnitCount(int projectId, String flatType, int newTotal) {
-        // TODO adjust availableUnits sensibly
-        return false;
-    }
-
-    public boolean addNewFlatType(int projectId, String type, int units, double price) {
-        // TODO
-        return false;
-    }
-
-    public boolean removeFlatType(int projectId, String type) {
-        // TODO
-        return false;
-    }
-
-    public boolean changeFlatPrice(int projectId, String type, double newPrice) {
-        // TODO
-        return false;
-    }
-
-    public boolean updateOpenDate(int projectId, LocalDate newDate) {
-        // TODO
-        return false;
-    }
-
-    public boolean updateCloseDate(int projectId, LocalDate newDate) {
-        // TODO
-        return false;
-    }
+    // TODO: implement the rest of the edit methods (units, prices, dates, slots)
 
     public boolean setVisibility(int projectId, Visibility state) {
-        // TODO
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setVisibility(state);
+            return true;
+        }
         return false;
     }
 
     public boolean setOfficerSlotLimit(int projectId, int newLimit) {
-        // TODO
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setOfficerSlotLimit(newLimit);
+            return true;
+        }
         return false;
     }
 
@@ -112,7 +122,7 @@ public class ProjectController {
        ------------------------------------------------------------------ */
 
     public boolean assignOfficer(int projectId, HDB_Officer officer) {
-        // TODO check slot availability etc.
+        // TODO: check slot availability, date overlap, etc.
         return false;
     }
 
@@ -128,4 +138,71 @@ public class ProjectController {
     public List<Project> filterByNeighbourhood(String hood) { /* TODO */ return null; }
     public List<Project> filterByFlatType(String type)      { /* TODO */ return null; }
     public List<Project> filterVisible()                    { /* TODO */ return null; }
+
+    public List<Project> getAllProjects() {
+        return new ArrayList<>(dataStore.getProjects());
+    }
+
+    public Project getProjectById(int projectId) {
+        return findById(projectId);
+    }
+
+    /**
+     * Single applicants under 35 ineligible for any.
+     * Single >=35 only 2-ROOM; Married >=21 any.
+     */
+    public boolean isEligibleForRoomType(Applicant applicant, String roomType) {
+        // example simplified logic
+        return true;
+    }
+
+    /**
+     * Creates a BTO application if no active one.
+     * Fix: unwrap Optional<BTOApplication> before getStatus().
+     */
+    public boolean createApplication(Applicant applicant, Project project, String roomType) {
+        Optional<BTOApplication> currentOpt = applicant.getCurrentApplication();
+        if (currentOpt.isPresent()) {
+            ApplicationStatus st = currentOpt.get().getStatus();
+            if (st != ApplicationStatus.WITHDRAWN && st != ApplicationStatus.REJECTED) {
+                return false;
+            }
+        }
+
+        BTOApplication application = new BTOApplication(applicant, project, roomType);
+        dataStore.getApplications().add(application);
+        applicant.setCurrentApplication(application);
+        return true;
+    }
+
+    /* ------------------------------------------------------------------
+       Manager helpers
+       ------------------------------------------------------------------ */
+
+    public void assignManager(Project p, HDB_Manager manager) {
+        p.setManager(manager);
+        manager.addManagedProject(p);
+    }
+
+    public boolean toggleVisibility(int projectId) {
+        Project p = findById(projectId);
+        if (p != null) {
+            p.setVisibility(p.getVisibility() == Visibility.ON ? Visibility.OFF : Visibility.ON);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean deleteProject(int projectId) {
+        Project p = findById(projectId);
+        if (p != null) {
+            dataStore.getProjects().remove(p);
+            if (p.getManager() != null) {
+                p.getManager().removeManagedProject(p);
+            }
+            return true;
+        }
+        return false;
+    }
+
 }

@@ -9,7 +9,6 @@ import SC2002.Project.control.persistence.CSVReader;
 import SC2002.Project.control.persistence.CSVWriter;
 import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.*;
-import SC2002.ProjectOLD.BTOapplication;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -21,7 +20,6 @@ public final class BTOSystem{
     protected static List<Project> projects = new ArrayList<>();
     protected static List<Enquiry> enquiries = new ArrayList<>();
     protected static List<Flat> flats = new ArrayList<>();
-    protected static List<BTOapplication> applications = new ArrayList<>();
 
     public static void main(String[] args) {
         DataStore.getInstance().getUsers().clear();  // ensure clean slate

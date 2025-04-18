@@ -124,6 +124,21 @@ public final class Menu {
         "Enter your choice: "
     );
 
+    public static final int COL_ID    = 5;
+    public static final int COL_NAME  = 40;
+    public static final int COL_HOOD  = 20;
+    public static final int COL_FLAT  = 25;
+    public static final int COL_PRICE = 15;
+    public static final int COL_OPEN  = 15;
+    public static final int COL_CLOSE = 15;
+    public static final int COL_ELIG  = 10;
+
+    public static final int PROJECT_TABLE_WIDTH =
+        COL_ID + COL_NAME + COL_HOOD + COL_FLAT
+      + COL_PRICE + COL_OPEN + COL_CLOSE
+      + ( /* eligibility? */ COL_ELIG )
+      + /* spaces between 8 columns */ 7;
+
     /* ────────────── static getters ────────────── */
     public static List<String> getWelcomeMenu()     { return WELCOME_MENU; }
     public static List<String> getLoginError()      { return LOGIN_ERROR; }

@@ -1,110 +1,174 @@
 package SC2002.Project.entity;
 
-import java.time.LocalDate;
-import java.util.*;
-
-import SC2002.Project.util.IdGenerator;
 import SC2002.Project.entity.enums.Visibility;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Entity representing a BTO project.
+ */
 public class Project {
+    private final int id;
+    private String name;
+    private String neighbourhood;
+    private List<String> flatTypes;
+    private List<Integer> totalUnits;
+    private List<Integer> availableUnits;
+    private List<Double> prices;
+    private LocalDate openDate;
+    private LocalDate closeDate;
+    private Visibility visibility;
+    private int officerSlotLimit;
+    private HDB_Manager manager;
 
-    /* ---------- identity & basic data ---------- */
-    private final int    id;
-    private String       name;
-    private String       neighbourhood;
-    private List<String> flatTypes;          // "2-ROOM", "3-ROOM", ..
-    private List<Integer> totalUnits;        // parallel list
-    private List<Integer> availableUnits;    // parallel list
-    private List<Double>  prices;            // parallel list
-
-    private LocalDate    openDate;
-    private LocalDate    closeDate;
-    private Visibility visibility = Visibility.ON;   // default visible
-
-    /* ---------- associations ---------- */
-    private HDB_Manager          manager;            // set by CSVReader / ManagerController
     private final List<HDB_Officer> assignedOfficers = new ArrayList<>();
-
-    /* ---------- configuration ---------- */
-    private int officerSlotLimit;           // max 10 by requirement
-
-    /* ---------- enquiries for this project ---------- */
     private final List<Enquiry> enquiries = new ArrayList<>();
 
-    /* ---------- ctor ---------- */
-    public Project(String name,
+    /**
+     * Constructs a new Project.
+     *
+     * @param id                unique project ID
+     * @param name              project name
+     * @param neighbourhood     neighbourhood name
+     * @param flatTypes         list of flat type names (e.g., "2-ROOM")
+     * @param totalUnits        total units per flat type
+     * @param prices            selling price per flat type
+     * @param openDate          application opening date
+     * @param closeDate         application closing date
+     * @param visibility        initial visibility (ON/OFF)
+     * @param officerSlotLimit  max number of officers
+     */
+    public Project(int id,
+                   String name,
                    String neighbourhood,
                    List<String> flatTypes,
                    List<Integer> totalUnits,
-                   List<Double>  prices,
-                   LocalDate open,
-                   LocalDate close,
-                   boolean visible,
-                   int officerSlots)
-    {
-        this.id            = IdGenerator.nextProjectId();
-        this.name          = name;
+                   List<Double> prices,
+                   LocalDate openDate,
+                   LocalDate closeDate,
+                   Visibility visibility,
+                   int officerSlotLimit) {
+        this.id = id;
+        this.name = name;
         this.neighbourhood = neighbourhood;
-
-        this.flatTypes     = new ArrayList<>(flatTypes);
-        this.totalUnits    = new ArrayList<>(totalUnits);
-        this.availableUnits= new ArrayList<>(totalUnits);     // initially all available
-        this.prices        = new ArrayList<>(prices);
-
-        this.openDate      = open;
-        this.closeDate     = close;
-        this.visibility    = visible ? Visibility.ON : Visibility.OFF;
-
-        this.officerSlotLimit = officerSlots;
+        this.flatTypes = new ArrayList<>(flatTypes);
+        this.totalUnits = new ArrayList<>(totalUnits);
+        this.availableUnits = new ArrayList<>(totalUnits);
+        this.prices = new ArrayList<>(prices);
+        this.openDate = openDate;
+        this.closeDate = closeDate;
+        this.visibility = visibility;
+        this.officerSlotLimit = officerSlotLimit;
     }
 
-    /* ---------- getters ---------- */
-    public int          getId()               { return id; }
-    public String       getName()             { return name; }
-    public String       getNeighbourhood()    { return neighbourhood; }
-    public List<String> getFlatTypes()        { return List.copyOf(flatTypes); }
-    public List<Integer>getTotalUnits()       { return List.copyOf(totalUnits); }
-    public List<Integer>getAvailableUnits()   { return List.copyOf(availableUnits); }
-    public List<Double> getPrices()           { return List.copyOf(prices); }
+    // ─────────── Getters ───────────
 
-    public LocalDate    getOpenDate()         { return openDate; }
-    public LocalDate    getCloseDate()        { return closeDate; }
-    public Visibility getVisibility()    { return visibility; }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getNeighbourhood() { return neighbourhood; }
+    public List<String> getFlatTypes() { return List.copyOf(flatTypes); }
+    public List<Integer> getTotalUnits() { return List.copyOf(totalUnits); }
+    public List<Integer> getAvailableUnits() { return List.copyOf(availableUnits); }
+    public List<Double> getPrices() { return List.copyOf(prices); }
+    public LocalDate getOpenDate() { return openDate; }
+    public LocalDate getCloseDate() { return closeDate; }
+    public Visibility getVisibility() { return visibility; }
+    public int getOfficerSlotLimit() { return officerSlotLimit; }
+    public HDB_Manager getManager() { return manager; }
+    public List<HDB_Officer> getAssignedOfficers() { return List.copyOf(assignedOfficers); }
+    public List<Enquiry> getEnquiries() { return List.copyOf(enquiries); }
 
-    public HDB_Manager          getManager()  { return manager; }
-    public List<HDB_Officer>    getAssignedOfficers() { return List.copyOf(assignedOfficers); }
+    // ─────────── Setters (for controllers) ───────────
 
-    public int getOfficerSlotLimit()          { return officerSlotLimit; }
-    public List<Enquiry> getEnquiries()       { return List.copyOf(enquiries); }
+    public void setName(String name) { this.name = name; }
+    public void setNeighbourhood(String neighbourhood) { this.neighbourhood = neighbourhood; }
+    public void setFlatTypes(List<String> flatTypes) { this.flatTypes = new ArrayList<>(flatTypes); }
+    void setTotalUnits(List<Integer> totalUnits) { this.totalUnits = new ArrayList<>(totalUnits); }
+    void setAvailableUnits(List<Integer> availableUnits) { this.availableUnits = new ArrayList<>(availableUnits); }
+    void setPrices(List<Double> prices) { this.prices = new ArrayList<>(prices); }
+    void setOpenDate(LocalDate openDate) { this.openDate = openDate; }
+    void setCloseDate(LocalDate closeDate) { this.closeDate = closeDate; }
+    public void setVisibility(Visibility visibility) { this.visibility = visibility; }
+    public void setManager(HDB_Manager manager) { this.manager = manager; }
+    public void setOfficerSlotLimit(int officerSlotLimit) { this.officerSlotLimit = officerSlotLimit; }
 
-    /* ---------- setters used by controllers ---------- */
-    /* (package‑private to limit direct UI usage) */
-    void setName(String n)                    { this.name = n; }
-    void setNeighbourhood(String n)           { this.neighbourhood = n; }
-    void setFlatTypes(List<String> f)         { this.flatTypes = new ArrayList<>(f); }
-    void setTotalUnits(List<Integer> u)       { this.totalUnits = new ArrayList<>(u); }
-    void setAvailableUnits(List<Integer> a)   { this.availableUnits = new ArrayList<>(a); }
-    void setPrices(List<Double> p)            { this.prices = new ArrayList<>(p); }
-    void setOpenDate(LocalDate d)             { this.openDate = d; }
-    void setCloseDate(LocalDate d)            { this.closeDate = d; }
-    void setVisibility(Visibility v)     { this.visibility = v; }
-    public void setManager(HDB_Manager m)            { this.manager = m; }
-    void setOfficerSlotLimit(int s)           { this.officerSlotLimit = s; }
+    // ─────────── Mutators ───────────
 
-    /* add / remove mutators accessed by controllers */
-    void addOfficer(HDB_Officer off)          { assignedOfficers.add(off); }
-    void removeOfficer(HDB_Officer off)       { assignedOfficers.remove(off); }
-    void addEnquiry(Enquiry e)                { enquiries.add(e); }
+    /**
+     * Assigns a new HDB officer to this project.
+     */
+    public void addOfficer(HDB_Officer officer) {
+        assignedOfficers.add(officer);
+    }
 
-    /* ---------- derived helpers ---------- */
+    /**
+     * Removes an HDB officer from this project.
+     */
+    void removeOfficer(HDB_Officer officer) {
+        assignedOfficers.remove(officer);
+    }
+
+    /**
+     * Records a new enquiry related to this project.
+     */
+    public void addEnquiry(Enquiry enquiry) {
+        enquiries.add(enquiry);
+    }
+
+    /**
+     * Removes an enquiry from this project.
+     */
+    void removeEnquiry(Enquiry enquiry) {
+        enquiries.remove(enquiry);
+    }
+
+    // ─────────── Derived Helpers ───────────
+
+    /**
+     * @return true if today is between openDate and closeDate (inclusive)
+     */
     public boolean isOpen() {
         LocalDate today = LocalDate.now();
         return !today.isBefore(openDate) && !today.isAfter(closeDate);
     }
 
-    /** price for a given flat type (0 if not found) */
+    /**
+     * @return the price for the given flat type, or 0 if not found
+     */
     public double getFlatPrice(String flatType) {
-        int idx = flatTypes.indexOf(flatType.toUpperCase());
+        int idx = this.flatTypes.indexOf(flatType.toUpperCase());
         return idx >= 0 ? prices.get(idx) : 0.0;
+    }
+
+    /**
+     * @return true if the project is marked visible
+     */
+    public boolean isVisible() {
+        return visibility == Visibility.ON;
+    }
+
+    /**
+     * Decrements available units for the specified flat type.
+     */
+    void decrementAvailableUnits(String flatType) {
+        int idx = this.flatTypes.indexOf(flatType.toUpperCase());
+        if (idx != -1 && availableUnits.get(idx) > 0) {
+            availableUnits.set(idx, availableUnits.get(idx) - 1);
+        } else {
+            System.err.println("Warning: cannot decrement units for " + flatType + " in project " + name);
+        }
+    }
+
+    /**
+     * Increments available units for the specified flat type.
+     */
+    void incrementAvailableUnits(String flatType) {
+        int idx = this.flatTypes.indexOf(flatType.toUpperCase());
+        if (idx != -1 && availableUnits.get(idx) < totalUnits.get(idx)) {
+            availableUnits.set(idx, availableUnits.get(idx) + 1);
+        } else {
+            System.err.println("Warning: cannot increment units for " + flatType + " in project " + name);
+        }
     }
 }

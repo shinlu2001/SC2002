@@ -1,83 +1,154 @@
 package SC2002.Project.boundary;
 
 import SC2002.Project.boundary.util.Input;
-import SC2002.Project.boundary.util.Input.InputExitException;
 import SC2002.Project.boundary.util.MenuPrinter;
-import SC2002.Project.control.AuthController;
+import SC2002.Project.control.ApplicantController;
+import SC2002.Project.control.ProjectController;
 import SC2002.Project.entity.Applicant;
+import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.Project;
+import SC2002.Project.entity.enums.ApplicationStatus;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class ApplicantUI {
-    private final Applicant user;
-    private final AuthController auth = new AuthController();
 
-    private ApplicantUI(Applicant user) {
-        this.user = user;
-    }
+    public static void start(Scanner sc, Applicant applicant) {
+        ApplicantController applicantController = new ApplicantController(applicant);
+        ProjectController   projectController   = new ProjectController();
+        boolean exit = false;
 
-    /** Entry point from LoginUI. */
-    public static void start(Applicant user, Scanner sc) {
-        new ApplicantUI(user).menuLoop(sc);
-    }
-
-    private void menuLoop(Scanner sc) {
-        boolean quit = false;
-        while (!quit) {
+        while (!exit) {
+            System.out.println("\nWelcome, " + applicant.getFirstName() + "!");
             MenuPrinter.printApplicantMenu();
-            int choice = Input.getIntInput(sc);
-            switch (choice) {
-                case 1  -> applyProject(sc);
-                case 2  -> viewActiveApplication();
-                case 3  -> viewEligibleListings();
-                case 4  -> viewAllListings();
-                case 5  -> withdrawApplication(sc);
-                case 6  -> manageEnquiry(sc);
-                case 7  -> viewAccountDetails();
-                case 8  -> changePassword(sc);
-                case 9  -> {
-                    System.out.println("Logging out Applicant...");
-                    quit = true;
+            try {
+                int choice = Input.getIntInput(sc);
+                switch (choice) {
+                    case 1 -> applyForProject(sc, applicant, applicantController, projectController);
+                    case 2 -> manageActiveApplication(applicant);
+                    case 3 -> viewEligibleListings(applicant, applicantController);
+                    case 4 -> viewAllListings(projectController, applicantController, applicant);
+                    case 5 -> withdrawApplication(sc, applicant, applicantController);
+                    case 6 -> EnquiryUI.start(sc, applicant);
+                    case 7 -> viewAccountDetails(applicant);
+                    case 8 -> AuthUI.changePassword(sc, applicant);
+                    case 9 -> exit = true;
+                    default -> System.out.println("Invalid choice. Please try again.");
                 }
-                default -> System.out.println("Invalid choice.");
+            } catch (Input.InputExitException e) {
+                System.out.println("Returning to previous menu.");
+                exit = true;
             }
         }
-        // returns to MainMenu
     }
 
-    private void changePassword(Scanner sc) {
+    private static void applyForProject(Scanner sc,
+                                        Applicant applicant,
+                                        ApplicantController ctrl,
+                                        ProjectController projCtrl) {
+        List<Project> eligible = ctrl.listEligibleProjects();
+        if (eligible.isEmpty()) {
+            System.out.println("You are not eligible for any current projects.");
+            return;
+        }
+        System.out.println("\nEligible Projects for Application:");
+        MenuPrinter.printProjectTableEligible(eligible, applicant, ctrl);
+
         try {
-            // 1) Verify current password
-            String oldPwd;
-            while (true) {
-                System.out.print("Enter current password: ");
-                oldPwd = Input.getStringInput(sc);
-                if (user.verifyPassword(oldPwd)) {
-                    break;
-                }
-                System.out.println("Incorrect – please try again.");
+            System.out.print("Project ID: ");
+            int pid = Input.getIntInput(sc);
+            Project p = projCtrl.getProjectById(pid);
+            if (p == null || !eligible.contains(p)) {
+                System.out.println("Invalid Project ID or not eligible.");
+                return;
             }
-    
-            // 2) Prompt for new password
-            System.out.print("Enter new password: ");
-            String newPwd = Input.getStringInput(sc);
-    
-            // 3) Commit change
-            boolean ok = auth.changePassword(user.getNric(), oldPwd, newPwd);
-            System.out.println(ok
-                ? "Password changed successfully."
-                : "Failed to change password.");
-        } catch (InputExitException e) {
-            System.out.println("Password change cancelled. Returning to menu.");
-            // simply return to your menuLoop; no further action needed
+
+            List<String> types = p.getFlatTypes().stream()
+                                  .filter(ctrl::isEligibleForRoomType)
+                                  .toList();
+            System.out.println("\nChoose flat type:");
+            types.forEach(t -> System.out.println(" - " + t));
+
+            String ft = Input.getStringInput(sc).toUpperCase();
+            if (!types.contains(ft)) {
+                System.out.println("Invalid flat type.");
+                return;
+            }
+            ctrl.createApplication(p, ft);
+        } catch (Input.InputExitException e) {
+            System.out.println("Cancelled.");
         }
     }
 
-    /* ===== stubs for the other flows ===== */
-    private void applyProject(Scanner sc)       { /* TODO */ }
-    private void viewActiveApplication()        { /* TODO */ }
-    private void viewEligibleListings()         { /* TODO */ }
-    private void viewAllListings()              { /* TODO */ }
-    private void withdrawApplication(Scanner sc){ /* TODO */ }
-    private void manageEnquiry(Scanner sc)      { /* TODO */ }
-    private void viewAccountDetails()           { /* TODO */ }
+    private static void manageActiveApplication(Applicant applicant) {
+        Optional<BTOApplication> oa = applicant.getCurrentApplication();
+        if (oa.isEmpty()) {
+            System.out.println("You have no active application.");
+            return;
+        }
+        BTOApplication app = oa.get();
+        System.out.println("\nCurrent Application:");
+        System.out.println(app);
+        if (app.getStatus() == ApplicationStatus.SUCCESS) {
+            System.out.println("Your application succeeded! An officer will be in touch.");
+        } else if (app.isWithdrawalRequested()) {
+            System.out.println("Withdrawal is pending approval.");
+        }
+    }
+
+    private static void viewEligibleListings(Applicant applicant,
+                                             ApplicantController ctrl) {
+        List<Project> eligible = ctrl.listEligibleProjects();
+        if (eligible.isEmpty()) {
+            System.out.println("No eligible projects.");
+            return;
+        }
+        System.out.println("\nEligible Projects:");
+        MenuPrinter.printProjectTableEligible(eligible, applicant, ctrl);
+    }
+
+    private static void viewAllListings(ProjectController projCtrl,
+                                        ApplicantController ctrl,
+                                        Applicant applicant) {
+        List<Project> all = projCtrl.getAllProjects()
+                                            .stream()
+                                            .filter(Project::isVisible)
+                                            .toList();
+        if (all.isEmpty()) {
+            System.out.println("No projects available.");
+            return;
+        }
+        System.out.println("\nAll Projects:");
+        MenuPrinter.printProjectTableAll(all, applicant, ctrl);
+    }
+
+    private static void withdrawApplication(Scanner sc,
+                                            Applicant applicant,
+                                            ApplicantController ctrl) {
+        Optional<BTOApplication> oa = applicant.getCurrentApplication();
+        if (oa.isEmpty()) {
+            System.out.println("No application to withdraw.");
+            return;
+        }
+        BTOApplication app = oa.get();
+        System.out.println(app);
+
+        try {
+            System.out.print("Confirm by entering your NRIC: ");
+            String n = Input.getStringInput(sc);
+            if (n.equalsIgnoreCase(applicant.getNric())) {
+                ctrl.requestWithdrawal();
+            } else {
+                System.out.println("NRIC mismatch.");
+            }
+        } catch (Input.InputExitException e) {
+            System.out.println("Cancelled.");
+        }
+    }
+
+    private static void viewAccountDetails(Applicant applicant) {
+        System.out.println("\nAccount Details:");
+        System.out.println(applicant);
+    }
 }
