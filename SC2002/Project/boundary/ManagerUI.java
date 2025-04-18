@@ -510,15 +510,15 @@ public class ManagerUI {
             System.out.println("No applications to display.");
             return;
         }
-        // Updated column widths for consistent formatting
-        System.out.printf("%-8s %-20s %-20s %-10s %-15s %-20s%n", 
+        // Updated column widths using Menu.COL_NAME for project name
+        System.out.printf("%-8s %-20s %-" + Menu.COL_NAME + "s %-10s %-15s %-20s%n", 
                           "App ID", "Applicant Name", "Project", "Flat Type", "Status", "Details");
-        System.out.println("-".repeat(95)); // Adjusted width for the separator line
+        System.out.println("-".repeat(115)); // Adjusted width for the separator line
         
         for (BTOApplication app : applications) {
             Applicant applicant = app.getApplicant();
-            // Truncate long text to maintain column width
-            String projectName = Input.truncateText(app.getProject().getName(), 18);
+            // Truncate long text to maintain column width using Menu.COL_NAME
+            String projectName = Input.truncateText(app.getProject().getName(), Menu.COL_NAME - 2);
             String statusText = app.getStatus().toString();
             String details = (app.isWithdrawalRequested() ? "Withdrawal Req" : "");
             
@@ -526,7 +526,7 @@ public class ManagerUI {
                 details += (details.isEmpty() ? "" : ", ") + "Booked: " + app.getBookedFlat().getId();
             }
             
-            System.out.printf("%-8d %-20s %-20s %-10s %-15s %-20s%n",
+            System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-10s %-15s %-20s%n",
                               app.getId(),
                               applicant.getFirstName() + " " + applicant.getLastName(),
                               projectName,
@@ -534,7 +534,7 @@ public class ManagerUI {
                               statusText,
                               details);
         }
-        System.out.println("-".repeat(95)); // Adjusted width for the separator line
+        System.out.println("-".repeat(115)); // Adjusted width for the separator line
     }
 
     // --- Officer Registration Management Methods ---
@@ -553,25 +553,25 @@ public class ManagerUI {
         
         System.out.println("Pending Officer Registration Requests:");
         // Standardized column widths for better display formatting
-        System.out.printf("%-8s %-20s %-25s %-15s %-20s%n", 
+        System.out.printf("%-8s %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n", 
                           "Reg ID", "Officer Name", "Project", "Status", "Project Dates");
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(105));
         
         for (Registration reg : pendingRegs) {
             HDB_Officer officer = reg.getOfficer();
             Project project = reg.getProject();
             
-            // Truncate project name to maintain column alignment
-            String projectName = Input.truncateText(project.getName(), 23);
+            // Truncate project name to maintain column alignment using Menu.COL_NAME
+            String projectName = Input.truncateText(project.getName(), Menu.COL_NAME - 2);
             
-            System.out.printf("%-8d %-20s %-25s %-15s %-20s%n",
+            System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n",
                           reg.getId(),
                           officer.getFirstName() + " " + officer.getLastName(),
                           projectName,
                           reg.getStatus(),
                           project.getOpenDate() + " to " + project.getCloseDate());
         }
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(105));
     }
     
     /**
@@ -586,26 +586,26 @@ public class ManagerUI {
         }
         
         System.out.println("\n=== Handle Officer Registration Requests ===");
-        // Standardized column widths for better display formatting
-        System.out.printf("%-8s %-20s %-25s %-15s %-20s%n", 
+        // Standardized column widths using Menu.COL_NAME for project name
+        System.out.printf("%-8s %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n", 
                           "Reg ID", "Officer Name", "Project", "Status", "Project Dates");
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(105));
         
         for (Registration reg : pendingRegs) {
             HDB_Officer officer = reg.getOfficer();
             Project project = reg.getProject();
             
-            // Truncate long project names to maintain table formatting
-            String projectName = Input.truncateText(project.getName(), 23);
+            // Truncate project name to maintain column alignment using Menu.COL_NAME
+            String projectName = Input.truncateText(project.getName(), Menu.COL_NAME - 2);
             
-            System.out.printf("%-8d %-20s %-25s %-15s %-20s%n",
+            System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n",
                           reg.getId(),
                           officer.getFirstName() + " " + officer.getLastName(),
                           projectName,
                           reg.getStatus(),
                           project.getOpenDate() + " to " + project.getCloseDate());
         }
-        System.out.println("-".repeat(90));
+        System.out.println("-".repeat(105));
         
         try {
             System.out.print("Enter Registration ID to approve/reject (or type 'back' to return): ");
@@ -675,25 +675,25 @@ public class ManagerUI {
         }
         
         System.out.println("\n=== Handle Officer Registration Withdrawal Requests ===");
-        // Standardized column widths for better display formatting
-        System.out.printf("%-8s %-20s %-25s %-20s%n", 
+        // Standardized column widths using Menu.COL_NAME for project name
+        System.out.printf("%-8s %-20s %-" + Menu.COL_NAME + "s %-20s%n", 
                           "Reg ID", "Officer Name", "Project", "Status");
-        System.out.println("-".repeat(75));
+        System.out.println("-".repeat(90));
         
         for (Registration reg : withdrawalRequests) {
             HDB_Officer officer = reg.getOfficer();
             Project project = reg.getProject();
             
-            // Truncate project name to maintain column alignment
-            String projectName = Input.truncateText(project.getName(), 23);
+            // Truncate project name to maintain column alignment using Menu.COL_NAME
+            String projectName = Input.truncateText(project.getName(), Menu.COL_NAME - 2);
             
-            System.out.printf("%-8d %-20s %-25s %-20s%n",
+            System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-20s%n",
                           reg.getId(),
                           officer.getFirstName() + " " + officer.getLastName(),
                           projectName,
                           reg.getStatus() + " (Withdrawal Req)");
         }
-        System.out.println("-".repeat(75));
+        System.out.println("-".repeat(90));
         
         try {
             System.out.print("Enter Registration ID to handle withdrawal request (or type 'back' to return): ");
