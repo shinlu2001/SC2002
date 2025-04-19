@@ -50,15 +50,16 @@ public class ManagerUI {
                     case 9 -> viewAssignedOfficers(managerController);
                     
                     // BTO Application Management (Cases 9-10)
-                    case 9 -> handleBTOApplications(sc, managerController);
-                    case 10 -> handleBTOWithdrawals(sc, managerController);
+                    case 10 -> handleBTOApplications(sc, managerController);
+                    case 11 -> handleBTOWithdrawals(sc, managerController);
                     
                     // Report & Enquiry (Cases 11-13) - TODO: Implement later
-                    case 11 -> ReportUI.start(sc, user); // Delegate
-                    case 12 -> StaffUI.viewEnquiriesStaff(sc, enquiryController, managerController); // enquiry ui and enquiry controller integration
-                    case 13 -> StaffUI.manageUserEnquiries(sc, user, enquiryController, managerController); 
-                    case 15 -> AuthUI.changePassword(sc, user);
-                    case 16 -> exit = true;
+                    case 12 -> ReportUI.start(sc, user); // Delegate
+                    case 13 -> EnquiryUI.viewEnquiriesStaff(sc, enquiryController, managerController); // enquiry ui and enquiry controller integration
+                    case 14 -> StaffUI.manageUserEnquiries(sc, user, enquiryController, managerController);
+                    case 15 -> viewAccountDetails(user);
+                    case 16 -> AuthUI.changePassword(sc, user);
+                    case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Input.InputExitException e) {
@@ -763,7 +764,7 @@ public class ManagerUI {
      */
     private static void viewAssignedOfficers(ManagerController controller) {
         System.out.println("\n=== Officers Assigned to Your Projects ===");
-        List<Project> managedProjects = controller.listMyProjects();
+        List<Project> managedProjects = controller.getAssignedProjects();
         
         if (managedProjects.isEmpty()) {
             System.out.println("You are not managing any projects.");
@@ -803,84 +804,6 @@ public class ManagerUI {
                 }
             }
             System.out.println(); // Extra line between projects
-        }
-    }
-
-    /**
-     * View all enquiries across all projects managed by this manager.
-     */
-    private static void viewAllEnquiries(Scanner sc, ManagerController controller) {
-        System.out.println("\n=== All Enquiries ===");
-        List<Enquiry> allEnquiries = controller.getAllEnquiries();
-        
-        if (allEnquiries.isEmpty()) {
-            System.out.println("No enquiries found in the system.");
-            return;
-        }
-        
-        // Display enquiries
-        System.out.println("All Enquiries:");
-        EnquiryUI.viewEnquiryForStaff(sc, controller.getManager(), allEnquiries, false);
-    }
-    
-    /**
-     * Handle enquiries specifically for projects managed by this manager.
-     */
-    private static void handleProjectEnquiries(Scanner sc, ManagerController controller) {
-        System.out.println("\n=== Project Enquiries ===");
-        List<Enquiry> projectEnquiries = controller.getManagedProjectEnquiries();
-        List<Enquiry> unansweredEnquiries = projectEnquiries.stream()
-                .filter(e -> !e.isAnswered())
-                .collect(Collectors.toList());
-                
-        if (unansweredEnquiries.isEmpty()) {
-            System.out.println("No unanswered enquiries for your managed projects.");
-            return;
-        }
-        
-        System.out.println("Unanswered Enquiries for Your Managed Projects:");
-        EnquiryUI.viewEnquiryForStaff(sc, controller.getManager(), unansweredEnquiries, false);
-        
-        try {
-            System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
-            String input = sc.nextLine().trim();
-            
-            if (input.equalsIgnoreCase("back")) {
-                return;
-            }
-            
-            try {
-                int enquiryId = Integer.parseInt(input);
-                
-                Optional<Enquiry> selectedEnquiryOpt = unansweredEnquiries.stream()
-                        .filter(e -> e.getId() == enquiryId)
-                        .findFirst();
-                
-                if (selectedEnquiryOpt.isEmpty()) {
-                    System.out.println("Invalid Enquiry ID or enquiry not found in your projects.");
-                    return;
-                }
-                
-                Enquiry selectedEnquiry = selectedEnquiryOpt.get();
-                EnquiryUI.viewSingleEnquiry(selectedEnquiry);
-                
-                System.out.print("Enter your response: ");
-                String response = Input.getStringInput(sc);
-                
-                if (controller.respondToEnquiry(enquiryId, response)) {
-                    System.out.println("Response submitted successfully!");
-                } else {
-                    System.out.println("Failed to submit response.");
-                }
-                
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid enquiry ID number.");
-            }
-            
-        } catch (Input.InputExitException e) {
-            System.out.println("Operation cancelled.");
-        } catch (Exception e) {
-            System.err.println("Error handling project enquiry: " + e.getMessage());
         }
     }
 }

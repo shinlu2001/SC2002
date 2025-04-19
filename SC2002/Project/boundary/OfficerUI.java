@@ -12,12 +12,6 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class OfficerUI {
-    private final HDB_Officer user;
-    private final AuthController auth = new AuthController();
-
-    private OfficerUI(HDB_Officer user) {
-        this.user = user;
-    }
 
     /** Entry point from LoginUI. */
     public static void start(Scanner sc, HDB_Officer officer) {
@@ -44,9 +38,9 @@ public class OfficerUI {
                     case 5 -> ApplicantUI.withdrawApplication(sc, officer, applicantController);
                     
                     // Enquiry Management (Cases 6-7)
-                    case 6 -> StaffUI.viewEnquiriesStaff(sc, enquiryController, officerController);
+                    case 6 -> EnquiryUI.viewEnquiriesStaff(sc, enquiryController, officerController);
                     case 7 -> StaffUI.manageUserEnquiries(sc, officer, enquiryController, officerController);
-                    case 8 -> ApplicantEnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
+                    case 8 -> EnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
                     
                     case 9 -> viewAccountDetails(officer);
                     case 10 -> AuthUI.changePassword(sc, officer); // Delegate
@@ -59,8 +53,8 @@ public class OfficerUI {
                     case 15 -> viewAssignedApplications(officerController, applicationController);
                     
                     // Account
-                    case 13 -> viewAccountDetails(officer);
-                    case 14 -> AuthUI.changePassword(sc, officer);
+                    case 16 -> viewAccountDetails(officer);
+                    case 17 -> AuthUI.changePassword(sc, officer);
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }

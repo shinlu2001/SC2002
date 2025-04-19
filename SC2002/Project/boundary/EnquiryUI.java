@@ -6,14 +6,17 @@ import SC2002.Project.boundary.util.MenuPrinter;
 import SC2002.Project.control.ApplicantController;
 import SC2002.Project.control.EnquiryController;
 import SC2002.Project.control.ProjectController;
+import SC2002.Project.control.StaffControllerInterface;
 import SC2002.Project.entity.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 /**
  * Boundary class for handling enquiry-related user interactions.
  */
-public class ApplicantEnquiryUI { // this is more for applicants
+public class EnquiryUI { // this is more for applicants
     private static final ProjectController projectController = new ProjectController();
     private static final EnquiryController enquiryController = new EnquiryController();
     
@@ -133,43 +136,16 @@ public class ApplicantEnquiryUI { // this is more for applicants
         
     }
 
-    /**
-     * View enquiries for staff (managers, officers) 
-     * @param sc Scanner for input
-     * @param staff The staff member (Manager or Officer) viewing the enquiries
-     * @param enquiries List of enquiries to display
-     * @param expand Whether to allow selection and expansion of an enquiry
-     */
-    public static void viewEnquiryForStaff(Scanner sc, User staff, List<Enquiry> enquiries, boolean expand) {
-        System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n",
-                "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
-        System.out.println("====================================================================================================================");
-        for (Enquiry enquiry : enquiries) {
-            System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
-                    enquiry.getId(),
-                    enquiry.getProject() != null ? enquiry.getProject().getName() : "General Enquiry",
-                    Input.truncateText(enquiry.getContent(), 30),
-                    Input.truncateText(enquiry.getResponse(), 30),
-                    enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
-                    enquiry.getRespondent() != null ? enquiry.getRespondent().getFirstName() : "");
-            if (enquiry.getFlatType() != null && !enquiry.getFlatType().isEmpty()) {
-                System.out.printf("%-5s %-20s %-30s%n", "", "", "Flat type: " + enquiry.getFlatType());
-            }
+   public static void viewEnquiriesStaff(Scanner sc, EnquiryController enctrl, StaffControllerInterface manctrl) {
+        List<Enquiry> filteredEnquiry = new ArrayList<>();
+        filteredEnquiry.addAll(enctrl.getGeneralEnquiries());
+        for (Project p:manctrl.getAssignedProjects()) {
+            if (p.getEnquiries().size()==0) {
+                continue;
+            } 
+            filteredEnquiry.addAll(p.getEnquiries());
         }
-        
-        if (expand) {
-            System.out.println("Select enquiry to view (-1 to cancel)");
-            int en_id = Input.getIntInput(sc);
-            if (en_id == -1) {
-                return;
-            }
-            Enquiry en = enquiryController.findEnquiryById(en_id);
-            if (en == null) {
-                System.err.println("Invalid ID");
-                return;
-            }
-            viewSingleEnquiry(en);
-        }
+        viewEnquiries(sc, filteredEnquiry, true);
     }
 
     private static void editEnquiry(Scanner sc, Applicant user) {

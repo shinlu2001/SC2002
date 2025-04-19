@@ -11,25 +11,13 @@ import SC2002.Project.control.StaffControllerInterface;
 import SC2002.Project.entity.*;
 
 public class StaffUI {
-    public static void viewEnquiriesStaff(Scanner sc, EnquiryController enctrl, StaffControllerInterface manctrl) {
-        List<Enquiry> filteredEnquiry = new ArrayList<>();
-        filteredEnquiry.addAll(enctrl.getGeneralEnquiries());
-        for (Project p:manctrl.getAssignedProjects()) {
-            if (p.getEnquiries().size()==0) {
-                continue;
-            } 
-            filteredEnquiry.addAll(p.getEnquiries());
-        }
-        ApplicantEnquiryUI.viewEnquiries(sc, filteredEnquiry, true);
-    }
-    
     // works for both manager AND officer controller
     public static void manageUserEnquiries(Scanner sc, User staff, EnquiryController enquiryCtrl, StaffControllerInterface officerCtrl) {
         List<Enquiry> relevantEnquiries = officerCtrl.getPendingEnquiries(enquiryCtrl);
 
         System.out.println("\nPending Enquiries (General / Project-Related):");
         System.out.println("------------------");
-        ApplicantEnquiryUI.viewEnquiries(sc, relevantEnquiries, false); // Use false to prevent immediate selection prompt
+        EnquiryUI.viewEnquiries(sc, relevantEnquiries, false); // Use false to prevent immediate selection prompt
 
         try {
             System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
@@ -53,7 +41,7 @@ public class StaffUI {
     
                 Enquiry selectedEnquiry = selectedEnquiryOpt.get();
                 System.out.println("\nSelected Enquiry:");
-                ApplicantEnquiryUI.viewSingleEnquiry(selectedEnquiry); // Display full details
+                EnquiryUI.viewSingleEnquiry(selectedEnquiry); // Display full details
     
                 System.out.print("Enter your response: ");
                 String response = Input.getStringInput(sc);

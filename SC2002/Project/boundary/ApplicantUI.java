@@ -34,12 +34,12 @@ public class ApplicantUI {
                     case 5 -> withdrawApplication(sc, applicant, applicantController);
                     
                     // Enquiries
-                    case 6 -> ApplicantEnquiryUI.start(sc, applicant);
+                    case 6 -> EnquiryUI.start(sc, applicant);
                     
                     // Account
                     case 7 -> viewAccountDetails(applicant);
                     case 8 -> AuthUI.changePassword(sc, applicant);
-                    case 9 -> exit = true;
+                    case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Input.InputExitException e) {

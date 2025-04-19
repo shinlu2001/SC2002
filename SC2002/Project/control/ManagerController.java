@@ -322,14 +322,6 @@ public class ManagerController implements StaffControllerInterface {
     // ---- Enquiry Management ----
     
     /**
-     * Gets the HDB_Manager instance associated with this controller
-     * @return The manager instance
-     */
-    public HDB_Manager getManager() {
-        return this.manager;
-    }
-    
-    /**
      * Retrieves all enquiries in the system
      * @return List of all enquiries
      */

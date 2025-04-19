@@ -46,7 +46,7 @@ public final class Menu {
         "==== Account ====",
         "7. View account details",
         "8. Change password",
-        "9. Log out",
+        "0. Log out",
         "Enter choice: "
     );
 
@@ -58,18 +58,19 @@ public final class Menu {
         "4. View all listings",
         "5. Withdraw application",
         "==== Enquiries ====",
-        "6. Manage user enquiries",
-        "7. Manage own enquiries",
+        "6. View all user submitted enquiries (as an OFFICER)",
+        "7. Manage user enquiries (as an OFFICER)",
+        "8. Manage own enquiries (as an APPLICANT)",
         "==== Officer Functions ====",
-        "8. Register for project",
-        "9. Manage officer registration",
-        "10. View project details",
-        "11. Process flat booking",
-        "12. View assigned project applications",
+        "9. Register for project",
+        "10. Manage officer registration",
+        "11. View project details",
+        "12. Process flat booking",
+        "13. View assigned project applications",
         "==== Account ====",
-        "13. View account details",
-        "14. Change password",
-        "15. Log out",
+        "14. View account details",
+        "15. Change password",
+        "0. Log out",
         "Enter choice: "
     );
 
@@ -95,7 +96,7 @@ public final class Menu {
         "==== Account ====",
         "15. View account details",
         "16. Change password",
-        "17. Log out",
+        "0. Log out",
         "Enter choice: "
     );
 
