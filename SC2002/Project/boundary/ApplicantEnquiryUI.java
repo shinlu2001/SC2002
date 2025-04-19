@@ -133,6 +133,45 @@ public class ApplicantEnquiryUI { // this is more for applicants
         
     }
 
+    /**
+     * View enquiries for staff (managers, officers) 
+     * @param sc Scanner for input
+     * @param staff The staff member (Manager or Officer) viewing the enquiries
+     * @param enquiries List of enquiries to display
+     * @param expand Whether to allow selection and expansion of an enquiry
+     */
+    public static void viewEnquiryForStaff(Scanner sc, User staff, List<Enquiry> enquiries, boolean expand) {
+        System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n",
+                "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
+        System.out.println("====================================================================================================================");
+        for (Enquiry enquiry : enquiries) {
+            System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
+                    enquiry.getId(),
+                    enquiry.getProject() != null ? enquiry.getProject().getName() : "General Enquiry",
+                    Input.truncateText(enquiry.getContent(), 30),
+                    Input.truncateText(enquiry.getResponse(), 30),
+                    enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
+                    enquiry.getRespondent() != null ? enquiry.getRespondent().getFirstName() : "");
+            if (enquiry.getFlatType() != null && !enquiry.getFlatType().isEmpty()) {
+                System.out.printf("%-5s %-20s %-30s%n", "", "", "Flat type: " + enquiry.getFlatType());
+            }
+        }
+        
+        if (expand) {
+            System.out.println("Select enquiry to view (-1 to cancel)");
+            int en_id = Input.getIntInput(sc);
+            if (en_id == -1) {
+                return;
+            }
+            Enquiry en = enquiryController.findEnquiryById(en_id);
+            if (en == null) {
+                System.err.println("Invalid ID");
+                return;
+            }
+            viewSingleEnquiry(en);
+        }
+    }
+
     private static void editEnquiry(Scanner sc, Applicant user) {
         List<Enquiry> editableEnquiries = enquiryController.getEditableEnquiries(user);
         if (editableEnquiries.isEmpty()) {

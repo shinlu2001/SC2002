@@ -19,7 +19,28 @@ public interface Input {
         if (input.equalsIgnoreCase("exit") || input.equalsIgnoreCase("back")) {
             throw new InputExitException("User requested exit/back");
         }
+        if (input.isEmpty()) {
+            System.out.println("Error: Input cannot be empty. Please try again.");
+            return getStringInput(sc);
+        }
         return input;
+    }
+
+    public static String getStringInput(Scanner sc, String prompt) throws InputExitException {
+        while (true) {
+            if (prompt != null) {
+                System.out.print(prompt);
+            }
+            String input = sc.nextLine().trim();
+            if (input.equalsIgnoreCase("exit") || input.equalsIgnoreCase("back")) {
+                throw new InputExitException("User requested exit/back");
+            }
+            if (input.isEmpty()) {
+                System.out.println("Error: Input cannot be empty. Please try again.");
+                continue;
+            }
+            return input;
+        }
     }
 
     static int getIntInput(Scanner sc) {
@@ -93,7 +114,7 @@ public interface Input {
     }
 
     public static LocalDate getDateInput(Scanner sc, String prompt) throws InputExitException {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         while (true) {
             if (prompt != null) {
                 System.out.print(prompt);
@@ -105,7 +126,26 @@ public interface Input {
             try {
                 return LocalDate.parse(line, formatter);
             } catch (DateTimeParseException e) {
-                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+                System.out.println("Error: Invalid date format. Please use format yyyy-MM-dd (e.g., 2025-04-30).");
+                System.out.println("Tip: Make sure the date exists. For example, 2025-02-30 is invalid because February doesn't have 30 days.");
+            }
+        }
+    }
+    
+    public static LocalDate getDateInput(Scanner sc, String prompt, LocalDate minDate, LocalDate maxDate) throws InputExitException {
+        while (true) {
+            LocalDate date = getDateInput(sc, prompt);
+            boolean beforeMin = minDate != null && date.isBefore(minDate);
+            boolean afterMax = maxDate != null && date.isAfter(maxDate);
+            
+            if (beforeMin && afterMax) {
+                System.out.println("Error: Date must be between " + minDate + " and " + maxDate + ". Please try again.");
+            } else if (beforeMin) {
+                System.out.println("Error: Date cannot be before " + minDate + ". Please try again.");
+            } else if (afterMax) {
+                System.out.println("Error: Date cannot be after " + maxDate + ". Please try again.");
+            } else {
+                return date;
             }
         }
     }

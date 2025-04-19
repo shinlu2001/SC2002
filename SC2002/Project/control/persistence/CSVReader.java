@@ -126,11 +126,20 @@ public final class CSVReader {
                 // link manager using name lookup
                 Optional<HDB_Manager> mgrOpt = ds.findManagerByName(mgrName);
                 if (mgrOpt.isEmpty()) {
-                    System.err.println("Manager with name '" + mgrName + "' not found for project '" + name + "', skipping manager assignment.");
+                    System.err.println("Error: Manager with name '" + mgrName + "' not found for project '" + name + 
+                        "'. The project will be created without a manager assignment.");
+                    System.err.println("To fix this issue: 1) Make sure the manager exists in ManagerList.csv, " + 
+                        "2) Check the spelling of the manager name in ProjectList.csv");
                 } else {
                     mgrOpt.ifPresent(m -> {
-                        prj.setManager(m);
-                        m.addManagedProject(prj);
+                        try {
+                            prj.setManager(m);
+                            m.addManagedProject(prj);
+                            System.out.println("Manager " + m.getFirstName() + " successfully assigned to Project " + prj.getName() + ".");
+                        } catch (Exception e) {
+                            System.err.println("Error assigning Manager " + m.getFirstName() + 
+                                " to Project " + prj.getName() + ": " + e.getMessage());
+                        }
                     });
                 }
 
@@ -179,17 +188,34 @@ public final class CSVReader {
                             // Check if already assigned (e.g., via explicit registration column)
                             boolean alreadyAssigned = prj.getAssignedOfficers().contains(off);
                             if (!alreadyAssigned) {
-                                int regId = IdGenerator.nextRegistrationId();
-                                Registration reg = new Registration(regId, off, prj);
-                                reg.setStatus(RegistrationStatus.APPROVED); // Directly approve based on CSV column
-                                ds.getRegistrations().add(reg);
-                                off.addRegistration(reg);
-                                prj.addAssignedOfficer(off); // Add to project's list
-                                off.addAssignedProject(prj); // Add to officer's assigned projects list
-                                System.out.println("DEBUG: Assigned Officer " + off.getFirstName() + " to Project " + prj.getName() + " from column 12."); // Debug print
+                                try {
+                                    // Check if project has reached its officer slot limit
+                                    if (prj.getAssignedOfficers().size() >= prj.getOfficerSlotLimit()) {
+                                        System.err.println("Error: Cannot assign Officer " + off.getFirstName() + 
+                                            " to Project " + prj.getName() + ". Officer slot limit (" + 
+                                            prj.getOfficerSlotLimit() + ") has been reached.");
+                                        continue;
+                                    }
+                                    
+                                    // Create and register the officer
+                                    int regId = IdGenerator.nextRegistrationId();
+                                    Registration reg = new Registration(regId, off, prj);
+                                    reg.setStatus(RegistrationStatus.APPROVED); // Directly approve based on CSV column
+                                    ds.getRegistrations().add(reg);
+                                    off.addRegistration(reg);
+                                    prj.addAssignedOfficer(off); // Add to project's list
+                                    off.addAssignedProject(prj); // Add to officer's assigned projects list
+                                    System.out.println("Officer " + off.getFirstName() + " successfully assigned to Project " + prj.getName() + ".");
+                                } catch (Exception e) {
+                                    System.err.println("Error assigning Officer " + off.getFirstName() + 
+                                        " to Project " + prj.getName() + ": " + e.getMessage());
+                                }
+                            } else {
+                                System.out.println("Officer " + off.getFirstName() + " already assigned to Project " + prj.getName() + ".");
                             }
                         } else {
-                             System.err.println("WARN: Officer with name '" + offName + "' not found for project '" + name + "' assignment.");
+                             System.err.println("Error: Officer with name '" + offName + "' not found for project '" + 
+                                name + "'. Please check that the officer exists and the name is spelled correctly in OfficerList.csv.");
                         }
                     }
                 }

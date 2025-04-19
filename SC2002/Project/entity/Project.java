@@ -132,18 +132,29 @@ public class Project {
     public boolean updateFlatTypeUnits(String flatType, int newUnits) {
         int index = flatTypes.indexOf(flatType.toUpperCase());
         if (index != -1) {
+            if (newUnits < 0) {
+                System.err.println("Error: Cannot set negative units for flat type " + flatType);
+                return false;
+            }
+            
             // Adjust available units based on the change in total units
             int oldTotalUnits = totalUnits.get(index);
-            int diff = newUnits - oldTotalUnits;
             int currentAvailable = availableUnits.get(index);
-            availableUnits.set(index, Math.max(0, currentAvailable + diff)); // Ensure available doesn't go below 0
+            
+            // Guard against integer overflow by using long for intermediate calculations
+            long diff = (long)newUnits - (long)oldTotalUnits;
+            
+            // Calculate new available units, ensuring it stays within valid bounds
+            long newAvailable = Math.max(0, currentAvailable + diff);
+            newAvailable = Math.min(newAvailable, newUnits);  // Can't have more available than total
+            
+            // Update values after all calculations are safely completed
             totalUnits.set(index, newUnits);
-            // Ensure available units do not exceed new total units
-            if (availableUnits.get(index) > newUnits) {
-                availableUnits.set(index, newUnits);
-            }
+            availableUnits.set(index, (int)newAvailable);
+            
             return true;
         }
+        System.err.println("Error: Flat type " + flatType + " not found in project " + name);
         return false;
     }
 
@@ -203,6 +214,41 @@ public class Project {
             return price != null ? price : 0.0; // Handle potential null Double
         }
         return 0.0; // Return default if index is invalid
+    }
+
+    /**
+     * Get the total number of units for a specific flat type
+     * @param flatType The flat type to check
+     * @return Total number of units for the specified flat type, or 0 if not found
+     */
+    public int getTotalUnits(String flatType) {
+        int idx = this.flatTypes.indexOf(flatType.toUpperCase());
+        if (idx >= 0 && idx < totalUnits.size()) {
+            return totalUnits.get(idx);
+        }
+        return 0;
+    }
+
+    /**
+     * Get the number of remaining (available) units for a specific flat type
+     * @param flatType The flat type to check
+     * @return Number of remaining units for the specified flat type, or 0 if not found
+     */
+    public int getRemainingUnits(String flatType) {
+        int idx = this.flatTypes.indexOf(flatType.toUpperCase());
+        if (idx >= 0 && idx < availableUnits.size()) {
+            return availableUnits.get(idx);
+        }
+        return 0;
+    }
+    
+    /**
+     * Get the price for a specific flat type
+     * @param flatType The flat type to check
+     * @return Price for the specified flat type, or 0 if not found
+     */
+    public double getFlatTypePrice(String flatType) {
+        return getFlatPrice(flatType);
     }
 
     /**

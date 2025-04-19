@@ -2,6 +2,7 @@ package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.BTOApplication;
+import SC2002.Project.entity.Enquiry;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.Project;
 import SC2002.Project.entity.*;
@@ -316,6 +317,67 @@ public class ManagerController implements StaffControllerInterface {
         }
         // Delegate the actual rejection logic to RegistrationController
         return registrationController.managerRejectWithdrawal(registration.getId());
+    }
+
+    // ---- Enquiry Management ----
+    
+    /**
+     * Gets the HDB_Manager instance associated with this controller
+     * @return The manager instance
+     */
+    public HDB_Manager getManager() {
+        return this.manager;
+    }
+    
+    /**
+     * Retrieves all enquiries in the system
+     * @return List of all enquiries
+     */
+    public List<Enquiry> getAllEnquiries() {
+        EnquiryController enquiryController = new EnquiryController();
+        return enquiryController.getAllEnquiries();
+    }
+    
+    /**
+     * Retrieves all enquiries related to projects managed by this manager
+     * @return List of enquiries for managed projects
+     */
+    public List<Enquiry> getManagedProjectEnquiries() {
+        EnquiryController enquiryController = new EnquiryController();
+        List<Enquiry> managedEnquiries = new ArrayList<>();
+        
+        // Get enquiries for each managed project
+        for (Project project : manager.getManagedProjects()) {
+            managedEnquiries.addAll(enquiryController.getProjectEnquiries(project));
+        }
+        
+        return managedEnquiries;
+    }
+
+    /**
+     * Responds to an enquiry with the given message
+     * @param enquiryId The ID of the enquiry to respond to
+     * @param response The response message
+     * @return true if the response was successfully added, false otherwise
+     */
+    public boolean respondToEnquiry(int enquiryId, String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return false;
+        }
+        
+        EnquiryController enquiryController = new EnquiryController();
+        Enquiry enquiry = enquiryController.findEnquiryById(enquiryId);
+        
+        if (enquiry == null) {
+            return false;
+        }
+        
+        // If it's a project-specific enquiry, verify the manager manages this project
+        if (enquiry.getProject() != null && !manager.getManagedProjects().contains(enquiry.getProject())) {
+            return false;
+        }
+        
+        return enquiryController.respondToEnquiry(manager, enquiryId, response);
     }
 
     // …plus stubs for other features: handle officer regs, generate reports…

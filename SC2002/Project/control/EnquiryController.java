@@ -115,7 +115,17 @@ public class EnquiryController {
         // Check permissions based on user role and enquiry type
         boolean permitted = false;
         if (staff instanceof HDB_Manager) {
-            permitted = true; // Managers can answer any enquiry
+            // Managers can only answer enquiries for projects they manage
+            Project project = enquiry.getProject();
+            if (project == null) {
+                // All managers can answer general enquiries
+                permitted = true;
+            } else if (project.getManager() != null && project.getManager().equals(staff)) {
+                // Manager can only answer project enquiries they manage
+                permitted = true;
+            } else {
+                System.out.println("Error: Manager is not assigned to this project.");
+            }
         } else if (staff instanceof HDB_Officer) {
             Project project = enquiry.getProject();
             if (project != null) {
@@ -161,5 +171,13 @@ public class EnquiryController {
         return dataStore.getEnquiries().stream()
                 .filter(e -> e.getProject() == null)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves all enquiries in the system
+     * @return A list of all enquiries
+     */
+    public List<Enquiry> getAllEnquiries() {
+        return dataStore.getEnquiries();
     }
 }

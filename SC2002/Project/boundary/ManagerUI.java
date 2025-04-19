@@ -12,7 +12,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ManagerUI {
     private final HDB_Manager manager; // Renamed from 'user' since we're accessing it
@@ -34,17 +36,18 @@ public class ManagerUI {
             try {
                 int choice = Input.getIntInput(sc);
                 switch (choice) {
-                    // Project Management (Cases 1-5)
+                    // Project Management
                     case 1 -> createProject(sc, managerController);
                     case 2 -> editProject(sc, managerController);
                     case 3 -> deleteProject(sc, managerController);
                     case 4 -> viewAllProjects(managerController);
                     case 5 -> viewOwnProjects(managerController);
                     
-                    // Officer Registration Management (Cases 6-8)
+                    // Officer Management
                     case 6 -> viewOfficerRegistrations(managerController);
                     case 7 -> handleOfficerRegistration(sc, managerController);
                     case 8 -> handleOfficerWithdrawal(sc, managerController);
+                    case 9 -> viewAssignedOfficers(managerController);
                     
                     // BTO Application Management (Cases 9-10)
                     case 9 -> handleBTOApplications(sc, managerController);
@@ -754,5 +757,130 @@ public class ManagerUI {
         }
     }
 
+    /**
+     * View officers assigned to manager's projects.
+     * This shows a list of projects with their assigned officers.
+     */
+    private static void viewAssignedOfficers(ManagerController controller) {
+        System.out.println("\n=== Officers Assigned to Your Projects ===");
+        List<Project> managedProjects = controller.listMyProjects();
+        
+        if (managedProjects.isEmpty()) {
+            System.out.println("You are not managing any projects.");
+            return;
+        }
+        
+        // Display projects and their assigned officers
+        System.out.printf("%-5s %-" + Menu.COL_NAME + "s %-15s %-10s %-15s%n", 
+                          "ID", "Project Name", "Total Slots", "Used Slots", "Assigned Officers");
+        System.out.println("-".repeat(5 + Menu.COL_NAME + 15 + 10 + 15 + 4));
+        
+        for (Project project : managedProjects) {
+            String projectName = Input.truncateText(project.getName(), Menu.COL_NAME - 2);
+            List<HDB_Officer> officers = project.getAssignedOfficers();
+            
+            if (officers.isEmpty()) {
+                System.out.printf("%-5d %-" + Menu.COL_NAME + "s %-15d %-10d No officers assigned%n",
+                              project.getId(),
+                              projectName,
+                              project.getOfficerSlotLimit(),
+                              0);
+            } else {
+                // Print first row with project info and first officer
+                System.out.printf("%-5d %-" + Menu.COL_NAME + "s %-15d %-10d %s%n",
+                              project.getId(),
+                              projectName,
+                              project.getOfficerSlotLimit(),
+                              officers.size(),
+                              officers.get(0).getFirstName() + " " + officers.get(0).getLastName());
+                
+                // Print remaining officers in separate rows
+                for (int i = 1; i < officers.size(); i++) {
+                    HDB_Officer officer = officers.get(i);
+                    System.out.printf("%-5s %-" + Menu.COL_NAME + "s %-15s %-10s %s%n",
+                                 "", "", "", "", 
+                                 officer.getFirstName() + " " + officer.getLastName());
+                }
+            }
+            System.out.println(); // Extra line between projects
+        }
+    }
+
+    /**
+     * View all enquiries across all projects managed by this manager.
+     */
+    private static void viewAllEnquiries(Scanner sc, ManagerController controller) {
+        System.out.println("\n=== All Enquiries ===");
+        List<Enquiry> allEnquiries = controller.getAllEnquiries();
+        
+        if (allEnquiries.isEmpty()) {
+            System.out.println("No enquiries found in the system.");
+            return;
+        }
+        
+        // Display enquiries
+        System.out.println("All Enquiries:");
+        EnquiryUI.viewEnquiryForStaff(sc, controller.getManager(), allEnquiries, false);
+    }
     
+    /**
+     * Handle enquiries specifically for projects managed by this manager.
+     */
+    private static void handleProjectEnquiries(Scanner sc, ManagerController controller) {
+        System.out.println("\n=== Project Enquiries ===");
+        List<Enquiry> projectEnquiries = controller.getManagedProjectEnquiries();
+        List<Enquiry> unansweredEnquiries = projectEnquiries.stream()
+                .filter(e -> !e.isAnswered())
+                .collect(Collectors.toList());
+                
+        if (unansweredEnquiries.isEmpty()) {
+            System.out.println("No unanswered enquiries for your managed projects.");
+            return;
+        }
+        
+        System.out.println("Unanswered Enquiries for Your Managed Projects:");
+        EnquiryUI.viewEnquiryForStaff(sc, controller.getManager(), unansweredEnquiries, false);
+        
+        try {
+            System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
+            String input = sc.nextLine().trim();
+            
+            if (input.equalsIgnoreCase("back")) {
+                return;
+            }
+            
+            try {
+                int enquiryId = Integer.parseInt(input);
+                
+                Optional<Enquiry> selectedEnquiryOpt = unansweredEnquiries.stream()
+                        .filter(e -> e.getId() == enquiryId)
+                        .findFirst();
+                
+                if (selectedEnquiryOpt.isEmpty()) {
+                    System.out.println("Invalid Enquiry ID or enquiry not found in your projects.");
+                    return;
+                }
+                
+                Enquiry selectedEnquiry = selectedEnquiryOpt.get();
+                EnquiryUI.viewSingleEnquiry(selectedEnquiry);
+                
+                System.out.print("Enter your response: ");
+                String response = Input.getStringInput(sc);
+                
+                if (controller.respondToEnquiry(enquiryId, response)) {
+                    System.out.println("Response submitted successfully!");
+                } else {
+                    System.out.println("Failed to submit response.");
+                }
+                
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid enquiry ID number.");
+            }
+            
+        } catch (Input.InputExitException e) {
+            System.out.println("Operation cancelled.");
+        } catch (Exception e) {
+            System.err.println("Error handling project enquiry: " + e.getMessage());
+        }
+    }
 }
