@@ -13,7 +13,7 @@ import java.util.Scanner;
 /**
  * Boundary class for handling enquiry-related user interactions.
  */
-public class EnquiryUI {
+public class ApplicantEnquiryUI { // this is more for applicants
     private static final ProjectController projectController = new ProjectController();
     private static final EnquiryController enquiryController = new EnquiryController();
     
@@ -29,7 +29,7 @@ public class EnquiryUI {
                     case 1 -> makeGeneralEnquiry(sc, user, applicantController);
                     case 2 -> makeProjectEnquiry(sc, user, applicantController);
                     case 3 -> editEnquiry(sc, user);
-                    case 4 -> viewEnquiries(sc, user, enquiryController.getUserEnquiries(user), true);
+                    case 4 -> viewEnquiries(sc, enquiryController.getUserEnquiries(user), true);
                     case 5 -> deleteEnquiry(sc, user, applicantController);
                     case 6 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
@@ -41,7 +41,7 @@ public class EnquiryUI {
         }
     }
 
-    private static void makeGeneralEnquiry(Scanner sc, Applicant user, ApplicantController applicantController) {
+    private static void makeGeneralEnquiry(Scanner sc, Applicant user, ApplicantController applicantController) { // user applicant controller because we are making changes to applicant's attributes (enquiries list)
         try {
             System.out.println("\nMaking General Enquiry");
             System.out.println("=====================");
@@ -58,7 +58,7 @@ public class EnquiryUI {
         }
     }
 
-    private static void makeProjectEnquiry(Scanner sc, Applicant user, ApplicantController applicantController) {
+    private static void makeProjectEnquiry(Scanner sc, Applicant user, ApplicantController applicantController) { 
         try {
             System.out.println("\nMaking Project-Related Enquiry");
             System.out.println("============================");
@@ -101,14 +101,14 @@ public class EnquiryUI {
         }
     }
 
-    static void viewEnquiries(Scanner sc, Applicant user, List<Enquiry> enquiries, boolean expand) {
+    public static void viewEnquiries(Scanner sc, List<Enquiry> enquiries, boolean expand) {
         System.out.printf("%-5s %-20s %-30s %-30s %-15s %-20s%n",
                 "ID", "Project", "Enquiry", "Reply", "Status", "Replied by");
         System.out.println("====================================================================================================================");
         for (Enquiry enquiry : enquiries) {
             System.out.printf("%-5d %-20s %-30s %-30s %-15s %-20s%n",
                     enquiry.getId(),
-                    enquiry.getProject() != null ? enquiry.getProject().getName() : "General Enquiry",
+                    enquiry.getProject() != null ? Input.truncateText(enquiry.getProject().getName(), 20) : "General Enquiry",
                     Input.truncateText(enquiry.getContent(), 30),
                     Input.truncateText(enquiry.getResponse(), 30),
                     enquiry.getResponse().isEmpty() ? "Pending" : "Answered",
@@ -140,7 +140,7 @@ public class EnquiryUI {
             return;
         }
 
-        viewEnquiries(sc, user, editableEnquiries, false);
+        viewEnquiries(sc, editableEnquiries, false);
 
         try {
             System.out.print("\nEnter Enquiry ID to edit: ");

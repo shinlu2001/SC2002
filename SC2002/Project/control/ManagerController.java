@@ -4,11 +4,12 @@ import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.Project;
-import SC2002.Project.entity.Registration;
+import SC2002.Project.entity.*;
 import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.RegistrationStatus;
 import SC2002.Project.entity.enums.Visibility;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  * Controller for manager-specific operations: approving/rejecting applications,
  * handling withdrawals, managing visibility of managed projects, and handling officer registrations.
  */
-public class ManagerController {
+public class ManagerController implements StaffControllerInterface {
     private final DataStore dataStore = DataStore.getInstance();
     private final ApplicationController appController = new ApplicationController();
     private final ProjectController projectController = new ProjectController();
@@ -25,6 +26,10 @@ public class ManagerController {
 
     public ManagerController(HDB_Manager manager) {
         this.manager = manager;
+    }
+
+    public HDB_Manager getManager() {
+        return this.manager;
     }
 
     // ---- Approve / Reject BTO Applications ----
@@ -194,8 +199,8 @@ public class ManagerController {
     }
 
     /** List projects managed by this manager */
-    public List<Project> listMyProjects() {
-        return List.copyOf(manager.getManagedProjects());
+    public List<Project> getAssignedProjects() {
+        return manager.getManagedProjects();
     }
 
     /** Toggle visibility on/off for a managed project */
@@ -315,4 +320,26 @@ public class ManagerController {
 
     // …plus stubs for other features: handle officer regs, generate reports…
     // TODO: Implement methods for enquiry management (view all, handle project-specific)
+    public List<Enquiry> getPendingEnquiries(EnquiryController enquiryCtrl) {
+        List<Enquiry> relevantEnquiries = new ArrayList<>();
+        for (Project p : manager.getManagedProjects()) {
+            relevantEnquiries.addAll(enquiryCtrl.getProjectEnquiries(p));
+        }
+        // Get general enquiries (not project-specific)
+        relevantEnquiries.addAll(enquiryCtrl.getGeneralEnquiries());
+    
+        // Filter out enquiries created by the officer themselves and already answered ones
+        List<Enquiry> actionableEnquiries = relevantEnquiries.stream()
+                .filter(e -> !e.getCreator().equals(this.manager))
+                .filter(e -> !e.isAnswered())
+                .distinct() // Avoid duplicates if an enquiry somehow appears twice
+                .collect(Collectors.toList());
+    
+        if (actionableEnquiries.isEmpty()) {
+            System.out.println("No pending enquiries found for your assigned projects or general topics.");
+            
+        }
+        return relevantEnquiries;
+    }
+    
 }

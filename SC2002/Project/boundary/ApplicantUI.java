@@ -31,7 +31,7 @@ public class ApplicantUI {
                     case 3 -> viewEligibleListings(applicant, applicantController); // done
                     case 4 -> viewAllListings(projectController, applicantController, applicant); // done
                     case 5 -> withdrawApplication(sc, applicant, applicantController);
-                    case 6 -> EnquiryUI.start(sc, applicant);
+                    case 6 -> ApplicantEnquiryUI.start(sc, applicant);
                     case 7 -> viewAccountDetails(applicant); // done
                     case 8 -> AuthUI.changePassword(sc, applicant); // done
                     case 9 -> exit = true;

@@ -1,10 +1,7 @@
 // SC2002/Project/entity/Enquiry.java
 package SC2002.Project.entity;
 
-import java.util.Optional;
 import SC2002.Project.util.IdGenerator;
-import SC2002.Project.entity.*;
-
 /**
  * Entity class representing an enquiry in the system.
  */

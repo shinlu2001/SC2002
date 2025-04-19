@@ -44,20 +44,21 @@ public class OfficerUI {
                     case 5 -> ApplicantUI.withdrawApplication(sc, officer, applicantController);
                     
                     // Enquiry Management (Cases 6-7)
-                    case 6 -> manageUserEnquiries(sc, officer, enquiryController, officerController);
-                    case 7 -> EnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
+                    case 6 -> StaffUI.viewEnquiriesStaff(sc, enquiryController, officerController);
+                    case 7 -> StaffUI.manageUserEnquiries(sc, officer, enquiryController, officerController);
+                    case 8 -> ApplicantEnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
                     
-                    case 8 -> viewAccountDetails(officer);
-                    case 9 -> AuthUI.changePassword(sc, officer); // Delegate
+                    case 9 -> viewAccountDetails(officer);
+                    case 10 -> AuthUI.changePassword(sc, officer); // Delegate
                     
                     // Officer Specific Features (Cases 10-14)
-                    case 10 -> registerForProject(sc, officer, registrationController, projectController);
-                    case 11 -> checkRegistrationStatus(sc, officer, registrationController);
-                    case 12 -> viewProjectDetails(sc, projectController);
-                    case 13 -> processFlatBooking(sc, officerController);
-                    case 14 -> viewAssignedApplications(officerController, applicationController);
+                    case 11 -> registerForProject(sc, officer, registrationController, projectController);
+                    case 12 -> checkRegistrationStatus(sc, officer, registrationController);
+                    case 13 -> viewProjectDetails(sc, projectController);
+                    case 14 -> processFlatBooking(sc, officerController);
+                    case 15 -> viewAssignedApplications(officerController, applicationController);
                     
-                    case 15 -> exit = true;
+                    case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Input.InputExitException e) {
@@ -130,75 +131,6 @@ public class OfficerUI {
               System.out.println("\nCurrent Applicant Application:");
               System.out.println("  " + appOpt.get());
          }
-    }
-    
-    private static void manageUserEnquiries(Scanner sc, HDB_Officer officer, EnquiryController enquiryCtrl, OfficerController officerCtrl) {
-        List<Project> assignedProjects = officerCtrl.getAssignedProjects();
-        List<Enquiry> relevantEnquiries = new ArrayList<>();
-
-        // Get enquiries for assigned projects
-        for (Project p : assignedProjects) {
-            relevantEnquiries.addAll(enquiryCtrl.getProjectEnquiries(p));
-        }
-        // Get general enquiries (not project-specific)
-        relevantEnquiries.addAll(enquiryCtrl.getGeneralEnquiries());
-
-        // Filter out enquiries created by the officer themselves and already answered ones
-        List<Enquiry> actionableEnquiries = relevantEnquiries.stream()
-                .filter(e -> !e.getCreator().equals(officer))
-                .filter(e -> !e.isAnswered())
-                .distinct() // Avoid duplicates if an enquiry somehow appears twice
-                .collect(Collectors.toList());
-
-        if (actionableEnquiries.isEmpty()) {
-            System.out.println("No pending enquiries found for your assigned projects or general topics.");
-            return;
-        }
-
-        System.out.println("\nPending Enquiries:");
-        System.out.println("------------------");
-        EnquiryUI.viewEnquiries(sc, officer, actionableEnquiries, false); // Use false to prevent immediate selection prompt
-
-        try {
-            System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
-            String input = sc.nextLine().trim();
-            
-            if (input.equalsIgnoreCase("back")) {
-                return;
-            }
-            
-            try {
-                int enquiryId = Integer.parseInt(input);
-                
-                Optional<Enquiry> selectedEnquiryOpt = actionableEnquiries.stream()
-                        .filter(e -> e.getId() == enquiryId)
-                        .findFirst();
-    
-                if (selectedEnquiryOpt.isEmpty()) {
-                    System.out.println("Invalid Enquiry ID or enquiry not actionable by you.");
-                    return;
-                }
-    
-                Enquiry selectedEnquiry = selectedEnquiryOpt.get();
-                System.out.println("\nSelected Enquiry:");
-                EnquiryUI.viewSingleEnquiry(selectedEnquiry); // Display full details
-    
-                System.out.print("Enter your response: ");
-                String response = Input.getStringInput(sc);
-    
-                if (enquiryCtrl.respondToEnquiry(officer, enquiryId, response)) {
-                    System.out.println("Response submitted successfully!");
-                } else {
-                    System.out.println("Failed to submit response. Please try again.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid enquiry ID number.");
-            }
-        } catch (Input.InputExitException e) {
-            System.out.println("Response process cancelled.");
-        } catch (Exception e) {
-            System.err.println("Error managing enquiries: " + e.getMessage());
-        }
     }
 
     private static void registerForProject(Scanner sc, HDB_Officer officer, RegistrationController regCtrl, ProjectController projCtrl) {
@@ -359,16 +291,17 @@ public class OfficerUI {
         try {
             System.out.print("Enter Project ID to view details: ");
             int projectId = Input.getIntInput(sc);
-
+            
             Project selectedProject = projCtrl.findById(projectId);
+            List<Project> toPrint = new ArrayList<>();
             if (selectedProject == null || !selectedProject.isVisible()) {
                 System.out.println("Invalid Project ID or project not visible.");
                 return;
             }
-
+            toPrint.add(selectedProject);
             System.out.println("\nProject Details:");
             System.out.println("----------------");
-            System.out.println(selectedProject); // Use Project's toString()
+            MenuPrinter.printProjectTableDetailed(toPrint); // Use detailed view from menu printer (like manager)
 
         } catch (Input.InputExitException e) {
             System.out.println("Viewing cancelled.");

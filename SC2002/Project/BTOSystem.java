@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 public final class BTOSystem{
-    public static final Project officerProject = null;
     protected static List<Applicant> applicants = new ArrayList<>();
     protected static List<HDB_Officer> officers = new ArrayList<>();
     protected static List<HDB_Manager> managers = new ArrayList<>();

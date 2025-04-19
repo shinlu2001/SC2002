@@ -4,14 +4,14 @@ import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.*;
 import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.RegistrationStatus;
-import java.util.List;
+import java.util.*;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Handles officer‑specific actions (flat booking, etc.).
  */
-public class OfficerController {
+public class OfficerController implements StaffControllerInterface{
     private final DataStore dataStore = DataStore.getInstance();
     private final HDB_Officer officer;
 
@@ -24,6 +24,29 @@ public class OfficerController {
             .filter(r -> r.getStatus() == RegistrationStatus.APPROVED)
             .map(Registration::getProject)
             .collect(Collectors.toList());
+    }
+
+    //enquiries that they can respond to, same as for manager
+    public List<Enquiry> getPendingEnquiries(EnquiryController enquiryCtrl) {
+        List<Enquiry> relevantEnquiries = new ArrayList<>();
+        for (Project p : officer.getAssignedProjects()) {
+            relevantEnquiries.addAll(enquiryCtrl.getProjectEnquiries(p));
+        }
+        // Get general enquiries (not project-specific)
+        relevantEnquiries.addAll(enquiryCtrl.getGeneralEnquiries());
+    
+        // Filter out enquiries created by the officer themselves and already answered ones
+        List<Enquiry> actionableEnquiries = relevantEnquiries.stream()
+                .filter(e -> !e.getCreator().equals(this.officer))
+                .filter(e -> !e.isAnswered())
+                .distinct() // Avoid duplicates if an enquiry somehow appears twice
+                .collect(Collectors.toList());
+    
+        if (actionableEnquiries.isEmpty()) {
+            System.out.println("No pending enquiries found for your assigned projects or general topics.");
+            
+        }
+        return relevantEnquiries;
     }
 
     public List<BTOApplication> getSuccessfulApplicationsForManagedProjects() {

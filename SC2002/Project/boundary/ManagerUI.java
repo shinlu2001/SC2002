@@ -2,6 +2,7 @@ package SC2002.Project.boundary;
 
 import SC2002.Project.boundary.util.Input;
 import SC2002.Project.boundary.util.MenuPrinter;
+import SC2002.Project.control.EnquiryController;
 import SC2002.Project.control.ManagerController;
 import SC2002.Project.entity.*;
 import SC2002.Project.entity.enums.ApplicationStatus;
@@ -23,6 +24,7 @@ public class ManagerUI {
     /** Entry point from LoginUI. */
     public static void start(HDB_Manager user, Scanner sc) {
         ManagerController managerController = new ManagerController(user);
+        EnquiryController enquiryController = new EnquiryController();
         boolean exit = false;
 
         while (!exit) {
@@ -50,10 +52,8 @@ public class ManagerUI {
                     
                     // Report & Enquiry (Cases 11-13) - TODO: Implement later
                     case 11 -> ReportUI.start(sc, user); // Delegate
-                    case 12 -> System.out.println("View All Enquiries - Not yet implemented."); // viewAllEnquiries(sc, managerController); // Needs EnquiryController integration
-                    case 13 -> System.out.println("Handle Project Enquiries - Not yet implemented."); // handleProjectEnquiries(sc, managerController); // Needs EnquiryController integration
-                    
-                    case 14 -> viewAccountDetails(user);
+                    case 12 -> StaffUI.viewEnquiriesStaff(sc, enquiryController, managerController); // enquiry ui and enquiry controller integration
+                    case 13 -> StaffUI.manageUserEnquiries(sc, user, enquiryController, managerController); 
                     case 15 -> AuthUI.changePassword(sc, user);
                     case 16 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
@@ -135,7 +135,7 @@ public class ManagerUI {
 
     private static void editProject(Scanner sc, ManagerController controller) {
         System.out.println("\n=== Edit Project ===");
-        List<Project> managedProjects = controller.listMyProjects();
+        List<Project> managedProjects = controller.getAssignedProjects();
         if (managedProjects.isEmpty()) {
             System.out.println("You are not managing any projects.");
             return;
@@ -324,7 +324,7 @@ public class ManagerUI {
 
     private static void deleteProject(Scanner sc, ManagerController controller) {
         System.out.println("\n=== Delete Project ===");
-        List<Project> managedProjects = controller.listMyProjects();
+        List<Project> managedProjects = controller.getAssignedProjects();
         if (managedProjects.isEmpty()) {
             System.out.println("You are not managing any projects.");
             return;
@@ -378,7 +378,7 @@ public class ManagerUI {
 
     private static void viewOwnProjects(ManagerController controller) {
         System.out.println("\n=== Your Managed Projects ===");
-        List<Project> managedProjects = controller.listMyProjects();
+        List<Project> managedProjects = controller.getAssignedProjects();
         if (managedProjects.isEmpty()) {
             System.out.println("You are not managing any projects.");
             return;
@@ -753,4 +753,6 @@ public class ManagerUI {
             System.err.println("Error handling officer withdrawal request: " + e.getMessage());
         }
     }
+
+    
 }

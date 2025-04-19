@@ -138,7 +138,7 @@ public final class MenuPrinter {
                 if (!projectEligibility.equals("Eligible")) {
                     eligDisplay = projectEligibility; // Project-level ineligibility (registered, not open, etc.)
                 } else {
-                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Age/Marital Status";
+                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Not Eligible";
                 }
 
                 if (first) {
@@ -213,11 +213,12 @@ public final class MenuPrinter {
     /**
      * Prints a detailed table of projects, including all flat types and manager info.
      * Based on ProjectOLD HDB_Manager.viewAllProjects format.
+     * use for officer also
      */
     public static void printProjectTableDetailed(List<Project> projects) {
         // Header similar to ProjectOLD
         String headerFormat = "%-5s %-25s %-15s %-25s %-15s %-12s %-12s %-10s %-15s %-15s%n";
-        int detailedWidth = 5 + 25 + 15 + 25 + 15 + 12 + 12 + 10 + 15 + 15 + 9; // Sum of column widths + spaces
+        int detailedWidth = 5 + 25 + 15 + 25 + 15 + 12 + 12 + 10 + 15 + 15 + 12; // Sum of column widths + spaces
 
         System.out.printf(headerFormat,
                 "ID", "Project Name", "Neighbourhood", "Flat Types (Units/Price)", "Manager",
@@ -248,7 +249,7 @@ public final class MenuPrinter {
                     firstFlat = false;
                 } else {
                     // Print subsequent flat types aligned under the flat type column
-                    System.out.printf("%-" + (5 + 25 + 15 + 1) + "s%s%n", "", flatInfo); // Adjust spacing
+                    System.out.printf("%-" + (5 + 25 + 15 + 3) + "s%s%n", "", flatInfo); // Adjust spacing
                 }
             }
              if (p.getFlatTypes().isEmpty()) { // Handle projects with no flats yet

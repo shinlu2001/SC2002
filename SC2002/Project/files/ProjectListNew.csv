@@ -1,4 +1,4 @@
 Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officer
-Acacia Breeze,Yishun,2-ROOM,2,0,3-ROOM,3,0,15/2/2025,20/3/2025,Jessica,3,"Emily"
-test overlapping dates with acacia,test,2-ROOM,2,0,3-ROOM,3,0,15/3/2025,20/4/2025,Jessica,3,"Daniel"
-test not overlapping dates with acacia,testt,2-ROOM,2,0,3-ROOM,3,0,15/5/2025,20/6/2025,Jessica,3,"David"
+Acacia Breeze,Yishun,2-ROOM,2,350000.0,3-ROOM,3,450000.0,15/2/2025,20/3/2025,Jessica,3,"Emily"
+test overlapping dates with acacia,test,2-ROOM,2,350000.0,3-ROOM,3,450000.0,15/3/2025,20/4/2025,Jessica,3,"Daniel"
+test not overlapping dates with acacia,testt,2-ROOM,2,350000.0,3-ROOM,3,450000.0,15/5/2025,20/6/2025,Jessica,3,"David"
