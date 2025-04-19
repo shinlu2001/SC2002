@@ -8,9 +8,15 @@ import SC2002.Project.BTOsystem;
 import SC2002.Project.Input;
 import SC2002.Project.Project;
 import SC2002.Project.boundary.applicantProjectDisplayer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class applyBTOServiceApplicant {
     private ApplicantBase a;
+    LocalDate today = LocalDate.now();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+    String formattedToday    = today.format(formatter);
+
     public applyBTOServiceApplicant(ApplicantBase a) {
         this.a = a;
     }
@@ -30,7 +36,10 @@ public class applyBTOServiceApplicant {
             Project p = BTOsystem.searchById(BTOsystem.projects, id, Project::getId);
             if (p == null || !p.isVisible()) {
                 System.out.println("No such project.");
-            } else {
+            } else if (today.isBefore(p.getOpenDate()) || today.isAfter(p.getCloseDate())){
+                System.out.println("Not in application period.");
+            }
+            else {
                 System.out.println("Enter room type (2-Room, 3-Room, etc): ");
                 String roomtype = Input.getStringInput(sc);
                 if (!a.getEligibility(roomtype)) {
