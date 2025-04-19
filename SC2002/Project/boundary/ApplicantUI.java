@@ -26,14 +26,19 @@ public class ApplicantUI {
             try {
                 int choice = Input.getIntInput(sc);
                 switch (choice) {
+                    // BTO Application
                     case 1 -> applyForProject(sc, applicant, applicantController, projectController);
-                    case 2 -> viewActiveApplication(applicant); // done
-                    case 3 -> viewEligibleListings(applicant, applicantController); // done
-                    case 4 -> viewAllListings(projectController, applicantController, applicant); // done
+                    case 2 -> viewActiveApplication(applicant);
+                    case 3 -> viewEligibleListings(applicant, applicantController);
+                    case 4 -> viewAllListings(projectController, applicantController, applicant);
                     case 5 -> withdrawApplication(sc, applicant, applicantController);
+                    
+                    // Enquiries
                     case 6 -> EnquiryUI.start(sc, applicant);
-                    case 7 -> viewAccountDetails(applicant); // done
-                    case 8 -> AuthUI.changePassword(sc, applicant); // done
+                    
+                    // Account
+                    case 7 -> viewAccountDetails(applicant);
+                    case 8 -> AuthUI.changePassword(sc, applicant);
                     case 9 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }

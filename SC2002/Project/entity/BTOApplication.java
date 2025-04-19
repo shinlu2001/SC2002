@@ -77,8 +77,17 @@ public class BTOApplication {
 
     /** Manager confirms a withdrawal request. */
     public void confirmWithdrawal() {
-        this.withdrawalRequested = false;
-        setStatus(ApplicationStatus.WITHDRAWN);
+        if (status != ApplicationStatus.WITHDRAWN) {
+            this.withdrawalRequested = false;
+            setStatus(ApplicationStatus.WITHDRAWN);
+            
+            // If this application has a booked flat, we need to release it
+            if (bookedFlat != null) {
+                bookedFlat.setBooked(false);
+                project.incrementAvailableUnits(roomType);
+                this.bookedFlat = null;
+            }
+        }
     }
 
     /** Manager approves the application. */
@@ -115,13 +124,40 @@ public class BTOApplication {
         }
     }
 
-    /** Future hook: cancel a booked flat and revert status, re‑increment units. */
-    public void cancelBooking() {
+    /** Future hook: cancel a booked flat and revert status, re‑increment units. */ //NOT IN USE
+    public boolean cancelBooking() {
         if (status == ApplicationStatus.BOOKED && bookedFlat != null) {
-            bookedFlat.setBooked(false);
-            project.incrementAvailableUnits(roomType);
-            this.bookedFlat = null;
-            setStatus(ApplicationStatus.SUCCESS);
+            // Store temporary references to avoid partial updates
+            Flat flatToReset = this.bookedFlat;
+            String roomTypeToIncrement = this.roomType;
+            
+            // Check if flat can be unbooked
+            if (flatToReset == null) {
+                System.err.println("Error: Cannot cancel booking for application ID " + id + " - flat reference is null");
+                return false;
+            }
+            
+            try {
+                // Attempt to reset the flat booking status
+                flatToReset.setBooked(false);
+                // Attempt to increment available units
+                project.incrementAvailableUnits(roomTypeToIncrement);
+                // If both operations succeed, update application state
+                this.bookedFlat = null;
+                setStatus(ApplicationStatus.SUCCESS);
+                return true;
+            } catch (Exception e) {
+                System.err.println("Error cancelling booking for application ID " + id + ": " + e.getMessage());
+                // If an error occurs, attempt to restore original state if needed
+                if (!flatToReset.isBooked()) {
+                    flatToReset.setBooked(true); // Restore the flat's booked status
+                }
+                return false;
+            }
+        } else {
+            System.err.println("Cannot cancel booking for application ID " + id 
+                + " - application not in BOOKED state or has no booked flat");
+            return false;
         }
     }
 

@@ -36,27 +36,27 @@ public class OfficerUI {
             try {
                 int choice = Input.getIntInput(sc);
                 switch (choice) {
-                    // Applicant Role Features (Cases 1-5, 7-9) - Delegate to ApplicantUI methods
+                    // BTO Application (Applicant Role)
                     case 1 -> ApplicantUI.applyForProject(sc, officer, applicantController, projectController);
                     case 2 -> ApplicantUI.viewActiveApplication(officer);
                     case 3 -> ApplicantUI.viewEligibleListings(officer, applicantController);
                     case 4 -> ApplicantUI.viewAllListings(projectController, applicantController, officer);
                     case 5 -> ApplicantUI.withdrawApplication(sc, officer, applicantController);
                     
-                    // Enquiry Management (Cases 6-7)
+                    // Enquiries
                     case 6 -> manageUserEnquiries(sc, officer, enquiryController, officerController);
-                    case 7 -> EnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
+                    case 7 -> EnquiryUI.start(sc, officer);
                     
-                    case 8 -> viewAccountDetails(officer);
-                    case 9 -> AuthUI.changePassword(sc, officer); // Delegate
+                    // Officer Functions
+                    case 8 -> registerForProject(sc, officer, registrationController, projectController);
+                    case 9 -> checkRegistrationStatus(sc, officer, registrationController);
+                    case 10 -> viewProjectDetails(sc, projectController);
+                    case 11 -> processFlatBooking(sc, officerController);
+                    case 12 -> viewAssignedApplications(officerController, applicationController);
                     
-                    // Officer Specific Features (Cases 10-14)
-                    case 10 -> registerForProject(sc, officer, registrationController, projectController);
-                    case 11 -> checkRegistrationStatus(sc, officer, registrationController);
-                    case 12 -> viewProjectDetails(sc, projectController);
-                    case 13 -> processFlatBooking(sc, officerController);
-                    case 14 -> viewAssignedApplications(officerController, applicationController);
-                    
+                    // Account
+                    case 13 -> viewAccountDetails(officer);
+                    case 14 -> AuthUI.changePassword(sc, officer);
                     case 15 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
@@ -95,6 +95,23 @@ public class OfficerUI {
             System.out.println("\nProcessing booking for:");
             System.out.println(selectedApp);
             System.out.println("Required Flat Type: " + selectedApp.getRoomType() + " in Project: " + selectedApp.getProject().getName());
+            
+            // Check flat availability first
+            int availableUnits = selectedApp.getProject().getRemainingUnits(selectedApp.getRoomType());
+            if (availableUnits <= 0) {
+                System.out.println("Error: No available units of type " + selectedApp.getRoomType() + 
+                             " in project " + selectedApp.getProject().getName());
+                return;
+            }
+            
+            // Ask for confirmation instead of re-entering room type
+            System.out.print("Type 'confirm' to proceed with booking or 'back' to cancel: ");
+            String confirmation = Input.getStringInput(sc);
+            
+            if (!confirmation.equalsIgnoreCase("confirm")) {
+                System.out.println("Booking cancelled.");
+                return;
+            }
 
             // Attempt booking
             Receipt receipt = controller.processFlatBooking(selectedApp);
@@ -385,21 +402,112 @@ public class OfficerUI {
             return;
         }
 
-        System.out.println("\nApplications for Your Assigned Projects:");
-        System.out.println("========================================");
+        System.out.println("\nYour Assigned Projects and Applications:");
+        System.out.println("======================================");
 
-        boolean foundAny = false;
+        boolean hasBookableApplications = false;
+
         for (Project project : assignedProjects) {
-            List<BTOApplication> projectApps = appCtrl.listApplicationsForProject(project.getId());
-            if (!projectApps.isEmpty()) {
-                foundAny = true;
-                System.out.println("\n--- Project: " + project.getName() + " (ID: " + project.getId() + ") ---");
-                printApplicationListSimple(projectApps); // Reuse existing helper
+            System.out.println("\n--- Project: " + project.getName() + " (ID: " + project.getId() + ") ---");
+            
+            // Display basic project information
+            System.out.println("Neighborhood: " + project.getNeighbourhood());
+            System.out.println("Application Period: " + project.getOpenDate() + " to " + project.getCloseDate());
+            
+            // Display flat types available
+            System.out.println("Flat Types:");
+            for (String flatType : project.getFlatTypes()) {
+                int totalUnits = project.getTotalUnits(flatType);
+                int remainingUnits = project.getRemainingUnits(flatType);
+                double price = project.getFlatTypePrice(flatType);
+                System.out.printf("  %s: %d/%d units available (%.2f SGD)\n", 
+                                  flatType, remainingUnits, totalUnits, price);
             }
+            
+            // Show applications for this project
+            List<BTOApplication> projectApps = appCtrl.listApplicationsForProject(project.getId());
+            
+            // Count bookable applications
+            List<BTOApplication> bookableApps = projectApps.stream()
+                .filter(app -> officerCtrl.isApplicationBookable(app))
+                .collect(Collectors.toList());
+                
+            int bookableCount = bookableApps.size();
+            
+            if (!projectApps.isEmpty()) {
+                System.out.println("\nApplications: " + projectApps.size() + " total, " + 
+                                  bookableCount + " waiting for booking");
+                
+                if (bookableCount > 0) {
+                    hasBookableApplications = true;
+                    System.out.println("\nApplications Ready for Booking:");
+                    printApplicationListSimple(bookableApps);
+                }
+            } else {
+                System.out.println("\nNo applications for this project.");
+            }
+            
+            System.out.println("-".repeat(75));
         }
 
-        if (!foundAny) {
-            System.out.println("No applications found for the projects you are assigned to.");
+        if (hasBookableApplications) {
+            try {
+                System.out.print("\nEnter Application ID to process booking (or type 'back' to return): ");
+                String input = new Scanner(System.in).nextLine().trim();
+                
+                if (input.equalsIgnoreCase("back")) {
+                    return;
+                }
+                
+                try {
+                    int appId = Integer.parseInt(input);
+                    processFlatBookingById(appId, officerCtrl);
+                } catch (NumberFormatException e) {
+                    System.out.println("Please enter a valid application ID number.");
+                }
+            } catch (Input.InputExitException e) {
+                System.out.println("Operation cancelled.");
+            }
+        }
+    }
+    
+    private static void processFlatBookingById(int appId, OfficerController controller) {
+        Optional<BTOApplication> selectedAppOpt = controller.findBookableApplicationById(appId);
+        if (selectedAppOpt.isEmpty()) {
+            System.out.println("Invalid Application ID or application not eligible for booking.");
+            return;
+        }
+        
+        BTOApplication selectedApp = selectedAppOpt.get();
+        System.out.println("\nProcessing booking for:");
+        System.out.println(selectedApp);
+        System.out.println("Required Flat Type: " + selectedApp.getRoomType() + " in Project: " + selectedApp.getProject().getName());
+        
+        // Check flat availability first
+        int availableUnits = selectedApp.getProject().getRemainingUnits(selectedApp.getRoomType());
+        if (availableUnits <= 0) {
+            System.out.println("Error: No available units of type " + selectedApp.getRoomType() + 
+                         " in project " + selectedApp.getProject().getName());
+            return;
+        }
+        
+        // Ask for confirmation instead of re-entering room type
+        System.out.print("Type 'confirm' to proceed with booking or 'back' to cancel: ");
+        String confirmation = new Scanner(System.in).nextLine().trim();
+        
+        if (!confirmation.equalsIgnoreCase("confirm")) {
+            System.out.println("Booking cancelled.");
+            return;
+        }
+
+        // Attempt booking
+        Receipt receipt = controller.processFlatBooking(selectedApp);
+
+        if (receipt != null) {
+            System.out.println("\nBooking Successful! Generating Receipt...");
+            System.out.println(receipt.getReceiptDetails());
+        } else {
+            System.out.println("Booking failed. Please check availability or application status.");
         }
     }
 

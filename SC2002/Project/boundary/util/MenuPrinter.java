@@ -138,7 +138,7 @@ public final class MenuPrinter {
                 if (!projectEligibility.equals("Eligible")) {
                     eligDisplay = projectEligibility; // Project-level ineligibility (registered, not open, etc.)
                 } else {
-                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Age/Marital Status";
+                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Not Eligible";
                 }
 
                 if (first) {
@@ -215,13 +215,13 @@ public final class MenuPrinter {
      * Based on ProjectOLD HDB_Manager.viewAllProjects format.
      */
     public static void printProjectTableDetailed(List<Project> projects) {
-        // Header similar to ProjectOLD
-        String headerFormat = "%-5s %-25s %-15s %-25s %-15s %-12s %-12s %-10s %-15s %-15s%n";
-        int detailedWidth = 5 + 25 + 15 + 25 + 15 + 12 + 12 + 10 + 15 + 15 + 9; // Sum of column widths + spaces
+        // Use standard column width (Menu.COL_NAME) for project name
+        String headerFormat = "%-5s %-" + Menu.COL_NAME + "s %-15s %-25s %-15s %-12s %-12s %-10s %-15s%n";
+        int detailedWidth = 5 + Menu.COL_NAME + 15 + 25 + 15 + 12 + 12 + 10 + 15 + 8; // Sum of column widths + spaces
 
         System.out.printf(headerFormat,
                 "ID", "Project Name", "Neighbourhood", "Flat Types (Units/Price)", "Manager",
-                "Open Date", "Close Date", "Visible", "Officer Slots", "Assigned Officers");
+                "Open Date", "Close Date", "Visible", "Officers (Avail/Total)");
         System.out.println("─".repeat(detailedWidth));
 
         for (Project p : projects) {
@@ -231,38 +231,52 @@ public final class MenuPrinter {
                 int units = p.getTotalUnits().get(i);
                 double price = p.getPrices().get(i);
                 String flatInfo = String.format("%s (%d / $%.2f)", flatType, units, price);
+                
+                // Truncate long project names
+                String projectName = Input.truncateText(p.getName(), Menu.COL_NAME - 2);
+                
+                // Display assigned/total officers in format: X/Y
+                String officerInfo = String.format("%d/%d", 
+                    p.getAssignedOfficers().size(),
+                    p.getOfficerSlotLimit());
 
                 if (firstFlat) {
                     System.out.printf(headerFormat,
                             p.getId(),
-                            p.getName(),
+                            projectName,
                             p.getNeighbourhood(),
                             flatInfo,
-                            (p.getManager() != null ? p.getManager().getFirstName() : "N/A"), // Assuming manager has getName()
+                            (p.getManager() != null ? p.getManager().getFirstName() : "N/A"),
                             p.getOpenDate(),
                             p.getCloseDate(),
                             p.getVisibility(),
-                            p.getOfficerSlotLimit(),
-                            p.getAssignedOfficers().size() // Use .size() on the list
+                            officerInfo
                     );
                     firstFlat = false;
                 } else {
                     // Print subsequent flat types aligned under the flat type column
-                    System.out.printf("%-" + (5 + 25 + 15 + 1) + "s%s%n", "", flatInfo); // Adjust spacing
+                    System.out.printf("%-" + (5 + Menu.COL_NAME + 15 + 1) + "s%s%n", "", flatInfo); // Adjust spacing for new width
                 }
             }
              if (p.getFlatTypes().isEmpty()) { // Handle projects with no flats yet
+                 // Truncate long project names
+                 String projectName = Input.truncateText(p.getName(), Menu.COL_NAME - 2);
+                 
+                 // Display assigned/total officers in format: X/Y
+                 String officerInfo = String.format("%d/%d", 
+                     p.getAssignedOfficers().size(),
+                     p.getOfficerSlotLimit());
+                 
                  System.out.printf(headerFormat,
                          p.getId(),
-                         p.getName(),
+                         projectName,
                          p.getNeighbourhood(),
                          "(No flat types defined)",
                          (p.getManager() != null ? p.getManager().getFirstName() : "N/A"),
                          p.getOpenDate(),
                          p.getCloseDate(),
                          p.getVisibility(),
-                         p.getOfficerSlotLimit(),
-                         p.getAssignedOfficers().size() // Use .size() on the list
+                         officerInfo
                  );
              }
             System.out.println(); // Add a blank line between projects

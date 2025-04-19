@@ -35,57 +35,68 @@ public final class Menu {
     );
 
     private static final List<String> APPLICANT_MENU = Arrays.asList(
-        "Please choose an option:",
-        "1. Apply for a project",
+        "==== BTO Application ====",
+        "1. Apply for project",
         "2. View active application",
-        "3. View only eligible listings",
+        "3. View eligible listings",
         "4. View all listings",
         "5. Withdraw application",
+        "==== Enquiries ====",
         "6. Manage enquiries",
+        "==== Account ====",
         "7. View account details",
-        "8. Change account password",
-        "9. Log out and return to main program",
-        "Enter your choice: "
+        "8. Change password",
+        "9. Log out",
+        "Enter choice: "
     );
 
     private static final List<String> OFFICER_MENU = Arrays.asList(
-        "Please choose an option:",
-        "1. Apply for a project",
+        "==== BTO Application ====",
+        "1. Apply for project",
         "2. View active application",
-        "3. View only eligible listings",
+        "3. View eligible listings",
         "4. View all listings",
         "5. Withdraw application",
+        "==== Enquiries ====",
         "6. Manage user enquiries",
         "7. Manage own enquiries",
-        "8. View account details",
-        "9. Change account password",
-        "10. Register to be a HDB officer of a project",
-        "11. Check status of registration to be an officer for a project",
-        "12. View project details",
-        "13. Process flat booking",
-        "14. View applications for assigned project",
-        "15. Log out and return to main program",
-        "Enter your choice: "
+        "==== Officer Functions ====",
+        "8. Register for project",
+        "9. Manage officer registration",
+        "10. View project details",
+        "11. Process flat booking",
+        "12. View assigned project applications",
+        "==== Account ====",
+        "13. View account details",
+        "14. Change password",
+        "15. Log out",
+        "Enter choice: "
     );
 
     private static final List<String> MANAGER_MENU = Arrays.asList(
-        "1. Create a Project",
-        "2. Edit a Project",
-        "3. Delete a Project",
-        "4. View All Projects",
-        "5. View My Projects",
-        "6. View Officer Registrations",
-        "7. Handle Officer Registration",
-        "8. Handle Officer Registration Withdrawal Requests",
-        "9. Handle BTO Applications",
-        "10. Handle BTO Application Withdrawal Requests",
-        "11. Generate Applicant Report",
-        "12. View All Enquiries",
-        "13. Handle Project Enquiries",
-        "14. View account details",
-        "15. Change account password",
-        "16. Log out",
-        "Enter your choice: "
+        "==== Project Management ====",
+        "1. Create project",
+        "2. Edit project",
+        "3. Delete project",
+        "4. View all projects",
+        "5. View my projects",
+        "==== Officer Management ====",
+        "6. View officer registrations",
+        "7. Handle officer registration",
+        "8. Handle officer withdrawal requests",
+        "9. View assigned officers",
+        "==== Application Management ====",
+        "10. Handle BTO applications",
+        "11. Handle withdrawal requests",
+        "12. Generate applicant report",
+        "==== Enquiries ====",
+        "13. View all enquiries",
+        "14. Handle project enquiries",
+        "==== Account ====",
+        "15. View account details",
+        "16. Change password",
+        "17. Log out",
+        "Enter choice: "
     );
 
     private static final List<String> ENQUIRY_MENU = Arrays.asList(
@@ -94,8 +105,7 @@ public final class Menu {
         "2. Make Project-related enquiry",
         "3. Edit enquiry",
         "4. View all enquiry",
-        "5. Delete enquiry",
-        "6. Return to User menu",
+        "5. Return to User menu",
         "Enter your choice: "
     );
 

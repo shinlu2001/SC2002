@@ -40,7 +40,46 @@ public class OfficerController {
             .findFirst();
     }
 
+    /**
+     * Determines if an application is ready for booking
+     * @param app The application to check
+     * @return true if the application can be booked
+     */
+    public boolean isApplicationBookable(BTOApplication app) {
+        // An application is bookable if:
+        // 1. It has been approved (SUCCESS status)
+        // 2. It hasn't been booked yet
+        // 3. It belongs to a project this officer is assigned to
+        
+        if (app == null || app.getStatus() != ApplicationStatus.SUCCESS) {
+            return false;
+        }
+        
+        // Check if the officer is assigned to this project
+        boolean isAssignedToProject = getAssignedProjects().contains(app.getProject());
+        if (!isAssignedToProject) {
+            return false;
+        }
+        
+        // Check if there are available flats of the requested type
+        Optional<Flat> availableFlat = dataStore.getFlats().stream()
+            .filter(f -> f.getProject().equals(app.getProject()))
+            .filter(f -> f.getFlatType().equalsIgnoreCase(app.getRoomType()))
+            .filter(f -> !f.isBooked())
+            .findFirst();
+            
+        return availableFlat.isPresent();
+    }
+
     public Receipt processFlatBooking(BTOApplication app) {
+        // First check if there are flats available for this room type
+        int availableUnits = app.getProject().getRemainingUnits(app.getRoomType());
+        if (availableUnits <= 0) {
+            System.err.println("No available units of type " + app.getRoomType() + 
+                             " in project " + app.getProject().getName());
+            return null;
+        }
+        
         Optional<Flat> opt = dataStore.getFlats().stream()
             .filter(f -> f.getProject().equals(app.getProject()))
             .filter(f -> f.getFlatType().equalsIgnoreCase(app.getRoomType()))
