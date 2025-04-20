@@ -37,24 +37,21 @@ public class OfficerUI {
                     case 4 -> ApplicantUI.viewAllListings(projectController, applicantController, officer);
                     case 5 -> ApplicantUI.withdrawApplication(sc, officer, applicantController);
                     
-                    // Enquiry Management (Cases 6-7)
+                    // Enquiry Management
                     case 6 -> EnquiryUI.viewEnquiriesStaff(sc, enquiryController, officerController);
                     case 7 -> StaffUI.manageUserEnquiries(sc, officer, enquiryController, officerController);
                     case 8 -> EnquiryUI.start(sc, officer); // Manage own enquiries via Applicant role
                     
-                    case 9 -> viewAccountDetails(officer);
-                    case 10 -> AuthUI.changePassword(sc, officer); // Delegate
-                    
-                    // Officer Specific Features (Cases 10-14)
-                    case 11 -> registerForProject(sc, officer, registrationController, projectController);
-                    case 12 -> checkRegistrationStatus(sc, officer, registrationController);
-                    case 13 -> viewProjectDetails(sc, projectController);
-                    case 14 -> processFlatBooking(sc, officerController);
-                    case 15 -> viewAssignedApplications(officerController, applicationController);
+                    // Officer Specific Features
+                    case 9 -> registerForProject(sc, officer, registrationController, projectController);
+                    case 10 -> checkRegistrationStatus(sc, officer, registrationController);
+                    case 11 -> viewProjectDetails(sc, projectController);
+                    case 12 -> processFlatBooking(sc, officerController);
+                    case 13 -> viewAssignedApplications(officerController, applicationController);
                     
                     // Account
-                    case 16 -> viewAccountDetails(officer);
-                    case 17 -> AuthUI.changePassword(sc, officer);
+                    case 14 -> viewAccountDetails(officer);
+                    case 15 -> AuthUI.changePassword(sc, officer);
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }

@@ -12,9 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class ManagerUI {
     private final HDB_Manager manager; // Renamed from 'user' since we're accessing it
@@ -49,14 +47,16 @@ public class ManagerUI {
                     case 8 -> handleOfficerWithdrawal(sc, managerController);
                     case 9 -> viewAssignedOfficers(managerController);
                     
-                    // BTO Application Management (Cases 9-10)
+                    // BTO Application Management
                     case 10 -> handleBTOApplications(sc, managerController);
                     case 11 -> handleBTOWithdrawals(sc, managerController);
+                    case 12 -> ReportUI.start(sc, user); // Delegate to ReportUI
                     
-                    // Report & Enquiry (Cases 11-13) - TODO: Implement later
-                    case 12 -> ReportUI.start(sc, user); // Delegate
-                    case 13 -> EnquiryUI.viewEnquiriesStaff(sc, enquiryController, managerController); // enquiry ui and enquiry controller integration
+                    // Enquiry Management
+                    case 13 -> EnquiryUI.viewEnquiriesStaff(sc, enquiryController, managerController);
                     case 14 -> StaffUI.manageUserEnquiries(sc, user, enquiryController, managerController);
+                    
+                    // Account
                     case 15 -> viewAccountDetails(user);
                     case 16 -> AuthUI.changePassword(sc, user);
                     case 0 -> exit = true;
