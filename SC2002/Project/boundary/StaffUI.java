@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import SC2002.Project.boundary.util.Input;
 import SC2002.Project.control.EnquiryController;
-import SC2002.Project.control.StaffControllerInterface;
 import SC2002.Project.entity.*;
 
 public class StaffUI {

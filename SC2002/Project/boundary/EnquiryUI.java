@@ -6,7 +6,6 @@ import SC2002.Project.boundary.util.MenuPrinter;
 import SC2002.Project.control.ApplicantController;
 import SC2002.Project.control.EnquiryController;
 import SC2002.Project.control.ProjectController;
-import SC2002.Project.control.StaffControllerInterface;
 import SC2002.Project.entity.*;
 
 import java.util.ArrayList;
