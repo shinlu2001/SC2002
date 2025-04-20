@@ -81,7 +81,7 @@ public class EnquiryUI { // this is more for applicants
             System.out.print("Enter your enquiry: ");
             String content = Input.getStringInput(sc);
             
-            if (enquiryController.createProjectEnquiry(user, selectedProject, content, flatType, applicantController)) {
+            if (enquiryController.createProjectEnquiry(user, selectedProject, content, flatType, applicantController, projectController)) {
                 System.out.println("Project enquiry submitted successfully!");
             } else {
                 System.out.println("Failed to submit enquiry. Please try again.");
@@ -185,7 +185,7 @@ public class EnquiryUI { // this is more for applicants
         for (Enquiry enquiry : userEnquiries) {
             System.out.println("\nEnquiry ID: " + enquiry.getId());
             System.out.println("Content: " + enquiry.getContent());
-            System.out.println("Status: " + (enquiry.getResponse() != null ? "Answered" : "Pending"));
+            System.out.println("Status: " + (!enquiry.getResponse().isBlank() ? "Answered" : "Pending"));
             System.out.println("-------------------");
         }
 
@@ -193,7 +193,7 @@ public class EnquiryUI { // this is more for applicants
             System.out.print("\nEnter Enquiry ID to delete: ");
             int enquiryId = Input.getIntInput(sc);
             
-            if (enquiryController.deleteEnquiry(user, enquiryId, applicantController)) {
+            if (enquiryController.deleteEnquiry(user, enquiryId, applicantController, projectController)) {
                 System.out.println("Enquiry deleted successfully!");
             } else {
                 System.out.println("Failed to delete enquiry. Please try again.");

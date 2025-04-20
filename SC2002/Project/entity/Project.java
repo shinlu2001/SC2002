@@ -79,7 +79,7 @@ public class Project {
     public int getOfficerSlotLimit() { return officerSlotLimit; }
     public HDB_Manager getManager() { return manager; }
     public List<HDB_Officer> getAssignedOfficers() { return List.copyOf(assignedOfficers); }
-    public List<Enquiry> getEnquiries() { return List.copyOf(enquiries); }
+    public List<Enquiry> getEnquiries() { return enquiries; }
 
     // ─────────── Setters (for controllers) ───────────
 

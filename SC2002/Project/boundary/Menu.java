@@ -106,7 +106,8 @@ public final class Menu {
         "2. Make Project-related enquiry",
         "3. Edit enquiry",
         "4. View all enquiry",
-        "5. Return to User menu",
+        "5. Delete enquiry",
+        "6. Return to User menu",
         "Enter your choice: "
     );
 

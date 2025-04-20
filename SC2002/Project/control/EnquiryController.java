@@ -29,7 +29,7 @@ public class EnquiryController {
         return true;
     }
 
-    public boolean createProjectEnquiry(User user, Project project, String content, String flatType, ApplicantController applicantController) {
+    public boolean createProjectEnquiry(User user, Project project, String content, String flatType, ApplicantController applicantController, ProjectController projectController) {
         if (content == null || content.trim().isEmpty() || project == null) {
             return false;
         }
@@ -44,8 +44,7 @@ public class EnquiryController {
         enquiry.setFlatType(flatType);
         applicantController.addEnquiry(enquiry);
         dataStore.getEnquiries().add(enquiry);
-        
-        project.addEnquiry(enquiry);
+        projectController.addEnquiry(project, enquiry);
         return true;
     }
 
@@ -83,16 +82,17 @@ public class EnquiryController {
         return true;
     }
 
-    public boolean deleteEnquiry(User user, int enquiryId, ApplicantController applicantController) {
+    public boolean deleteEnquiry(User user, int enquiryId, ApplicantController applicantController, ProjectController projectController) {
         Enquiry enquiry = findEnquiryById(enquiryId);
         if (enquiry == null || !enquiry.getCreator().equals(user)) {
             return false;
         }
-        applicantController.deleteEnquiry(enquiry);
-        dataStore.getEnquiries().remove(enquiry);
-        if (enquiry.getProject() != null) {
-            enquiry.getProject().getEnquiries().remove(enquiry);
-        }
+        applicantController.deleteEnquiry(enquiry); // remove from applicant enquiry list
+        dataStore.getEnquiries().remove(enquiry); // remove from outer system
+        // if (enquiry.getProject() != null) {
+        //     enquiry.getProject().getEnquiries().remove(enquiry); 
+        // }
+        projectController.deleteEnquiry(enquiry.getProject(), enquiry); //remove from project enquiry list
         return true;
     }
 
@@ -135,9 +135,8 @@ public class EnquiryController {
                 } else {
                     System.out.println("Error: Officer is not assigned to this project.");
                 }
-            } else {
-                // Officers cannot answer general enquiries
-                System.out.println("Error: Officers cannot answer general enquiries.");
+            } else { // officers are able to respond to general enquiries
+                permitted = true;
             }
         } else {
             // Other user types (e.g., Applicant) cannot respond

@@ -1,6 +1,7 @@
 package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
+import SC2002.Project.entity.Enquiry;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.HDB_Officer;
 import SC2002.Project.entity.Project;
@@ -194,6 +195,22 @@ public class ProjectController {
             return true;
         }
         return false;
+    }
+
+    // enquiry matters
+    public List<Enquiry> getEnquiries(int projectId) {
+        Project project = findById(projectId);
+        return project.getEnquiries();
+    }
+
+    public void addEnquiry(Project project, Enquiry en) {
+        // Project project = findById(projectId);
+        project.getEnquiries().add(en);
+    }
+
+    public void deleteEnquiry(Project project, Enquiry en) {
+        // Project project = findById(projectId);
+        project.getEnquiries().remove(en);
     }
 
     /* ------------------------------------------------------------------
