@@ -63,7 +63,7 @@ public final class Menu {
         "8. Manage own enquiries (as an APPLICANT)",
         "==== Officer Functions ====",
         "9. Register for project",
-        "10. Manage officer registration",
+        "10. Withdraw officer registration",
         "11. View project details",
         "12. Process flat booking",
         "13. View assigned project applications",

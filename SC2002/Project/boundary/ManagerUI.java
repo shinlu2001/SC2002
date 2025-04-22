@@ -89,7 +89,7 @@ public class ManagerUI {
             boolean addMoreFlats = true;
             while (addMoreFlats) {
                 System.out.print("Enter Flat Type (e.g., 2-ROOM, 3-ROOM): ");
-                String flatType = Input.getStringInput(sc);
+                String flatType = Input.getStringInput(sc).toUpperCase();
                 int units = Input.getIntInput(sc, "Enter number of " + flatType + " units: ", 0, Integer.MAX_VALUE);
                 double price = Input.getDoubleInput(sc, "Enter price for " + flatType + ": ", 0.0);
 
@@ -245,7 +245,7 @@ public class ManagerUI {
         System.out.println("--- Edit Flat Units ---");
         MenuPrinter.printFlatTypesMenu(project);
         System.out.print("Select flat type to edit units (by name): ");
-        String flatType = Input.getStringInput(sc);
+        String flatType = Input.getStringInput(sc).toUpperCase();
 
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Flat type '" + flatType + "' not found in this project.");
@@ -263,7 +263,7 @@ public class ManagerUI {
     private static void addFlatType(Scanner sc, ManagerController controller, Project project) throws Input.InputExitException {
         System.out.println("--- Add New Flat Type ---");
         System.out.print("Enter new Flat Type name: ");
-        String flatType = Input.getStringInput(sc);
+        String flatType = Input.getStringInput(sc).toUpperCase();
 
         if (project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Flat type '" + flatType + "' already exists.");
@@ -288,7 +288,7 @@ public class ManagerUI {
         }
         MenuPrinter.printFlatTypesMenu(project);
         System.out.print("Select flat type to remove (by name): ");
-        String flatType = Input.getStringInput(sc);
+        String flatType = Input.getStringInput(sc).toUpperCase();
 
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Flat type '" + flatType + "' not found.");
@@ -311,7 +311,7 @@ public class ManagerUI {
         System.out.println("--- Edit Flat Price ---");
         MenuPrinter.printFlatTypesMenu(project);
         System.out.print("Select flat type to edit price (by name): ");
-        String flatType = Input.getStringInput(sc);
+        String flatType = Input.getStringInput(sc).toUpperCase();
 
         if (!project.getFlatTypes().contains(flatType)) {
             System.out.println("Error: Flat type '" + flatType + "' not found.");
@@ -392,7 +392,9 @@ public class ManagerUI {
 
     private static void handleBTOApplications(Scanner sc, ManagerController controller) {
         List<BTOApplication> pendingApps = controller.getPendingApplications();
-        if (pendingApps.isEmpty()) {
+        List<BTOApplication> applicationWithdrawalRequests = controller.getWithdrawalRequests();
+
+        if (pendingApps.isEmpty() || !applicationWithdrawalRequests.isEmpty()) {
             System.out.println("No pending BTO applications to handle.");
             return;
         }
@@ -444,15 +446,15 @@ public class ManagerUI {
     }
 
     private static void handleBTOWithdrawals(Scanner sc, ManagerController controller) {
-        List<BTOApplication> withdrawalRequests = controller.getWithdrawalRequests();
-        if (withdrawalRequests.isEmpty()) {
+        List<BTOApplication> applicationWithdrawalRequests = controller.getWithdrawalRequests();
+        if (applicationWithdrawalRequests.isEmpty()) {
             System.out.println("No pending BTO withdrawal requests.");
             return;
         }
 
         System.out.println("\nPending BTO Withdrawal Requests:");
         System.out.println("-------------------------------");
-        printApplicationList(withdrawalRequests);
+        printApplicationList(applicationWithdrawalRequests);
 
         try {
             System.out.print("Enter Application ID to confirm/reject withdrawal (or type 'back' to return): ");
@@ -552,7 +554,8 @@ public class ManagerUI {
     private static void viewOfficerRegistrations(ManagerController controller) {
         System.out.println("\n=== Pending Officer Registration Requests ===");
         List<Registration> pendingRegs = controller.getPendingOfficerRegistrations();
-        
+        List<Registration> officerWithdrawalRequests = controller.getOfficerWithdrawalRequests();
+
         if (pendingRegs.isEmpty()) {
             System.out.println("No pending officer registration requests for your projects.");
             return;
@@ -570,13 +573,22 @@ public class ManagerUI {
             
             // Truncate project name to maintain column alignment using Menu.COL_NAME
             String projectName = Input.truncateText(project.getName(), Menu.COL_NAME - 2);
-            
-            System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n",
+
+            if (officerWithdrawalRequests.isEmpty()){
+                System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-15s %-20s%n",
+                            reg.getId(),
+                            officer.getFirstName() + " " + officer.getLastName(),
+                            projectName,
+                            reg.getStatus(),
+                            project.getOpenDate() + " to " + project.getCloseDate());
+            }
+            else{
+                System.out.printf("%-8d %-20s %-" + Menu.COL_NAME + "s %-20s%n",
                           reg.getId(),
                           officer.getFirstName() + " " + officer.getLastName(),
                           projectName,
-                          reg.getStatus(),
-                          project.getOpenDate() + " to " + project.getCloseDate());
+                          reg.getStatus() + " (Withdrawal Req)");
+            }
         }
         System.out.println("-".repeat(105));
     }
@@ -586,8 +598,9 @@ public class ManagerUI {
      */
     private static void handleOfficerRegistration(Scanner sc, ManagerController controller) {
         List<Registration> pendingRegs = controller.getPendingOfficerRegistrations();
-        
-        if (pendingRegs.isEmpty()) {
+        List<Registration> officerWithdrawalRequests = controller.getOfficerWithdrawalRequests();
+
+        if (pendingRegs.isEmpty() || !officerWithdrawalRequests.isEmpty()) {
             System.out.println("No pending officer registration requests to handle.");
             return;
         }
@@ -674,9 +687,9 @@ public class ManagerUI {
      * Allows managers to review and approve/reject withdrawal requests.
      */
     private static void handleOfficerWithdrawal(Scanner sc, ManagerController controller) {
-        List<Registration> withdrawalRequests = controller.getOfficerWithdrawalRequests();
+        List<Registration> officerWithdrawalRequests = controller.getOfficerWithdrawalRequests();
         
-        if (withdrawalRequests.isEmpty()) {
+        if (officerWithdrawalRequests.isEmpty()) {
             System.out.println("No pending officer registration withdrawal requests to handle.");
             return;
         }
@@ -687,7 +700,7 @@ public class ManagerUI {
                           "Reg ID", "Officer Name", "Project", "Status");
         System.out.println("-".repeat(90));
         
-        for (Registration reg : withdrawalRequests) {
+        for (Registration reg : officerWithdrawalRequests) {
             HDB_Officer officer = reg.getOfficer();
             Project project = reg.getProject();
             
@@ -713,7 +726,7 @@ public class ManagerUI {
             try {
                 int regId = Integer.parseInt(input);
                 
-                Registration selectedReg = withdrawalRequests.stream()
+                Registration selectedReg = officerWithdrawalRequests.stream()
                     .filter(reg -> reg.getId() == regId)
                     .findFirst()
                     .orElse(null);

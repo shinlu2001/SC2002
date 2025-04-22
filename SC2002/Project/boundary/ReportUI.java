@@ -104,14 +104,27 @@ public class ReportUI {
         
         for (BTOApplication app : applications) {
             Applicant applicant = (Applicant) app.getApplicant();
-            System.out.printf("%-5d %-20s %-5d %-10s %-15s %-15s %-10s%n",
+
+            if (!app.isWithdrawalRequested()){
+                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-15s %-10s%n",
+                    app.getId(),
+                    applicant.getFirstName() + " " + applicant.getLastName(),
+                    applicant.getAge(),
+                    applicant.getMaritalStatus(),
+                    app.getRoomType(),
+                    Input.truncateText(app.getProject().getName(), 15),
+                    app.getStatus());
+            }
+            else{
+                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-15s %-10s%n",
                 app.getId(),
                 applicant.getFirstName() + " " + applicant.getLastName(),
                 applicant.getAge(),
                 applicant.getMaritalStatus(),
                 app.getRoomType(),
                 Input.truncateText(app.getProject().getName(), 15),
-                app.getStatus());
+                app.getStatus()+ " (Withdrawal Req)");
+            }
         }
         System.out.println("-----------------------------------------------------------------------------------");
     }

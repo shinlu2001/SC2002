@@ -218,11 +218,11 @@ public final class MenuPrinter {
      */
     public static void printProjectTableDetailed(List<Project> projects) {
         // Use standard column width (Menu.COL_NAME) for project name
-        String headerFormat = "%-5s %-" + Menu.COL_NAME + "s %-15s %-25s %-15s %-12s %-12s %-10s %-15s%n";
-        int detailedWidth = 5 + Menu.COL_NAME + 15 + 25 + 15 + 12 + 12 + 10 + 15 + 8; // Sum of column widths + spaces
+        String headerFormat = "%-5s %-" + Menu.COL_NAME + "s %-15s %-30s %-15s %-12s %-12s %-10s %-15s%n";
+        int detailedWidth = 15 + Menu.COL_NAME + 15 + 30 + 15 + 12 + 12 + 10 + 15 + 8; // Sum of column widths + spaces
 
         System.out.printf(headerFormat,
-                "ID", "Project Name", "Neighbourhood", "Flat Types (Units/Price)", "Manager",
+                "ID", "Project Name", "Neighbourhood", "Flat Types (Units - Price)", "Manager",
                 "Open Date", "Close Date", "Visible", "Officers (Avail/Total)");
         System.out.println("─".repeat(detailedWidth));
 
@@ -230,9 +230,10 @@ public final class MenuPrinter {
             boolean firstFlat = true;
             for (int i = 0; i < p.getFlatTypes().size(); i++) {
                 String flatType = p.getFlatTypes().get(i);
-                int units = p.getTotalUnits().get(i);
+                int totalunits = p.getTotalUnits().get(i);
+                int occupiedUnits = totalunits - p.getAvailableUnits().get(i);
                 double price = p.getPrices().get(i);
-                String flatInfo = String.format("%s (%d / $%.2f)", flatType, units, price);
+                String flatInfo = String.format("%s (%d/%d - $%.2f)", flatType, occupiedUnits, totalunits, price);
                 
                 // Truncate long project names
                 String projectName = Input.truncateText(p.getName(), Menu.COL_NAME - 2);
