@@ -400,10 +400,12 @@ public class ManagerUI {
         System.out.println("\nPending BTO Applications:");
         System.out.println("-------------------------");
         printApplicationList(pendingApps);
+        
 
         try {
             System.out.print("Enter Application ID to approve/reject (or type 'back' to return): ");
-            String input = sc.nextLine().trim();
+
+            String input = Input.getStringInput(sc);
             
             if (input.equalsIgnoreCase("back")) {
                 return;
@@ -419,7 +421,8 @@ public class ManagerUI {
                 }
                 
                 System.out.println("\nSelected Application:");
-                System.out.println(selectedApp);
+                // view applications in full
+                System.out.println(selectedApp.toString());
                 System.out.print("Approve or Reject? (approve/reject): ");
                 String decision = Input.getStringInput(sc).toLowerCase();
     

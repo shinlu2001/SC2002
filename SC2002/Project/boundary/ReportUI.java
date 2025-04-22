@@ -110,7 +110,7 @@ public class ReportUI {
                 applicant.getAge(),
                 applicant.getMaritalStatus(),
                 app.getRoomType(),
-                app.getProject().getName(),
+                Input.truncateText(app.getProject().getName(), 15),
                 app.getStatus());
         }
         System.out.println("-----------------------------------------------------------------------------------");

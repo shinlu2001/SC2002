@@ -4,6 +4,7 @@ package SC2002.Project.entity;
 import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.util.IdGenerator;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents a Build‑To‑Order (BTO) application submitted by an Applicant.
@@ -163,9 +164,12 @@ public class BTOApplication {
 
     @Override
     public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");    
         return String.format(
-            "Application ID: %d | Applicant Name: %s %s | Project Name: %s | Room: %s | Status: %s%s%s",
+            "Application ID: %d | Submission Date: %s | Last Update: %s | Applicant Name: %s %s | Project Name: %s | Room: %s | Status: %s%s%s",
             id,
+            submissionDate.format(formatter),
+            lastUpdateDate.format(formatter),
             applicant.getFirstName(),
             applicant.getLastName(),
             project.getName(),

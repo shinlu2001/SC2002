@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class ApplicantController {
     private final DataStore dataStore = DataStore.getInstance();
     private final Applicant applicant;
-    private final RegistrationController registrationController = new RegistrationController();
 
     public ApplicantController(Applicant applicant) {
         this.applicant = applicant;

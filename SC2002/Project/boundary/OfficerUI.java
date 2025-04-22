@@ -47,7 +47,7 @@ public class OfficerUI {
                     case 10 -> checkRegistrationStatus(sc, officer, registrationController);
                     case 11 -> viewProjectDetails(sc, projectController);
                     case 12 -> processFlatBooking(sc, officerController);
-                    case 13 -> viewAssignedApplications(officerController, applicationController);
+                    case 13 -> viewAssignedApplications(sc, officerController, applicationController);
                     
                     // Account
                     case 14 -> viewAccountDetails(officer);
@@ -321,7 +321,7 @@ public class OfficerUI {
         }
     }
 
-    private static void viewAssignedApplications(OfficerController officerCtrl, ApplicationController appCtrl) {
+    private static void viewAssignedApplications(Scanner sc, OfficerController officerCtrl, ApplicationController appCtrl) {
         List<Project> assignedProjects = officerCtrl.getAssignedProjects();
 
         if (assignedProjects.isEmpty()) {
@@ -380,7 +380,7 @@ public class OfficerUI {
         if (hasBookableApplications) {
             try {
                 System.out.print("\nEnter Application ID to process booking (or type 'back' to return): ");
-                String input = new Scanner(System.in).nextLine().trim();
+                String input = Input.getStringInput(sc);
                 
                 if (input.equalsIgnoreCase("back")) {
                     return;
@@ -450,7 +450,7 @@ public class OfficerUI {
             System.out.printf("%-10d %-20s %-15s %-15s %-10s%n",
                               app.getId(),
                               applicant.getFirstName() + " " + applicant.getLastName(),
-                              app.getProject().getName(),
+                              Input.truncateText(app.getProject().getName(), 20),
                               app.getRoomType(),
                               app.getStatus());
         }

@@ -1,7 +1,6 @@
 package SC2002.Project.control;
 
 import SC2002.Project.boundary.StaffControllerInterface;
-import SC2002.Project.control.persistence.DataStore;
 import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.Enquiry;
 import SC2002.Project.entity.HDB_Manager;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
  * handling withdrawals, managing visibility of managed projects, and handling officer registrations.
  */
 public class ManagerController implements StaffControllerInterface {
-    private final DataStore dataStore = DataStore.getInstance();
     private final ApplicationController appController = new ApplicationController();
     private final ProjectController projectController = new ProjectController();
     public final RegistrationController registrationController = new RegistrationController();
