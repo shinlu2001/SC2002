@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 
 /**
  * Controller for manager-specific operations: approving/rejecting applications,
- * handling withdrawals, managing visibility of managed projects, and handling officer registrations.
+ * handling withdrawals, managing visibility of managed projects, and handling
+ * officer registrations.
  */
 public class ManagerController implements StaffControllerInterface {
     private final ApplicationController appController = new ApplicationController();
@@ -39,9 +40,9 @@ public class ManagerController implements StaffControllerInterface {
      */
     public List<BTOApplication> getPendingApplications() {
         return manager.getManagedProjects().stream()
-            .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
-            .filter(app -> app.getStatus() == ApplicationStatus.PENDING)
-            .collect(Collectors.toList());
+                .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
+                .filter(app -> app.getStatus() == ApplicationStatus.PENDING)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -77,15 +78,18 @@ public class ManagerController implements StaffControllerInterface {
      */
     public List<BTOApplication> getWithdrawalRequests() {
         return manager.getManagedProjects().stream()
-            .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
-            .filter(BTOApplication::isWithdrawalRequested)
-            .collect(Collectors.toList());
+                .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
+                .filter(BTOApplication::isWithdrawalRequested)
+                .collect(Collectors.toList());
     }
 
     public boolean confirmWithdrawal(BTOApplication app) {
         if (app == null || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
+        // This will now call the modified confirmWithdrawalRequest method that allows
+        // approving withdrawals
+        // regardless of application status
         return appController.confirmWithdrawalRequest(app);
     }
 
@@ -100,61 +104,73 @@ public class ManagerController implements StaffControllerInterface {
 
     /** Create a new project */
     public Project createProject(String name, String neighbourhood, List<String> flatTypes,
-                                 List<Integer> totalUnits, List<Double> prices, LocalDate open,
-                                 LocalDate close, boolean visible, int officerSlots) {
+            List<Integer> totalUnits, List<Double> prices, LocalDate open,
+            LocalDate close, boolean visible, int officerSlots) {
         // Delegate creation to ProjectController, passing the current manager
         return projectController.createProject(name, neighbourhood, flatTypes, totalUnits, prices,
-                                               open, close, visible, officerSlots, this.manager);
+                open, close, visible, officerSlots, this.manager);
     }
 
-    /** Edit an existing project - delegates checks and updates to ProjectController */
+    /**
+     * Edit an existing project - delegates checks and updates to ProjectController
+     */
     public boolean renameProject(int projectId, String newName) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.renameProject(projectId, newName);
     }
 
     public boolean changeNeighbourhood(int projectId, String newHood) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.changeNeighbourhood(projectId, newHood);
     }
 
     public boolean updateFlatTypeUnits(int projectId, String flatType, int newUnits) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.updateFlatTypeUnits(projectId, flatType, newUnits);
     }
 
     public boolean addFlatType(int projectId, String flatType, int units, double price) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.addFlatType(projectId, flatType, units, price);
     }
 
     public boolean removeFlatType(int projectId, String flatType) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.removeFlatType(projectId, flatType);
     }
 
     public boolean updateFlatPrice(int projectId, String flatType, double newPrice) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.updateFlatPrice(projectId, flatType, newPrice);
     }
 
     public boolean setOpenDate(int projectId, LocalDate openDate) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.setOpenDate(projectId, openDate);
     }
 
     public boolean setCloseDate(int projectId, LocalDate closeDate) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.setCloseDate(projectId, closeDate);
     }
 
     public boolean setVisibility(int projectId, Visibility state) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.setVisibility(projectId, state);
     }
 
     public boolean setOfficerSlotLimit(int projectId, int newLimit) {
-        if (!isManagerOfProject(projectId)) return false;
+        if (!isManagerOfProject(projectId))
+            return false;
         return projectController.setOfficerSlotLimit(projectId, newLimit);
     }
 
@@ -185,10 +201,37 @@ public class ManagerController implements StaffControllerInterface {
         return manager.getManagedProjects();
     }
 
+    /**
+     * Filter manager's projects by neighbourhood
+     * 
+     * @param neighbourhood The neighbourhood to filter by
+     * @return List of projects in the specified neighbourhood managed by this
+     *         manager
+     */
+    public List<Project> filterProjectsByNeighbourhood(String neighbourhood) {
+        return manager.getManagedProjects().stream()
+                .filter(project -> project.getNeighbourhood().equalsIgnoreCase(neighbourhood))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Filter manager's projects by room type
+     * 
+     * @param roomType The room type to filter by
+     * @return List of projects containing the specified room type managed by this
+     *         manager
+     */
+    public List<Project> filterProjectsByRoomType(String roomType) {
+        return manager.getManagedProjects().stream()
+                .filter(project -> project.getFlatTypes().contains(roomType))
+                .collect(Collectors.toList());
+    }
+
     /** Toggle visibility on/off for a managed project */
     public boolean toggleProjectVisibility(int projectId) {
         Project p = projectController.findById(projectId);
-        if (p == null || !manager.getManagedProjects().contains(p)) return false;
+        if (p == null || !manager.getManagedProjects().contains(p))
+            return false;
         Visibility newState = (p.getVisibility() == Visibility.ON) ? Visibility.OFF : Visibility.ON;
         return projectController.setVisibility(projectId, newState);
     }
@@ -206,19 +249,20 @@ public class ManagerController implements StaffControllerInterface {
      */
     public List<Registration> getPendingOfficerRegistrations() {
         return manager.getManagedProjects().stream()
-            .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
-            .filter(reg -> reg.getStatus() == RegistrationStatus.PENDING)
-            .collect(Collectors.toList());
+                .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
+                .filter(reg -> reg.getStatus() == RegistrationStatus.PENDING)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Finds a PENDING registration by ID, ensuring it's for a project this manager manages.
+     * Finds a PENDING registration by ID, ensuring it's for a project this manager
+     * manages.
      */
     public Registration findManagedPendingRegistrationById(int regId) {
         Registration reg = registrationController.findById(regId);
-        if (reg != null && 
-            reg.getStatus() == RegistrationStatus.PENDING &&
-            manager.getManagedProjects().contains(reg.getProject())) {
+        if (reg != null &&
+                reg.getStatus() == RegistrationStatus.PENDING &&
+                manager.getManagedProjects().contains(reg.getProject())) {
             return reg;
         }
         return null;
@@ -226,31 +270,35 @@ public class ManagerController implements StaffControllerInterface {
 
     /**
      * Approves a pending officer registration.
-     * Delegates checks (slots, overlap) and status change to RegistrationController.
+     * Delegates checks (slots, overlap) and status change to
+     * RegistrationController.
+     * 
      * @param registration The registration to approve.
      * @return true if successfully approved, false otherwise.
      */
     public boolean approveOfficerRegistration(Registration registration) {
-        if (registration == null || 
-            registration.getStatus() != RegistrationStatus.PENDING ||
-            !manager.getManagedProjects().contains(registration.getProject())) {
+        if (registration == null ||
+                registration.getStatus() != RegistrationStatus.PENDING ||
+                !manager.getManagedProjects().contains(registration.getProject())) {
             System.out.println("Error: Registration not found, not pending, or not for a managed project.");
             return false;
         }
-        // Delegate the actual approval logic (including overlap/slot checks) to RegistrationController
+        // Delegate the actual approval logic (including overlap/slot checks) to
+        // RegistrationController
         return registrationController.changeStatus(registration.getId(), RegistrationStatus.APPROVED);
     }
 
     /**
      * Rejects a pending officer registration.
      * Delegates status change to RegistrationController.
+     * 
      * @param registration The registration to reject.
      * @return true if successfully rejected, false otherwise.
      */
     public boolean rejectOfficerRegistration(Registration registration) {
-        if (registration == null || 
-            registration.getStatus() != RegistrationStatus.PENDING ||
-            !manager.getManagedProjects().contains(registration.getProject())) {
+        if (registration == null ||
+                registration.getStatus() != RegistrationStatus.PENDING ||
+                !manager.getManagedProjects().contains(registration.getProject())) {
             System.out.println("Error: Registration not found, not pending, or not for a managed project.");
             return false;
         }
@@ -259,40 +307,43 @@ public class ManagerController implements StaffControllerInterface {
     }
 
     /**
-     * Lists all registrations with withdrawal requests for projects managed by this manager.
+     * Lists all registrations with withdrawal requests for projects managed by this
+     * manager.
      */
     public List<Registration> getOfficerWithdrawalRequests() {
         return manager.getManagedProjects().stream()
-            .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
-            .filter(Registration::isWithdrawalRequested)
-            .collect(Collectors.toList());
+                .flatMap(proj -> registrationController.listForProject(proj.getId()).stream())
+                .filter(Registration::isWithdrawalRequested)
+                .collect(Collectors.toList());
     }
-    
+
     /**
      * Approve a registration withdrawal request.
+     * 
      * @param registration The registration to approve withdrawal for.
      * @return true if successfully withdrawn, false otherwise.
      */
     public boolean approveRegistrationWithdrawal(Registration registration) {
-        if (registration == null || 
-            !registration.isWithdrawalRequested() ||
-            !manager.getManagedProjects().contains(registration.getProject())) {
+        if (registration == null ||
+                !registration.isWithdrawalRequested() ||
+                !manager.getManagedProjects().contains(registration.getProject())) {
             System.out.println("Error: Registration not found, no withdrawal requested, or not for a managed project.");
             return false;
         }
         // Delegate the actual withdrawal logic to RegistrationController
         return registrationController.managerApproveWithdrawal(registration.getId());
     }
-    
+
     /**
      * Reject a registration withdrawal request.
+     * 
      * @param registration The registration to reject withdrawal for.
      * @return true if successfully rejected, false otherwise.
      */
     public boolean rejectRegistrationWithdrawal(Registration registration) {
-        if (registration == null || 
-            !registration.isWithdrawalRequested() ||
-            !manager.getManagedProjects().contains(registration.getProject())) {
+        if (registration == null ||
+                !registration.isWithdrawalRequested() ||
+                !manager.getManagedProjects().contains(registration.getProject())) {
             System.out.println("Error: Registration not found, no withdrawal requested, or not for a managed project.");
             return false;
         }
@@ -301,60 +352,106 @@ public class ManagerController implements StaffControllerInterface {
     }
 
     // ---- Enquiry Management ----
-    
+
     /**
      * Retrieves all enquiries in the system
+     * 
      * @return List of all enquiries
      */
     public List<Enquiry> getAllEnquiries() {
         EnquiryController enquiryController = new EnquiryController();
         return enquiryController.getAllEnquiries();
     }
-    
+
     /**
      * Retrieves all enquiries related to projects managed by this manager
+     * 
      * @return List of enquiries for managed projects
      */
     public List<Enquiry> getManagedProjectEnquiries() {
         EnquiryController enquiryController = new EnquiryController();
         List<Enquiry> managedEnquiries = new ArrayList<>();
-        
+
         // Get enquiries for each managed project
         for (Project project : manager.getManagedProjects()) {
             managedEnquiries.addAll(enquiryController.getProjectEnquiries(project));
         }
-        
+
         return managedEnquiries;
     }
 
     /**
      * Responds to an enquiry with the given message
+     * 
      * @param enquiryId The ID of the enquiry to respond to
-     * @param response The response message
+     * @param response  The response message
      * @return true if the response was successfully added, false otherwise
      */
     public boolean respondToEnquiry(int enquiryId, String response) {
         if (response == null || response.trim().isEmpty()) {
             return false;
         }
-        
+
         EnquiryController enquiryController = new EnquiryController();
         Enquiry enquiry = enquiryController.findEnquiryById(enquiryId);
-        
+
         if (enquiry == null) {
             return false;
         }
-        
+
         // If it's a project-specific enquiry, verify the manager manages this project
         if (enquiry.getProject() != null && !manager.getManagedProjects().contains(enquiry.getProject())) {
             return false;
         }
-        
+
         return enquiryController.respondToEnquiry(manager, enquiryId, response);
     }
 
+    // ---- Flat Booking Finalization ----
+
+    /**
+     * Finalizes a flat booking by decrementing the available unit count in the
+     * project.
+     * This should be called only after an officer has marked a flat as booked.
+     * This method ensures that unit counts are only decremented when a manager
+     * takes action, not when an officer initially books a flat.
+     * 
+     * @param application The application with the booked flat to finalize
+     * @return true if the booking was successfully finalized, false otherwise
+     */
+    public boolean finalizeBooking(BTOApplication application) {
+        if (application == null || application.getStatus() != ApplicationStatus.BOOKED ||
+                !manager.getManagedProjects().contains(application.getProject())) {
+            return false;
+        }
+
+        // The flat is already marked as booked by the officer, but the project's unit
+        // count
+        // has not been decremented yet. We'll do that now.
+        Project project = application.getProject();
+        String roomType = application.getRoomType();
+
+        // Decrement the available units for this room type
+        return project.decrementAvailableUnits(roomType);
+    }
+
+    /**
+     * Lists all applications that have been booked but not yet finalized.
+     * These are applications in BOOKED status where the project's unit count
+     * has not yet been decremented.
+     * 
+     * @return List of applications that need booking finalization
+     */
+    public List<BTOApplication> getPendingBookingFinalizations() {
+        return manager.getManagedProjects().stream()
+                .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
+                .filter(app -> app.getStatus() == ApplicationStatus.BOOKED)
+                .collect(Collectors.toList());
+    }
+
     // …plus stubs for other features: handle officer regs, generate reports…
-    // TODO: Implement methods for enquiry management (view all, handle project-specific)
+    // TODO: Implement methods for enquiry management (view all, handle
+    // project-specific)
     public List<Enquiry> getPendingEnquiries(EnquiryController enquiryCtrl) {
         List<Enquiry> relevantEnquiries = new ArrayList<>();
         for (Project p : manager.getManagedProjects()) {
@@ -362,19 +459,20 @@ public class ManagerController implements StaffControllerInterface {
         }
         // Get general enquiries (not project-specific)
         relevantEnquiries.addAll(enquiryCtrl.getGeneralEnquiries());
-    
-        // Filter out enquiries created by the officer themselves and already answered ones
+
+        // Filter out enquiries created by the officer themselves and already answered
+        // ones
         List<Enquiry> actionableEnquiries = relevantEnquiries.stream()
                 .filter(e -> !e.getCreator().equals(this.manager))
                 .filter(e -> !e.isAnswered())
                 .distinct() // Avoid duplicates if an enquiry somehow appears twice
                 .collect(Collectors.toList());
-    
+
         if (actionableEnquiries.isEmpty()) {
             System.out.println("No pending enquiries found for your assigned projects or general topics.");
-            
+
         }
         return relevantEnquiries;
     }
-    
+
 }

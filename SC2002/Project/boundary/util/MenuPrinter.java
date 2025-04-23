@@ -198,7 +198,7 @@ public final class MenuPrinter {
         int detailedWidth = 15 + Menu.COL_NAME + 15 + 30 + 15 + 12 + 12 + 10 + 15 + 8; // Sum of column widths + spaces
 
         System.out.printf(headerFormat,
-                "ID", "Project Name", "Neighbourhood", "Flat Types (Units - Price)", "Manager",
+                "ID", "Project Name", "Neighbourhood", "Flat Types (Units Used - Price)", "Manager",
                 "Open Date", "Close Date", "Visible", "Officers (Assigned/Total)");
         System.out.println("─".repeat(detailedWidth));
 

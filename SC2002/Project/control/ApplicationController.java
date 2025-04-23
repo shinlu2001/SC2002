@@ -9,16 +9,44 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Centralized controller for creating and querying BTO applications.
+ * Centralized controller for managing the entire BTO application lifecycle.
+ * <p>
+ * This controller handles all operations related to BTO applications:
+ * <ul>
+ * <li>Creating new applications</li>
+ * <li>Managing application status transitions</li>
+ * <li>Processing withdrawal requests</li>
+ * <li>Querying applications by various criteria</li>
+ * <li>Coordinating with project availability</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Fulfills the following requirements:
+ * <ul>
+ * <li>Allows applicants to apply for a single project at a time</li>
+ * <li>Manages application status transitions (pending →
+ * successful/unsuccessful/withdrawn)</li>
+ * <li>Supports manager approval/rejection of applications</li>
+ * <li>Supports flat booking for successful applications</li>
+ * <li>Handles withdrawal requests at various stages</li>
+ * <li>Updates flat availability based on application status changes</li>
+ * </ul>
+ * </p>
  */
 public class ApplicationController {
 
     private final DataStore dataStore = DataStore.getInstance();
 
     /**
-     * Create a new application for an applicant on a project with a flat type.
+     * Creates a new application for an applicant on a project with a specified flat
+     * type.
+     * This fulfills the requirement that applicants can apply for projects,
+     * with appropriate validation of eligibility to be done at the UI level.
      * 
-     * @return the newly created BTOApplication, or null if creation failed.
+     * @param applicant The applicant submitting the application
+     * @param project   The project being applied for
+     * @param flatType  The type of flat being requested (e.g., "2-ROOM")
+     * @return The newly created BTOApplication, or null if creation failed
      */
     public BTOApplication createApplication(Applicant applicant, Project project, String flatType) {
         // Delegate eligibility, uniqueness, etc., to the BTOApplication constructor and
@@ -30,7 +58,10 @@ public class ApplicationController {
     }
 
     /**
-     * Find an application by its unique ID.
+     * Finds an application by its unique ID.
+     * 
+     * @param id The ID of the application to find
+     * @return The application with the specified ID, or null if not found
      */
     public BTOApplication findById(int id) {
         return dataStore.getApplications().stream()
@@ -40,7 +71,12 @@ public class ApplicationController {
     }
 
     /**
-     * List all applications submitted for a given project.
+     * Lists all applications submitted for a given project.
+     * This supports the requirement for managers to view
+     * applications for their managed projects.
+     * 
+     * @param projectId The ID of the project
+     * @return A list of applications for the specified project
      */
     public List<BTOApplication> listApplicationsForProject(int projectId) {
         return dataStore.getApplications().stream()
@@ -49,7 +85,12 @@ public class ApplicationController {
     }
 
     /**
-     * List all applications submitted by a given applicant.
+     * Lists all applications submitted by a given applicant.
+     * This supports the requirement for applicants to view
+     * their application status.
+     * 
+     * @param applicantId The ID of the applicant
+     * @return A list of applications from the specified applicant
      */
     public List<BTOApplication> listApplicationsByApplicant(int applicantId) {
         return dataStore.getApplications().stream()
@@ -58,11 +99,20 @@ public class ApplicationController {
     }
 
     /**
-     * Change the status of an existing application.
-     * Supports transitions: PENDING→SUCCESS, PENDING→REJECTED, SUCCESS→BOOKED,
-     * PENDING→WITHDRAWN, SUCCESS→WITHDRAWN
+     * Changes the status of an existing application.
+     * Supports various status transitions and manages flat availability:
+     * <ul>
+     * <li>PENDING→SUCCESS: Reserves a flat unit (decreases available count)</li>
+     * <li>PENDING→REJECTED: Releases applicant to apply again</li>
+     * <li>SUCCESS→BOOKED: Confirms flat booking</li>
+     * <li>PENDING→WITHDRAWN: Releases applicant to apply again</li>
+     * <li>SUCCESS→WITHDRAWN: Returns flat to available pool (increases available
+     * count)</li>
+     * </ul>
      * 
-     * @return true if the transition was performed; false otherwise.
+     * @param applicationId The ID of the application to update
+     * @param newStatus     The desired new status
+     * @return True if the transition was performed, false otherwise
      */
     public boolean changeStatus(int applicationId, ApplicationStatus newStatus) {
         BTOApplication app = findById(applicationId);
@@ -93,6 +143,7 @@ public class ApplicationController {
                     }
 
                     // Decrement available flats count when approving application
+                    // This is a manager action, so we modify the flat count
                     project.decrementAvailableUnits(flatType);
                     app.approve();
                     System.out.println("Application approved. Reserved 1 unit of " + flatType + " in project "
@@ -111,22 +162,25 @@ public class ApplicationController {
             case BOOKED -> {
                 if (current == ApplicationStatus.SUCCESS) {
                     app.requestBooking();
-                    // Note: We no longer need to decrement units here since they were
-                    // already decremented when the application was approved
+                    // No need to decrement units here - they were already decremented when approved
+                    // by manager
                     return true;
                 }
             }
             case WITHDRAWN -> {
-                // Allow withdrawal from PENDING or SUCCESS states
+                // Allow withdrawal from PENDING, SUCCESS, or BOOKED states
                 if (current == ApplicationStatus.PENDING) {
                     app.confirmWithdrawal();
                     // Clean up applicant reference to allow new applications
                     app.getApplicant().clearCurrentApplicationReference();
                     System.out.println(
                             "Application ID " + app.getId() + " withdrawn. Applicant can now apply for a new project.");
+                    // No change to flat count for pending applications
                     return true;
-                } else if (current == ApplicationStatus.SUCCESS) {
-                    // Increment the available units when an approved application is withdrawn
+                } else if (current == ApplicationStatus.SUCCESS || current == ApplicationStatus.BOOKED) {
+                    // Increment the available units when an approved/booked application is
+                    // withdrawn
+                    // This is a manager action, so we modify the flat count
                     project.incrementAvailableUnits(flatType);
                     app.confirmWithdrawal();
                     app.getApplicant().clearCurrentApplicationReference();
@@ -136,17 +190,19 @@ public class ApplicationController {
                 }
             }
             default -> {
+                // Unsupported transition
             }
         }
-        // Unsupported transition
         return false;
     }
 
     /**
-     * Approve a pending application
+     * Approves a pending application.
+     * Fulfills the requirement for managers to approve applicant applications.
+     * Checks for flat availability before approval.
      * 
      * @param application The application to approve
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean approveApplication(BTOApplication application) {
         if (application == null || application.getStatus() != ApplicationStatus.PENDING) {
@@ -156,10 +212,11 @@ public class ApplicationController {
     }
 
     /**
-     * Reject a pending application
+     * Rejects a pending application.
+     * Fulfills the requirement for managers to reject applicant applications.
      * 
      * @param application The application to reject
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean rejectApplication(BTOApplication application) {
         if (application == null || application.getStatus() != ApplicationStatus.PENDING) {
@@ -169,10 +226,12 @@ public class ApplicationController {
     }
 
     /**
-     * Set a pending or approved application status to withdrawn
+     * Sets a pending or approved application status to withdrawn.
+     * Fulfills the requirement for approving withdrawal requests.
+     * Returns flat units to the available pool if the application was approved.
      * 
      * @param application The application to withdraw
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean withdrawApplication(BTOApplication application) {
         if (application == null) {
@@ -180,7 +239,8 @@ public class ApplicationController {
         }
 
         if (application.getStatus() != ApplicationStatus.PENDING &&
-                application.getStatus() != ApplicationStatus.SUCCESS) {
+                application.getStatus() != ApplicationStatus.SUCCESS &&
+                application.getStatus() != ApplicationStatus.BOOKED) {
             return false;
         }
 
@@ -188,10 +248,11 @@ public class ApplicationController {
     }
 
     /**
-     * Request booking for an approved application
+     * Requests booking for an approved application.
+     * Fulfills the requirement that successful applicants can book a flat.
      * 
      * @param application The application to book
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean bookApplication(BTOApplication application) {
         if (application == null || application.getStatus() != ApplicationStatus.SUCCESS) {
@@ -201,15 +262,21 @@ public class ApplicationController {
     }
 
     /**
-     * Request withdrawal for an application
+     * Requests withdrawal for an application.
+     * Fulfills the requirement that applicants can request withdrawal
+     * before/after flat booking.
+     * Note: This does not change flat counts, it only sets the withdrawal request
+     * flag
+     * which will be processed by a manager.
      * 
      * @param application The application to request withdrawal for
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean requestWithdrawal(BTOApplication application) {
         if (application == null ||
                 (application.getStatus() != ApplicationStatus.PENDING &&
-                        application.getStatus() != ApplicationStatus.SUCCESS)) {
+                        application.getStatus() != ApplicationStatus.SUCCESS &&
+                        application.getStatus() != ApplicationStatus.BOOKED)) {
             return false;
         }
 
@@ -218,29 +285,44 @@ public class ApplicationController {
     }
 
     /**
-     * Confirm a withdrawal request
+     * Confirms a withdrawal request by a manager.
+     * Fulfills the requirement for managers to approve withdrawal requests.
+     * This is when flat counts are updated for successful applications.
      * 
      * @param application The application to confirm withdrawal for
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean confirmWithdrawalRequest(BTOApplication application) {
         if (application == null || !application.isWithdrawalRequested()) {
             return false;
         }
 
-        if (application.getStatus() == ApplicationStatus.BOOKED) {
-            // Cannot withdraw a booked application without officer intervention
-            return false;
+        // Allow managers to approve withdrawals regardless of application status
+        ApplicationStatus current = application.getStatus();
+        Project project = application.getProject();
+        String flatType = application.getRoomType();
+
+        // Only increment available units if the application was successful or booked
+        if (current == ApplicationStatus.SUCCESS || current == ApplicationStatus.BOOKED) {
+            // Return the flat to the available pool
+            project.incrementAvailableUnits(flatType);
         }
 
-        return withdrawApplication(application);
+        // Set to withdrawn status and clean up applicant reference
+        application.confirmWithdrawal();
+        application.getApplicant().clearCurrentApplicationReference();
+
+        System.out.println("Application ID " + application.getId()
+                + " withdrawal approved. Applicant can now apply for a new project.");
+        return true;
     }
 
     /**
-     * Reject a withdrawal request
+     * Rejects a withdrawal request.
+     * Fulfills the requirement for managers to reject withdrawal requests.
      * 
      * @param application The application to reject withdrawal for
-     * @return true if successful, false otherwise
+     * @return True if successful, false otherwise
      */
     public boolean rejectWithdrawalRequest(BTOApplication application) {
         if (application == null || !application.isWithdrawalRequested()) {
@@ -252,7 +334,8 @@ public class ApplicationController {
     }
 
     /**
-     * Get all applications with withdrawal requests
+     * Gets all applications with pending withdrawal requests.
+     * Helps managers view and process withdrawal requests.
      * 
      * @return List of applications with withdrawal requests
      */
@@ -263,7 +346,8 @@ public class ApplicationController {
     }
 
     /**
-     * Get all pending applications
+     * Gets all pending applications.
+     * Helps managers view and process applications waiting for approval.
      * 
      * @return List of pending applications
      */
@@ -274,7 +358,9 @@ public class ApplicationController {
     }
 
     /**
-     * Get all applications managed by a specific manager
+     * Gets all applications for projects managed by a specific manager.
+     * Fulfills the requirement for managers to view applications for their
+     * projects.
      * 
      * @param managerId The ID of the manager
      * @return List of applications for projects managed by the specified manager

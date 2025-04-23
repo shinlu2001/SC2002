@@ -1,2 +1,3 @@
-Application ID,Applicant NRIC,Project ID,Flat Type,Status,WithdrawalRequested
-1,S1234567A,2,2-ROOM,SUCCESS,false
+Application ID,Applicant NRIC,Project ID,Flat Type,Status,WithdrawalRequested,BookedFlatID
+1,T1111111A,2,3-ROOM,BOOKED,false,8
+2,S1234567A,2,2-ROOM,BOOKED,false,6

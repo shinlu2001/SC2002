@@ -112,6 +112,17 @@ public class IdGenerator {
     } // Added getter for Receipt IDs
 
     /**
+     * Ensures the next project ID is at least the given value
+     * 
+     * @param id The minimum value for the next project ID
+     */
+    public static void ensureProjectIdAtLeast(int id) {
+        if (id >= nextProjectId) {
+            nextProjectId = id + 1;
+        }
+    }
+
+    /**
      * Ensures the next application ID is at least the given value
      * 
      * @param id The minimum value for the next application ID

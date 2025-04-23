@@ -25,6 +25,7 @@ public class ApplicantController {
     public Applicant getApplicant() {
         return applicant;
     }
+
     /**
      * Eligibility rule: SINGLE >=35 only for 2-ROOM, MARRIED >=21 for any.
      */
@@ -48,11 +49,12 @@ public class ApplicantController {
         if (current.isPresent()) {
             ApplicationStatus st = current.get().getStatus();
             if (st == ApplicationStatus.PENDING
-             || st == ApplicationStatus.SUCCESS
-             || st == ApplicationStatus.BOOKED) {       
-                String projName = current.get().getProject().getName();         
-                System.out.println("You may not apply for another project as you already have an active application for "
-                                    + projName + " (Status: " + st + ").");
+                    || st == ApplicationStatus.SUCCESS
+                    || st == ApplicationStatus.BOOKED) {
+                String projName = current.get().getProject().getName();
+                System.out
+                        .println("You may not apply for another project as you already have an active application for "
+                                + projName + " (Status: " + st + ").");
                 return true;
             }
         }
@@ -62,6 +64,7 @@ public class ApplicantController {
     /**
      * Submits a new BTO application if no active one exists.
      * Includes checks for officer registration conflicts.
+     * 
      * @return true if submitted, false otherwise.
      */
     public boolean createApplication(Project project, String roomType) {
@@ -72,12 +75,13 @@ public class ApplicantController {
         // Check if the applicant is an officer and is registered for this project
         if (applicant instanceof HDB_Officer officer) {
             boolean isRegistered = dataStore.getRegistrations().stream()
-                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
-                                 reg.getProject().equals(project) &&
-                                 (reg.getStatus() == RegistrationStatus.PENDING || reg.getStatus() == RegistrationStatus.APPROVED));
+                    .anyMatch(reg -> reg.getOfficer().equals(officer) &&
+                            reg.getProject().equals(project) &&
+                            (reg.getStatus() == RegistrationStatus.PENDING
+                                    || reg.getStatus() == RegistrationStatus.APPROVED));
             if (isRegistered) {
-                System.out.println("Error: Cannot apply for project '" + project.getName() + 
-                                   "' as you have a pending or approved officer registration for it.");
+                System.out.println("Error: Cannot apply for project '" + project.getName() +
+                        "' as you have a pending or approved officer registration for it.");
                 return false;
             }
         }
@@ -88,7 +92,8 @@ public class ApplicantController {
             return false;
         }
         if (!project.isOpen()) {
-            System.out.println("Error: Project application period is not open (Open: " + project.getOpenDate() + ", Close: " + project.getCloseDate() + ").");
+            System.out.println("Error: Project application period is not open (Open: " + project.getOpenDate()
+                    + ", Close: " + project.getCloseDate() + ").");
             return false;
         }
         if (!isEligibleForRoomType(roomType)) {
@@ -105,8 +110,8 @@ public class ApplicantController {
             System.out.println("Error: No available flats of this type in the selected project.");
             return false;
         }
-        // Decrement available units
-        project.decrementAvailableUnits(roomType);
+        // Remove the decrement of available units - this should only happen when
+        // manager approves
         BTOApplication app = new BTOApplication(applicant, project, roomType);
         dataStore.getApplications().add(app);
         applicant.setCurrentApplication(app);
@@ -123,9 +128,9 @@ public class ApplicantController {
             return false;
         }
         Project p = dataStore.getProjects().stream()
-                             .filter(x -> x.getId() == projectId)
-                             .findFirst()
-                             .orElse(null);
+                .filter(x -> x.getId() == projectId)
+                .findFirst()
+                .orElse(null);
         if (p == null) {
             System.out.println("Error: Project not found.");
             return false;
@@ -155,7 +160,7 @@ public class ApplicantController {
     }
 
     /**
-     * Requests withdrawal if status allows it (not BOOKED/REJECTED/WITHDRAWN).
+     * Requests withdrawal if status allows it (not REJECTED/WITHDRAWN).
      */
     public boolean requestWithdrawal() {
         Optional<BTOApplication> opt = applicant.getCurrentApplication();
@@ -165,9 +170,8 @@ public class ApplicantController {
         }
         BTOApplication app = opt.get();
         ApplicationStatus st = app.getStatus();
-        if (st == ApplicationStatus.BOOKED
-         || st == ApplicationStatus.REJECTED
-         || st == ApplicationStatus.WITHDRAWN) {
+        if (st == ApplicationStatus.REJECTED
+                || st == ApplicationStatus.WITHDRAWN) {
             System.out.println("Cannot withdraw at status " + st);
             return false;
         }
@@ -180,9 +184,8 @@ public class ApplicantController {
         return true;
     }
 
-    
     // enquiry matters
-    
+
     public void addEnquiry(Enquiry en) {
         applicant.getEnquiries().add(en);
     }
@@ -197,23 +200,23 @@ public class ApplicantController {
      */
     public List<Project> listEligibleProjects() {
         List<Project> potentiallyEligible = dataStore.getProjects().stream()
-                        .filter(Project::isVisible)
-                        .filter(Project::isOpen) // Also check if open
-                        .filter(p -> p.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType))
-                        .toList();
+                .filter(Project::isVisible)
+                .filter(Project::isOpen) // Also check if open
+                .filter(p -> p.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType))
+                .toList();
 
         // Only filter out registered projects if the applicant is an officer
         if (applicant instanceof HDB_Officer officer) {
             List<Integer> registeredProjectIds = dataStore.getRegistrations().stream()
-                .filter(reg -> reg.getOfficer().equals(officer) && 
-                               (reg.getStatus() == RegistrationStatus.PENDING || 
-                                reg.getStatus() == RegistrationStatus.APPROVED))
-                .map(reg -> reg.getProject().getId())
-                .toList();
-            
+                    .filter(reg -> reg.getOfficer().equals(officer) &&
+                            (reg.getStatus() == RegistrationStatus.PENDING ||
+                                    reg.getStatus() == RegistrationStatus.APPROVED))
+                    .map(reg -> reg.getProject().getId())
+                    .toList();
+
             return potentiallyEligible.stream()
-                .filter(p -> !registeredProjectIds.contains(p.getId()))
-                .collect(Collectors.toList());
+                    .filter(p -> !registeredProjectIds.contains(p.getId()))
+                    .collect(Collectors.toList());
         } else {
             // Not an officer, return all potentially eligible projects
             return potentiallyEligible;
@@ -226,24 +229,25 @@ public class ApplicantController {
      */
     public boolean isEligibleForProject(Project project) {
         // Basic eligibility: visible, open, and has eligible flat types
-        boolean basicEligible = project.isVisible() && 
-                                project.isOpen() && 
-                                project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType);
-        
+        boolean basicEligible = project.isVisible() &&
+                project.isOpen() &&
+                project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType);
+
         // If not even basically eligible, no need to check officer restrictions
-        if (!basicEligible) return false;
-        
+        if (!basicEligible)
+            return false;
+
         // Officers have additional restrictions - can't apply if registered
         if (applicant instanceof HDB_Officer officer) {
             boolean isRegistered = dataStore.getRegistrations().stream()
-                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
-                                 reg.getProject().equals(project) &&
-                                 (reg.getStatus() == RegistrationStatus.PENDING || 
-                                  reg.getStatus() == RegistrationStatus.APPROVED));
-            
+                    .anyMatch(reg -> reg.getOfficer().equals(officer) &&
+                            reg.getProject().equals(project) &&
+                            (reg.getStatus() == RegistrationStatus.PENDING ||
+                                    reg.getStatus() == RegistrationStatus.APPROVED));
+
             return !isRegistered; // Not eligible if registered
         }
-        
+
         // Regular applicants just need the basic eligibility
         return true;
     }
@@ -258,23 +262,23 @@ public class ApplicantController {
         if (!project.isOpen()) {
             return "Not Open";
         }
-        
+
         if (applicant instanceof HDB_Officer officer) {
             boolean isRegistered = dataStore.getRegistrations().stream()
-                .anyMatch(reg -> reg.getOfficer().equals(officer) && 
-                                 reg.getProject().equals(project) &&
-                                 (reg.getStatus() == RegistrationStatus.PENDING || 
-                                  reg.getStatus() == RegistrationStatus.APPROVED));
-            
+                    .anyMatch(reg -> reg.getOfficer().equals(officer) &&
+                            reg.getProject().equals(project) &&
+                            (reg.getStatus() == RegistrationStatus.PENDING ||
+                                    reg.getStatus() == RegistrationStatus.APPROVED));
+
             if (isRegistered) {
                 return "Officer Registered";
             }
         }
-        
+
         if (!project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType)) {
             return "Age/Marital Status";
         }
-        
+
         return "Eligible";
     }
 
@@ -283,8 +287,8 @@ public class ApplicantController {
      */
     public List<Project> listAllVisibleProjects() {
         return dataStore.getProjects().stream()
-                        .filter(Project::isVisible)
-                        .collect(Collectors.toList());
+                .filter(Project::isVisible)
+                .collect(Collectors.toList());
     }
 
     /* ────────── UI‐Friendly Overloads for ApplicantUI ────────── */

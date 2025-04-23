@@ -7,28 +7,64 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Saves data from in-memory DataStore to CSV files
+ */
 public final class CSVWriter {
     private CSVWriter() {
     }
 
     private static final Path BASE = Paths.get("SC2002/Project/files");
+    private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("d/M/yyyy");
 
+    /**
+     * Saves all data to system snapshot files in the proper order:
+     * 1. Users (Applicants, Officers, Managers)
+     * 2. Projects
+     * 3. Flats (related to Projects)
+     * 4. Registrations (relating Officers to Projects)
+     * 5. Applications (relating Applicants to Projects)
+     * 6. Enquiries (relating Users to optional Projects)
+     */
     public static void saveAll() {
         DataStore ds = DataStore.getInstance();
+
+        // Step 1: Save all user types first
         writeUsers(ds, Applicant.class, "ApplicantListNew.csv");
         writeUsers(ds, HDB_Officer.class, "OfficerListNew.csv");
         writeUsers(ds, HDB_Manager.class, "ManagerListNew.csv");
+
+        // Step 2: Save projects (they can exist independently)
         writeProjects(ds, "ProjectListNew.csv");
-        writeRegistrations(ds, "RegistrationsNew.csv");
-        writeApplications(ds, "ApplicationsNew.csv");
-        writeEnquiries(ds, "EnquiriesNew.csv");
+
+        // Step 3: Save flats (dependent on projects)
         writeFlats(ds, "FlatsNew.csv");
-        System.out.println("All data has been saved to the system snapshot files successfully.");
+
+        // Step 4: Save registrations (relate officers to projects)
+        writeRegistrations(ds, "RegistrationsNew.csv");
+
+        // Step 5: Save applications (relate applicants to projects)
+        writeApplications(ds, "ApplicationsNew.csv");
+
+        // Step 6: Save enquiries (relate users and optionally projects)
+        writeEnquiries(ds, "EnquiriesNew.csv");
+
+        System.out.println("All data has been saved to the system snapshot files successfully:");
+        System.out.println(" - Users: " + ds.getUsers().size() +
+                "\n - Projects: " + ds.getProjects().size() +
+                "\n - Flats: " + ds.getFlats().size() +
+                "\n - Registrations: " + ds.getRegistrations().size() +
+                "\n - Applications: " + ds.getApplications().size() +
+                "\n - Enquiries: " + ds.getEnquiries().size());
     }
 
+    /**
+     * Write users of a specific type to a CSV file
+     */
     private static void writeUsers(DataStore ds,
             Class<? extends User> roleClass,
             String filename) {
@@ -42,7 +78,7 @@ public final class CSVWriter {
                     .forEach(u -> {
                         String fullName = u.getFirstName() + " " + u.getLastName();
                         String line = String.join(",",
-                                fullName,
+                                fullName.trim(),
                                 u.getNric(),
                                 String.valueOf(u.getAge()),
                                 u.getMaritalStatus().name(),
@@ -55,41 +91,47 @@ public final class CSVWriter {
                             throw new UncheckedIOException(e);
                         }
                     });
-
         } catch (IOException e) {
             System.err.println("Could not write " + filename + ": " + e.getMessage());
         }
     }
 
-    // Save all projects to ProjectListNew.csv in the same format as read
+    /**
+     * Save all projects to CSV
+     */
     private static void writeProjects(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
         try (BufferedWriter bw = Files.newBufferedWriter(out)) {
             // Write header
-            bw.write(
-                    "Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officer");
+            bw.write("Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1," +
+                    "Type 2,Number of units for Type 2,Selling price for Type 2," +
+                    "Application opening date,Application closing date,Manager,Officer Slot,Officers,ProjectID");
             bw.newLine();
+
             for (Project p : ds.getProjects()) {
                 // Only support up to 2 flat types for CSV compatibility
                 List<String> types = p.getFlatTypes();
                 List<Integer> units = p.getTotalUnits();
                 List<Double> prices = p.getPrices();
+
                 String type1 = types.size() > 0 ? types.get(0) : "";
                 String type2 = types.size() > 1 ? types.get(1) : "";
                 String units1 = units.size() > 0 ? String.valueOf(units.get(0)) : "";
                 String units2 = units.size() > 1 ? String.valueOf(units.get(1)) : "";
                 String price1 = prices.size() > 0 ? String.valueOf(prices.get(0)) : "";
                 String price2 = prices.size() > 1 ? String.valueOf(prices.get(1)) : "";
+
                 String openDate = p.getOpenDate() != null
-                        ? p.getOpenDate().format(java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy"))
+                        ? p.getOpenDate().format(DF)
                         : "";
                 String closeDate = p.getCloseDate() != null
-                        ? p.getCloseDate().format(java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy"))
+                        ? p.getCloseDate().format(DF)
                         : "";
+
                 String managerName = p.getManager() != null ? p.getManager().getFirstName() : "";
                 String officerSlot = String.valueOf(p.getOfficerSlotLimit());
 
-                // Get all assigned officers - ensure we only include approved registrations
+                // Get all assigned officers - only include approved registrations
                 String officers = ds.getRegistrations().stream()
                         .filter(reg -> reg.getProject().equals(p) &&
                                 reg.getStatus() == RegistrationStatus.APPROVED)
@@ -97,6 +139,7 @@ public final class CSVWriter {
                         .distinct() // Ensure no duplicates
                         .collect(Collectors.joining(","));
 
+                // Include project ID at the end for snapshot loading
                 String line = String.join(",",
                         p.getName(),
                         p.getNeighbourhood(),
@@ -110,7 +153,8 @@ public final class CSVWriter {
                         closeDate,
                         managerName,
                         officerSlot,
-                        '"' + officers + '"');
+                        '"' + officers + '"',
+                        String.valueOf(p.getId()));
                 bw.write(line);
                 bw.newLine();
             }
@@ -120,7 +164,7 @@ public final class CSVWriter {
     }
 
     /**
-     * Save all registrations to RegistrationsNew.csv
+     * Save all registrations to CSV
      */
     private static void writeRegistrations(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
@@ -145,23 +189,27 @@ public final class CSVWriter {
     }
 
     /**
-     * Save all applications to ApplicationsNew.csv
+     * Save all applications to CSV
      */
     private static void writeApplications(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
         try (BufferedWriter bw = Files.newBufferedWriter(out)) {
             // Write header
-            bw.write("Application ID,Applicant NRIC,Project ID,Flat Type,Status,WithdrawalRequested");
+            bw.write("Application ID,Applicant NRIC,Project ID,Flat Type,Status,WithdrawalRequested,BookedFlatID");
             bw.newLine();
 
             for (BTOApplication app : ds.getApplications()) {
+                // Include booked flat ID if applicable
+                String bookedFlatId = app.getBookedFlat() != null ? String.valueOf(app.getBookedFlat().getId()) : "";
+
                 String line = String.join(",",
                         String.valueOf(app.getId()),
                         app.getApplicant().getNric(),
                         String.valueOf(app.getProject().getId()),
                         app.getRoomType(),
                         app.getStatus().name(),
-                        String.valueOf(app.isWithdrawalRequested()));
+                        String.valueOf(app.isWithdrawalRequested()),
+                        bookedFlatId);
                 bw.write(line);
                 bw.newLine();
             }
@@ -171,29 +219,33 @@ public final class CSVWriter {
     }
 
     /**
-     * Save all enquiries to EnquiriesNew.csv
+     * Save all enquiries to CSV
      */
     private static void writeEnquiries(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
         try (BufferedWriter bw = Files.newBufferedWriter(out)) {
             // Write header
-            bw.write("Enquiry ID,Creator NRIC,Project ID,Flat Type,Content,Response,Respondent NRIC,Status");
+            bw.write("Enquiry ID,Creator NRIC,Project ID,Flat Type,Content,Response,Respondent NRIC");
             bw.newLine();
 
             for (Enquiry enq : ds.getEnquiries()) {
                 // Handle potential nulls
                 String projectId = enq.getProject() != null ? String.valueOf(enq.getProject().getId()) : "";
+                String flatType = enq.getFlatType() != null ? enq.getFlatType() : "";
                 String responderNric = enq.getRespondent() != null ? enq.getRespondent().getNric() : "";
+
+                // Properly escape any commas or quotes in content/response
+                String content = '"' + enq.getContent().replace("\"", "\"\"") + '"';
+                String response = '"' + enq.getResponse().replace("\"", "\"\"") + '"';
 
                 String line = String.join(",",
                         String.valueOf(enq.getId()),
                         enq.getCreator().getNric(),
                         projectId,
-                        enq.getFlatType() != null ? enq.getFlatType() : "",
-                        '"' + enq.getContent().replace("\"", "\"\"") + '"', // Escape quotes in content
-                        '"' + enq.getResponse().replace("\"", "\"\"") + '"', // Escape quotes in response
-                        responderNric,
-                        enq.isAnswered() ? "ANSWERED" : "PENDING");
+                        flatType,
+                        content,
+                        response,
+                        responderNric);
                 bw.write(line);
                 bw.newLine();
             }
@@ -203,7 +255,7 @@ public final class CSVWriter {
     }
 
     /**
-     * Save all flats to FlatsNew.csv
+     * Save all flats to CSV
      */
     private static void writeFlats(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
