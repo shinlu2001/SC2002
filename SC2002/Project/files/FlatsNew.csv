@@ -1,0 +1,16 @@
+Flat ID,Project ID,Flat Type,Price,Booked Status
+1,1,2-ROOM,350000.0,false
+2,1,2-ROOM,350000.0,false
+3,1,3-ROOM,450000.0,false
+4,1,3-ROOM,450000.0,false
+5,1,3-ROOM,450000.0,false
+6,2,2-ROOM,350000.0,false
+7,2,2-ROOM,350000.0,false
+8,2,3-ROOM,450000.0,false
+9,2,3-ROOM,450000.0,false
+10,2,3-ROOM,450000.0,false
+11,3,2-ROOM,350000.0,false
+12,3,2-ROOM,350000.0,false
+13,3,3-ROOM,450000.0,false
+14,3,3-ROOM,450000.0,false
+15,3,3-ROOM,450000.0,false
