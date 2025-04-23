@@ -599,8 +599,8 @@ public class Project {
         if (availableUnits.get(idx) < totalUnits.get(idx)) {
             availableUnits.set(idx, availableUnits.get(idx) + 1);
         } else {
-            System.err.println("Warning: Cannot increment units for " + flatType + " in project " + name
-                    + " - already at maximum capacity");
+            // System.err.println("Warning: Cannot increment units for " + flatType + " in project " + name
+            //         + " - already at maximum capacity");
         }
     }
 
