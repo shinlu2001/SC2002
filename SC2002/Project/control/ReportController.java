@@ -25,7 +25,7 @@ public class ReportController {
 
     public List<BTOApplication> filterByMaritalStatus(HDB_Manager manager, String status) {
         return getAllApplications(manager).stream()
-                .filter(app -> ((Applicant)app.getApplicant()).getMaritalStatus().equals(status))
+                .filter(app -> app.getApplicant().getMaritalStatus().name().equals(status))
                 .collect(Collectors.toList());
     }
 
@@ -37,7 +37,7 @@ public class ReportController {
 
     public List<BTOApplication> filterByBoth(HDB_Manager manager, String status, String flatType) {
         return getAllApplications(manager).stream()
-                .filter(app -> ((Applicant)app.getApplicant()).getMaritalStatus().equals(status)
+                .filter(app -> app.getApplicant().getMaritalStatus().name().equals(status)
                         && app.getRoomType().equals(flatType))
                 .collect(Collectors.toList());
     }
@@ -51,12 +51,12 @@ public class ReportController {
         content.append(String.format("Total Applications: %d\n", applications.size()));
         
         long singleCount = applications.stream()
-                .filter(app -> ((Applicant)app.getApplicant()).getMaritalStatus().equals("SINGLE"))
+                .filter(app -> app.getApplicant().getMaritalStatus().name().equals("SINGLE"))
                 .count();
         content.append(String.format("Single Applicants: %d\n", singleCount));
         
         long marriedCount = applications.stream()
-                .filter(app -> ((Applicant)app.getApplicant()).getMaritalStatus().equals("MARRIED"))
+                .filter(app -> app.getApplicant().getMaritalStatus().name().equals("MARRIED"))
                 .count();
         content.append(String.format("Married Applicants: %d\n", marriedCount));
         
@@ -64,7 +64,7 @@ public class ReportController {
         content.append("\nDetailed Application List:\n");
         content.append("-------------------------\n");
         for (BTOApplication app : applications) {
-            Applicant applicant = (Applicant) app.getApplicant();
+            Applicant applicant = app.getApplicant();
             content.append(String.format("Application ID: %d\n", app.getId()));
             content.append(String.format("Applicant: %s %s\n", 
                     applicant.getFirstName(), applicant.getLastName()));

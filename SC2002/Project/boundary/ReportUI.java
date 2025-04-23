@@ -48,7 +48,7 @@ public class ReportUI {
         try {
             System.out.print("Enter marital status (SINGLE/MARRIED): ");
             String status = Input.getStringInput(sc).toUpperCase();
-            
+
             List<BTOApplication> applications = reportController.filterByMaritalStatus(manager, status);
             if (applications.isEmpty()) {
                 System.out.println("No applications found for " + status + " applicants.");
@@ -64,7 +64,7 @@ public class ReportUI {
         try {
             System.out.print("Enter flat type (2-ROOM/3-ROOM/etc): ");
             String flatType = Input.getStringInput(sc).toUpperCase();
-            
+
             List<BTOApplication> applications = reportController.filterByFlatType(manager, flatType);
             if (applications.isEmpty()) {
                 System.out.println("No applications found for " + flatType + " flats.");
@@ -80,10 +80,10 @@ public class ReportUI {
         try {
             System.out.print("Enter marital status (SINGLE/MARRIED): ");
             String status = Input.getStringInput(sc).toUpperCase();
-            
+
             System.out.print("Enter flat type (2-ROOM/3-ROOM/etc): ");
             String flatType = Input.getStringInput(sc).toUpperCase();
-            
+
             List<BTOApplication> applications = reportController.filterByBoth(manager, status, flatType);
             if (applications.isEmpty()) {
                 System.out.println("No applications found for " + status + " applicants and " + flatType + " flats.");
@@ -98,34 +98,35 @@ public class ReportUI {
     private static void printApplications(List<BTOApplication> applications) {
         System.out.println("\nApplication Report");
         System.out.println("=================");
-        System.out.printf("%-5s %-20s %-5s %-10s %-15s %-15s %-10s%n",
-            "ID", "Applicant Name", "Age", "Status", "Flat Type", "Project", "Status");
-        System.out.println("-----------------------------------------------------------------------------------");
-        
+        System.out.printf("%-5s %-20s %-5s %-10s %-15s %-40s %-10s%n",
+                "ID", "Applicant Name", "Age", "Status", "Flat Type", "Project", "Status");
+        System.out.println(
+                "----------------------------------------------------------------------------------------------------------------------");
+
         for (BTOApplication app : applications) {
             Applicant applicant = (Applicant) app.getApplicant();
 
-            if (!app.isWithdrawalRequested()){
-                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-15s %-10s%n",
-                    app.getId(),
-                    applicant.getFirstName() + " " + applicant.getLastName(),
-                    applicant.getAge(),
-                    applicant.getMaritalStatus(),
-                    app.getRoomType(),
-                    Input.truncateText(app.getProject().getName(), 15),
-                    app.getStatus());
-            }
-            else{
-                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-15s %-10s%n",
-                app.getId(),
-                applicant.getFirstName() + " " + applicant.getLastName(),
-                applicant.getAge(),
-                applicant.getMaritalStatus(),
-                app.getRoomType(),
-                Input.truncateText(app.getProject().getName(), 15),
-                app.getStatus()+ " (Withdrawal Req)");
+            if (!app.isWithdrawalRequested()) {
+                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-40s %-10s%n",
+                        app.getId(),
+                        applicant.getFirstName() + " " + applicant.getLastName(),
+                        applicant.getAge(),
+                        applicant.getMaritalStatus(),
+                        app.getRoomType(),
+                        Input.truncateText(app.getProject().getName(), 40),
+                        app.getStatus());
+            } else {
+                System.out.printf("%-5d %-20s %-5d %-10s %-15s %-40s %-10s%n",
+                        app.getId(),
+                        applicant.getFirstName() + " " + applicant.getLastName(),
+                        applicant.getAge(),
+                        applicant.getMaritalStatus(),
+                        app.getRoomType(),
+                        Input.truncateText(app.getProject().getName(), 40),
+                        app.getStatus() + " (Withdrawal Req)");
             }
         }
-        System.out.println("-----------------------------------------------------------------------------------");
+        System.out.println(
+                "----------------------------------------------------------------------------------------------------------------------");
     }
 }

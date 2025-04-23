@@ -20,15 +20,12 @@ public final class MenuPrinter {
     public static void printReportMenu()      { Menu.printMenu(Menu.getReportMenu()); }
     public static void printEditProjectMenu() { Menu.printMenu(Menu.getEditProjectMenu()); }
 
-    /* ────────────── new table‑printing methods ────────────── */
-
+    /* ────────────── reusable helper methods ────────────── */
+    
     /**
-     * Prints only those flat‑type rows the applicant is eligible for.
+     * Prints the common header for project tables with eligibility information.
      */
-    public static void printProjectTableEligible(List<Project> projects,
-                                                 Applicant applicant,
-                                                 ApplicantController ctrl) {
-        // header
+    private static void printProjectTableHeader() {
         System.out.printf(
             "%-" + Menu.COL_ID    + "s " +
             "%-" + Menu.COL_NAME  + "s " +
@@ -42,6 +39,66 @@ public final class MenuPrinter {
             "Price", "Open Date", "Close Date", "Eligibility"
         );
         System.out.println("─".repeat(Menu.PROJECT_TABLE_WIDTH));
+    }
+    
+    /**
+     * Prints a row for a flat type in a project table.
+     * @param p Project
+     * @param flatIndex Index of the flat type in the project's lists
+     * @param info Flat type info string
+     * @param price Flat price
+     * @param eligDisplay Eligibility display string
+     * @param isFirstRow Whether this is the first row for this project
+     */
+    private static void printProjectTableRow(Project p, String info, double price, 
+                                           String eligDisplay, boolean isFirstRow) {
+        if (isFirstRow) {
+            System.out.printf(
+                "%-" + Menu.COL_ID    + "d " +
+                "%-" + Menu.COL_NAME  + "s " +
+                "%-" + Menu.COL_HOOD  + "s " +
+                "%-" + Menu.COL_FLAT  + "s " +
+                "%-" + Menu.COL_PRICE + ".2f " +
+                "%-" + Menu.COL_OPEN  + "s " +
+                "%-" + Menu.COL_CLOSE + "s " +
+                "%-" + Menu.COL_ELIG  + "s%n",
+                p.getId(),
+                p.getName(),
+                p.getNeighbourhood(),
+                info,
+                price,
+                p.getOpenDate(),
+                p.getCloseDate(),
+                eligDisplay
+            );
+        } else {
+            System.out.printf(
+                "%-" + Menu.COL_ID    + "s " +
+                "%-" + Menu.COL_NAME  + "s " +
+                "%-" + Menu.COL_HOOD  + "s " +
+                "%-" + Menu.COL_FLAT  + "s " +
+                "%-" + Menu.COL_PRICE + ".2f " +
+                "%-" + Menu.COL_OPEN  + "s " +
+                "%-" + Menu.COL_CLOSE + "s " +
+                "%-" + Menu.COL_ELIG  + "s%n",
+                "", "", "", info,
+                price,
+                "", "",
+                eligDisplay
+            );
+        }
+    }
+
+    /* ────────────── new table‑printing methods ────────────── */
+
+    /**
+     * Prints only those flat‑type rows the applicant is eligible for.
+     */
+    public static void printProjectTableEligible(List<Project> projects,
+                                                 Applicant applicant,
+                                                 ApplicantController ctrl) {
+        // header
+        printProjectTableHeader();
 
         for (Project p : projects) {
             boolean first = true;
@@ -56,42 +113,8 @@ public final class MenuPrinter {
                 double price  = p.getPrices().get(i);
                 String elig   = "Yes";
 
-                if (first) {
-                    System.out.printf(
-                        "%-" + Menu.COL_ID    + "d " +
-                        "%-" + Menu.COL_NAME  + "s " +
-                        "%-" + Menu.COL_HOOD  + "s " +
-                        "%-" + Menu.COL_FLAT  + "s " +
-                        "%-" + Menu.COL_PRICE + ".2f " +
-                        "%-" + Menu.COL_OPEN  + "s " +
-                        "%-" + Menu.COL_CLOSE + "s " +
-                        "%-" + Menu.COL_ELIG  + "s%n",
-                        p.getId(),
-                        p.getName(),
-                        p.getNeighbourhood(),
-                        info,
-                        price,
-                        p.getOpenDate(),
-                        p.getCloseDate(),
-                        elig
-                    );
-                    first = false;
-                } else {
-                    System.out.printf(
-                        "%-" + Menu.COL_ID    + "s " +
-                        "%-" + Menu.COL_NAME  + "s " +
-                        "%-" + Menu.COL_HOOD  + "s " +
-                        "%-" + Menu.COL_FLAT  + "s " +
-                        "%-" + Menu.COL_PRICE + ".2f " +
-                        "%-" + Menu.COL_OPEN  + "s " +
-                        "%-" + Menu.COL_CLOSE + "s " +
-                        "%-" + Menu.COL_ELIG  + "s%n",
-                        "", "", "", info,
-                        price,
-                        "", "",
-                        elig
-                    );
-                }
+                printProjectTableRow(p, info, price, elig, first);
+                first = false;
             }
             System.out.println();
         }
@@ -105,19 +128,7 @@ public final class MenuPrinter {
                                             Applicant applicant,
                                             ApplicantController ctrl) {
         // header (with Eligibility column)
-        System.out.printf(
-            "%-" + Menu.COL_ID    + "s " +
-            "%-" + Menu.COL_NAME  + "s " +
-            "%-" + Menu.COL_HOOD  + "s " +
-            "%-" + Menu.COL_FLAT  + "s " +
-            "%-" + Menu.COL_PRICE + "s " +
-            "%-" + Menu.COL_OPEN  + "s " +
-            "%-" + Menu.COL_CLOSE + "s " +
-            "%-" + Menu.COL_ELIG  + "s%n",
-            "ID", "Name", "Neighbourhood", "FlatType(Avail/Total)",
-            "Price", "Open Date", "Close Date", "Eligibility"
-        );
-        System.out.println("─".repeat(Menu.PROJECT_TABLE_WIDTH));
+        printProjectTableHeader();
 
         for (Project p : projects) {
             boolean first = true;
@@ -139,45 +150,10 @@ public final class MenuPrinter {
                     eligDisplay = projectEligibility; // Project-level ineligibility (registered, not open, etc.)
                 } else {
                     eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Not Eligible";
-                    eligDisplay = ctrl.isEligibleForRoomType(ft) ? "Eligible" : "Not Eligible";
                 }
 
-                if (first) {
-                    System.out.printf(
-                        "%-" + Menu.COL_ID    + "d " +
-                        "%-" + Menu.COL_NAME  + "s " +
-                        "%-" + Menu.COL_HOOD  + "s " +
-                        "%-" + Menu.COL_FLAT  + "s " +
-                        "%-" + Menu.COL_PRICE + ".2f " +
-                        "%-" + Menu.COL_OPEN  + "s " +
-                        "%-" + Menu.COL_CLOSE + "s " +
-                        "%-" + Menu.COL_ELIG  + "s%n",
-                        p.getId(),
-                        p.getName(),
-                        p.getNeighbourhood(),
-                        info,
-                        price,
-                        p.getOpenDate(),
-                        p.getCloseDate(),
-                        eligDisplay
-                    );
-                    first = false;
-                } else {
-                    System.out.printf(
-                        "%-" + Menu.COL_ID    + "s " +
-                        "%-" + Menu.COL_NAME  + "s " +
-                        "%-" + Menu.COL_HOOD  + "s " +
-                        "%-" + Menu.COL_FLAT  + "s " +
-                        "%-" + Menu.COL_PRICE + ".2f " +
-                        "%-" + Menu.COL_OPEN  + "s " +
-                        "%-" + Menu.COL_CLOSE + "s " +
-                        "%-" + Menu.COL_ELIG  + "s%n",
-                        "", "", "", info,
-                        price,
-                        "", "",
-                        eligDisplay
-                    );
-                }
+                printProjectTableRow(p, info, price, eligDisplay, first);
+                first = false;
             }
             System.out.println();
         }
@@ -223,7 +199,7 @@ public final class MenuPrinter {
 
         System.out.printf(headerFormat,
                 "ID", "Project Name", "Neighbourhood", "Flat Types (Units - Price)", "Manager",
-                "Open Date", "Close Date", "Visible", "Officers (Avail/Total)");
+                "Open Date", "Close Date", "Visible", "Officers (Assigned/Total)");
         System.out.println("─".repeat(detailedWidth));
 
         for (Project p : projects) {

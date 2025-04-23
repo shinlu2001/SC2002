@@ -196,6 +196,15 @@ public class Project {
     // ─────────── Derived Helpers ───────────
 
     /**
+     * Get the index of a flat type in the flatTypes list.
+     * @param flatType The flat type to look for
+     * @return The index of the flat type, or -1 if not found
+     */
+    public int getFlatTypeIndex(String flatType) {
+        return this.flatTypes.indexOf(flatType.toUpperCase());
+    }
+
+    /**
      * @return true if today is between openDate and closeDate (inclusive)
      */
     public boolean isOpen() {
@@ -273,7 +282,7 @@ public class Project {
     /**
      * Increments available units for the specified flat type.
      */
-    void incrementAvailableUnits(String flatType) {
+    public void incrementAvailableUnits(String flatType) {
         int idx = this.flatTypes.indexOf(flatType.toUpperCase());
         if (idx != -1 && availableUnits.get(idx) < totalUnits.get(idx)) {
             availableUnits.set(idx, availableUnits.get(idx) + 1);

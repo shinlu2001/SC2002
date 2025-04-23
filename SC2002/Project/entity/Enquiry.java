@@ -2,20 +2,34 @@
 package SC2002.Project.entity;
 
 import SC2002.Project.util.IdGenerator;
+
 /**
  * Entity class representing an enquiry in the system.
  */
 public class Enquiry {
     private final int id;
     private String content;
-    private String response="";
-    private Project project;  // null for general enquiries
-    private String flatType;  // null for general enquiries
+    private String response = "";
+    private Project project; // null for general enquiries
+    private String flatType; // null for general enquiries
     private User creator;
     private User respondent;
 
     public Enquiry(User creator, String content) {
         this.id = IdGenerator.nextEnquiryId();
+        this.creator = creator;
+        this.content = content;
+    }
+
+    /**
+     * Constructor with ID parameter for loading from CSV files
+     * 
+     * @param id      The enquiry ID
+     * @param creator The user who created this enquiry
+     * @param content The enquiry content
+     */
+    public Enquiry(int id, User creator, String content) {
+        this.id = id;
         this.creator = creator;
         this.content = content;
     }

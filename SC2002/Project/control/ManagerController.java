@@ -57,25 +57,17 @@ public class ManagerController implements StaffControllerInterface {
     }
 
     public boolean approveApplication(BTOApplication app) {
-        if (app == null
-         || app.getStatus() != ApplicationStatus.PENDING
-         || !manager.getManagedProjects().contains(app.getProject())) {
+        if (app == null || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        return appController.changeStatus(app.getId(), ApplicationStatus.SUCCESS);
+        return appController.approveApplication(app);
     }
 
     public boolean rejectApplication(BTOApplication app) {
-        if (app == null
-         || app.getStatus() != ApplicationStatus.PENDING
-         || !manager.getManagedProjects().contains(app.getProject())) {
+        if (app == null || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        boolean result = appController.changeStatus(app.getId(), ApplicationStatus.REJECTED);
-        if (result) {
-            app.getApplicant().clearCurrentApplicationReference();
-        }
-        return result;
+        return appController.rejectApplication(app);
     }
 
     // ---- Handle Withdrawal Requests ----
@@ -91,27 +83,17 @@ public class ManagerController implements StaffControllerInterface {
     }
 
     public boolean confirmWithdrawal(BTOApplication app) {
-        if (app == null
-         || !app.isWithdrawalRequested()
-         || !manager.getManagedProjects().contains(app.getProject())
-         || app.getStatus() == ApplicationStatus.BOOKED) {
+        if (app == null || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        boolean ok = appController.changeStatus(app.getId(), ApplicationStatus.WITHDRAWN);
-        if (ok) {
-            app.getApplicant().finalizeWithdrawal();
-        }
-        return ok;
+        return appController.confirmWithdrawalRequest(app);
     }
 
     public boolean rejectWithdrawalRequest(BTOApplication app) {
-        if (app == null
-         || !app.isWithdrawalRequested()
-         || !manager.getManagedProjects().contains(app.getProject())) {
+        if (app == null || !manager.getManagedProjects().contains(app.getProject())) {
             return false;
         }
-        app.setWithdrawalRequested(false);
-        return true;
+        return appController.rejectWithdrawalRequest(app);
     }
 
     // ---- Project Management ----

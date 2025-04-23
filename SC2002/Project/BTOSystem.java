@@ -37,7 +37,7 @@ public final class BTOSystem{
         DataStore ds = DataStore.getInstance();
         Scanner sc = new Scanner(System.in);
         boolean exit = false;
-    
+
         while (!exit) {
             MenuPrinter.printWelcomeMenu();
             try {
@@ -63,8 +63,26 @@ public final class BTOSystem{
                         }
                     }
                     case 3 -> {
-                        CSVReader.loadAll();
-                        System.out.println("Data loaded.");
+                        System.out.println("Data Load Options:");
+                        System.out.println("1. Load from original files (minimal data)");
+                        System.out.println("2. Load from system snapshot (complete state)");
+                        System.out.print("Enter choice: ");
+                        try {
+                            int loadChoice = Input.getIntInput(sc);
+                            if (loadChoice == 1) {
+                                CSVReader.setUseSnapshot(false);
+                                CSVReader.loadAll();
+                                System.out.println("Original data loaded.");
+                            } else if (loadChoice == 2) {
+                                CSVReader.setUseSnapshot(true);
+                                CSVReader.loadAll();
+                                System.out.println("System snapshot loaded.");
+                            } else {
+                                System.out.println("Invalid choice. No data loaded.");
+                            }
+                        } catch (InputExitException e) {
+                            System.out.println("Data load cancelled.");
+                        }
                     }
                     case 4 -> {
                         CSVWriter.saveAll();
@@ -74,7 +92,7 @@ public final class BTOSystem{
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (InputExitException e) {
-                // user typed “exit” or “back” at the welcome prompt
+                // user typed "exit" or "back" at the welcome prompt
                 System.out.println("Exiting program.");
                 exit = true;
             }
