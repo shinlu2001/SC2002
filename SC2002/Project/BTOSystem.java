@@ -22,13 +22,13 @@ public final class BTOSystem{
 
     public static void main(String[] args) {
         DataStore.getInstance().getUsers().clear();  // ensure clean slate
-        CSVReader.loadAll();
-        System.out.println("Loaded users: " 
-            + DataStore.getInstance().getUsers().size());
-        System.out.println("Loaded projects: " 
-            + DataStore.getInstance().getProjects().size());
-        System.out.println("Loaded registrations: " 
-            + DataStore.getInstance().getRegistrations().size());
+        // CSVReader.loadAll();
+        // System.out.println("Loaded users: " 
+        //     + DataStore.getInstance().getUsers().size());
+        // System.out.println("Loaded projects: " 
+        //     + DataStore.getInstance().getProjects().size());
+        // System.out.println("Loaded registrations: " 
+        //     + DataStore.getInstance().getRegistrations().size());
 
         MainMenu();
     }

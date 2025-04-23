@@ -15,7 +15,7 @@ public final class Menu {
         "Please choose an option:",
         "1. Log in",
         "2. Register user",
-        "3. Fetch data from excel sheets (autoloaded on startup)",
+        "3. Fetch data from excel sheets",
         "4. Exit program",
         "Enter your choice: "
     );
