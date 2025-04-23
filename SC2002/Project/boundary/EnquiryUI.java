@@ -159,7 +159,9 @@ public class EnquiryUI { // this is more for applicants
         try {
             System.out.print("\nEnter Enquiry ID to edit: ");
             int enquiryId = Input.getIntInput(sc);
-            
+            Enquiry en = enquiryController.findEnquiryById(enquiryId);
+            if (en!=null){
+                viewSingleEnquiry(en);
             System.out.print("Enter new content: ");
             String newContent = Input.getStringInput(sc);
             
@@ -168,6 +170,7 @@ public class EnquiryUI { // this is more for applicants
             } else {
                 System.out.println("Failed to update enquiry. Please try again.");
             }
+        }
         } catch (Input.InputExitException e) {
             System.out.println("Edit operation cancelled.");
         }

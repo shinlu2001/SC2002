@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class AuthUI {
     private static final AuthController authController = new AuthController();
 
-    public static void changePassword(Scanner sc, User user) {
+    public static boolean changePassword(Scanner sc, User user) {
         System.out.println("\nChange Password");
         System.out.println("---------------");
         try {
@@ -33,17 +33,20 @@ public class AuthUI {
 
             if (!newPassword1.equals(newPassword2)) {
                 System.out.println("New passwords do not match. Password change failed.");
-                return;
+                return false;
             }
 
             if (authController.changePassword(user, currentPassword, newPassword1)) {
                 System.out.println("Password changed successfully.");
+                return true;
             } else {
                 System.out.println("Password change failed. Please contact support.");
+                return false;
             }
 
         } catch (Input.InputExitException e) {
             System.out.println("Password change cancelled.");
+            return false;
         }
     }
     

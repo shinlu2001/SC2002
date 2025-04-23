@@ -38,7 +38,7 @@ public class ApplicantUI {
                     
                     // Account
                     case 7 -> viewAccountDetails(applicant);
-                    case 8 -> AuthUI.changePassword(sc, applicant);
+                    case 8 -> {if (AuthUI.changePassword(sc, applicant)) {exit=true;}}
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }

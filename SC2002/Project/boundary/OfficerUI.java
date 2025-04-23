@@ -388,7 +388,7 @@ public class OfficerUI {
                 
                 try {
                     int appId = Integer.parseInt(input);
-                    processFlatBookingById(appId, officerCtrl);
+                    processFlatBookingById(sc, appId, officerCtrl);
                 } catch (NumberFormatException e) {
                     System.out.println("Please enter a valid application ID number.");
                 }
@@ -398,7 +398,7 @@ public class OfficerUI {
         }
     }
     
-    private static void processFlatBookingById(int appId, OfficerController controller) {
+    private static void processFlatBookingById(Scanner sc, int appId, OfficerController controller) {
         Optional<BTOApplication> selectedAppOpt = controller.findBookableApplicationById(appId);
         if (selectedAppOpt.isEmpty()) {
             System.out.println("Invalid Application ID or application not eligible for booking.");
@@ -420,7 +420,7 @@ public class OfficerUI {
         
         // Ask for confirmation instead of re-entering room type
         System.out.print("Type 'confirm' to proceed with booking or 'back' to cancel: ");
-        String confirmation = new Scanner(System.in).nextLine().trim();
+        String confirmation = Input.getStringInput(sc);
         
         if (!confirmation.equalsIgnoreCase("confirm")) {
             System.out.println("Booking cancelled.");
@@ -450,7 +450,7 @@ public class OfficerUI {
             System.out.printf("%-10d %-20s %-15s %-15s %-10s%n",
                               app.getId(),
                               applicant.getFirstName() + " " + applicant.getLastName(),
-                              Input.truncateText(app.getProject().getName(), 20),
+                              Input.truncateText(app.getProject().getName(), 15),
                               app.getRoomType(),
                               app.getStatus());
         }
