@@ -102,7 +102,7 @@ public final class Menu {
         "                            ",
         "==== Enquiries ====",
         "13. View all enquiries",
-        "14. Handle project enquiries",
+        "14. Handle enquiries",
         "                            ",
         "==== Account ====",
         "15. View account details",
