@@ -54,6 +54,7 @@ public final class BTOSystem {
         // System.out.println("Loaded registrations: "
         // + DataStore.getInstance().getRegistrations().size());
 
+        System.out.println("\nType \"back\" or \"exit\" at any point to return to previous menu! :D\n");
         MainMenu();
     }
 
