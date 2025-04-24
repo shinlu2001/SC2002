@@ -271,7 +271,7 @@ public final class CSVWriter {
         Path out = BASE.resolve(filename);
         try (BufferedWriter bw = Files.newBufferedWriter(out)) {
             // Write header
-            bw.write("Flat ID,Project ID,Flat Type,Price,Booked Status");
+            bw.write("Flat ID,Project ID,Flat Type,Price,Booked Status,Booking ID");
             bw.newLine();
 
             for (Flat flat : ds.getFlats()) {
@@ -280,7 +280,8 @@ public final class CSVWriter {
                         String.valueOf(flat.getProject().getId()),
                         flat.getFlatType(),
                         String.valueOf(flat.getPrice()),
-                        String.valueOf(flat.isBooked()));
+                        String.valueOf(flat.isBooked()),
+                        flat.getBookingId());
                 bw.write(line);
                 bw.newLine();
             }

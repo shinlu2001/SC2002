@@ -763,6 +763,9 @@ public final class CSVReader {
                     String flatType = cols[2].trim();
                     double price = Double.parseDouble(cols[3].trim());
                     boolean booked = Boolean.parseBoolean(cols[4].trim());
+                    
+                    // Read booking ID if available
+                    String bookingId = cols.length > 5 ? cols[5].trim() : "";
 
                     // Find referenced project
                     Project project = PROJECT_MAP.get(projectId);
@@ -774,9 +777,10 @@ public final class CSVReader {
                         // Create flat
                         Flat flat = new Flat(id, project, flatType, price);
 
-                        // Set booked status
+                        // Set booked status and booking ID
                         if (booked) {
                             flat.setBooked(true);
+                            flat.setBookingId(bookingId);
                         }
 
                         // Add to datastore

@@ -263,6 +263,7 @@ public class BTOApplication {
             // If this application has a booked flat, we need to release it
             if (bookedFlat != null) {
                 bookedFlat.setBooked(false);
+                bookedFlat.setBookingId(""); // Clear the booking ID
                 project.incrementAvailableUnits(roomType);
                 this.bookedFlat = null;
             }
@@ -315,6 +316,7 @@ public class BTOApplication {
         if (status == ApplicationStatus.SUCCESS && flat != null && !flat.isBooked()) {
             this.bookedFlat = flat;
             flat.setBooked(true); // Mark flat as booked
+            flat.setBookingId(String.valueOf(this.id)); // Set booking ID to this application's ID
             setStatus(ApplicationStatus.BOOKED);
         } else {
             System.err.println("Cannot book flat for application ID " + id
@@ -345,6 +347,7 @@ public class BTOApplication {
             try {
                 // Attempt to reset the flat booking status
                 flatToReset.setBooked(false);
+                flatToReset.setBookingId(""); // Clear the booking ID
                 // Attempt to increment available units
                 project.incrementAvailableUnits(roomTypeToIncrement);
                 // If both operations succeed, update application state
