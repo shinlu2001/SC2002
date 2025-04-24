@@ -32,9 +32,9 @@ public class OfficerUI {
                 switch (choice) {
                     // BTO Application (Applicant Role)
                     case 1 -> ApplicantUI.applyForProject(sc, officer, applicantController, projectController);
-                    case 2 -> ApplicantUI.viewActiveApplication(officer);
-                    case 3 -> ApplicantUI.viewEligibleListings(officer, applicantController);
-                    case 4 -> ApplicantUI.viewAllListings(projectController, applicantController, officer);
+                    case 2 -> ApplicantUI.viewActiveApplication(sc, officer);
+                    case 3 -> ApplicantUI.viewEligibleListings(sc, officer, applicantController);
+                    case 4 -> ApplicantUI.viewAllListings(sc, projectController, applicantController, officer);
                     case 5 -> ApplicantUI.withdrawApplication(sc, officer, applicantController);
 
                     // Enquiry Management
@@ -45,7 +45,7 @@ public class OfficerUI {
                     // Officer Specific Features
                     case 9 -> registerForProject(sc, officer, registrationController, projectController);
                     case 10 -> checkRegistrationStatus(sc, officer, registrationController);
-                    case 11 -> viewProjectDetails(sc, projectController);
+                    case 11 -> viewProjectDetails(sc, projectController, officer);
                     case 12 -> processFlatBooking(sc, officerController);
                     case 13 -> viewAssignedApplications(sc, officerController, applicationController);
 
@@ -283,10 +283,8 @@ public class OfficerUI {
         }
     }
 
-    private static void viewProjectDetails(Scanner sc, ProjectController projCtrl) {
-        List<Project> allProjects = projCtrl.listAll().stream()
-                .filter(Project::isVisible)
-                .collect(Collectors.toList());
+    private static void viewProjectDetails(Scanner sc, ProjectController projCtrl, HDB_Officer officer) {
+        List<Project> allProjects = officer.getAssignedProjects();
 
         if (allProjects.isEmpty()) {
             System.out.println("No projects available to view.");
@@ -302,8 +300,8 @@ public class OfficerUI {
 
             Project selectedProject = projCtrl.findById(projectId);
             List<Project> toPrint = new ArrayList<>();
-            if (selectedProject == null || !selectedProject.isVisible()) {
-                System.out.println("Invalid Project ID or project not visible.");
+            if (selectedProject == null || !allProjects.contains(selectedProject)) { // no need to check for visibility
+                System.out.println("Invalid Project ID.");
                 return;
             }
             toPrint.add(selectedProject);

@@ -28,9 +28,9 @@ public class ApplicantUI {
                 switch (choice) {
                     // BTO Application
                     case 1 -> applyForProject(sc, applicant, applicantController, projectController);
-                    case 2 -> viewActiveApplication(applicant);
-                    case 3 -> viewEligibleListings(applicant, applicantController);
-                    case 4 -> viewAllListings(projectController, applicantController, applicant);
+                    case 2 -> viewActiveApplication(sc, applicant);
+                    case 3 -> viewEligibleListings(sc, applicant, applicantController);
+                    case 4 -> viewAllListings(sc, projectController, applicantController, applicant);
                     case 5 -> withdrawApplication(sc, applicant, applicantController);
 
                     // Enquiries
@@ -96,10 +96,16 @@ public class ApplicantUI {
         }
     }
 
-    public static void viewActiveApplication(Applicant applicant) {
+    public static void viewActiveApplication(Scanner sc, Applicant applicant) {
         Optional<BTOApplication> oa = applicant.getCurrentApplication();
         if (oa.isEmpty()) {
+            if (applicant.getApplicationHistory().isEmpty()) {
             System.out.println("You have no active application.");
+
+            } else {
+                System.out.println("Your most recent application was withdrawn/rejected. You may create a new application.");
+                System.out.println(applicant.getApplicationHistory().getLast());
+            }
             return;
         }
         BTOApplication app = oa.get();
@@ -109,18 +115,16 @@ public class ApplicantUI {
             System.out.println("Your application succeeded! An officer will be in touch.");
         } else if (app.isWithdrawalRequested()) {
             System.out.println("Withdrawal is pending approval.");
-        }
+        } 
     }
 
-    protected static void viewEligibleListings(Applicant applicant,
+    protected static void viewEligibleListings(Scanner sc, Applicant applicant,
             ApplicantController ctrl) {
         List<Project> eligible = ctrl.listEligibleProjects();
         if (eligible.isEmpty()) {
             System.out.println("No eligible projects.");
             return;
         }
-
-        Scanner sc = new Scanner(System.in);
         boolean exit = false;
 
         while (!exit) {
@@ -227,7 +231,7 @@ public class ApplicantUI {
         }
     }
 
-    protected static void viewAllListings(ProjectController projCtrl,
+    protected static void viewAllListings(Scanner sc, ProjectController projCtrl,
             ApplicantController ctrl,
             Applicant applicant) {
         List<Project> all = projCtrl.listAll()
@@ -239,7 +243,6 @@ public class ApplicantUI {
             return;
         }
 
-        Scanner sc = new Scanner(System.in);
         boolean exit = false;
 
         while (!exit) {

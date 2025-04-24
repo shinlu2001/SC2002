@@ -20,7 +20,7 @@ public class StaffUI {
 
         try {
             System.out.print("Enter Enquiry ID to respond (or type 'back' to return): ");
-            String input = sc.nextLine().trim();
+            String input = Input.getStringInput(sc);
             
             if (input.equalsIgnoreCase("back")) {
                 return;

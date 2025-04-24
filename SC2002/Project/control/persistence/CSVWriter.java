@@ -34,8 +34,8 @@ public final class CSVWriter {
         DataStore ds = DataStore.getInstance();
 
         // Step 1: Save all user types first
-        writeUsers(ds, Applicant.class, "ApplicantListNew.csv");
         writeUsers(ds, HDB_Officer.class, "OfficerListNew.csv");
+        writeUsers(ds, Applicant.class, "ApplicantListNew.csv");
         writeUsers(ds, HDB_Manager.class, "ManagerListNew.csv");
 
         // Step 2: Save projects (they can exist independently)
@@ -75,6 +75,7 @@ public final class CSVWriter {
 
             ds.getUsers().stream()
                     .filter(roleClass::isInstance)
+                    .filter(u -> roleClass.isInstance(u) && (u.getClass() == roleClass || !Applicant.class.equals(roleClass)))
                     .forEach(u -> {
                         String fullName = u.getFirstName() + " " + u.getLastName();
                         String line = String.join(",",

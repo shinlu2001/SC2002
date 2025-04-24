@@ -145,8 +145,8 @@ public final class CSVReader {
         DataStore ds = DataStore.getInstance();
 
         // Step 1: Load all user types first
-        readUsers("ApplicantListNew.csv", "APPLICANT", ds);
         readUsers("OfficerListNew.csv", "OFFICER", ds);
+        readUsers("ApplicantListNew.csv", "APPLICANT", ds);
         readUsers("ManagerListNew.csv", "MANAGER", ds);
 
         // Build the user map for quick reference

@@ -111,7 +111,7 @@ public final class MenuPrinter {
                                               p.getAvailableUnits().get(i),
                                               p.getTotalUnits().get(i));
                 double price  = p.getPrices().get(i);
-                String elig   = "Yes";
+                String elig   = "Eligible";
 
                 printProjectTableRow(p, info, price, elig, first);
                 first = false;

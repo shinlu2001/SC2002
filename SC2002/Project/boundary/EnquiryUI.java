@@ -64,9 +64,10 @@ public class EnquiryUI { // this is more for applicants
         try {
             System.out.println("\nMaking Project-Related Enquiry");
             System.out.println("============================");
-            ApplicantUI.viewAllListings(projectController, applicantController, user);
+            System.out.println("(select 0 after viewing/filtering projects to start making enquiry)");
+            ApplicantUI.viewAllListings(sc, projectController, applicantController, user);
 
-            System.out.print("\nEnter Project ID: ");
+            System.out.print("Enter Project ID: ");
             int projectId = Input.getIntInput(sc);
             
             Project selectedProject = enquiryController.getProjectById(projectId);
@@ -126,8 +127,8 @@ public class EnquiryUI { // this is more for applicants
                 return;
             }
             Enquiry en = enquiryController.findEnquiryById(en_id);
-            if (en == null) {
-                System.err.println("Invalid ID");
+            if (en == null||!enquiries.contains(en)) {
+                System.err.println("Invalid ID or enquiry not actionable by you.");
                 return;
             }
             viewSingleEnquiry(en);

@@ -156,6 +156,7 @@ public class ApplicationController {
                     app.reject();
                     // Clean up applicant reference if needed
                     app.getApplicant().clearCurrentApplicationReference();
+                    System.out.println("Application rejected.");
                     return true;
                 }
             }
