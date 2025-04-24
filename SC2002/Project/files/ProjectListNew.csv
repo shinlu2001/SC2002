@@ -1,6 +1,6 @@
-Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officers,Visibility,ProjectID
-Sunrise Gardens,Punggol,2-ROOM,50,250000.0,3-ROOM,30,350000.0,1/5/2025,1/6/2025,Robert,3,"William,Jennifer",ON,50
-Parkview Heights,Tampines,2-ROOM,40,300000.0,3-ROOM,20,380000.0,10/4/2025,10/5/2025,Emily,2,Daniel,ON,1002
-Lakeside Residences,Jurong,2-ROOM,30,280000.0,3-ROOM,15,360000.0,15/3/2025,15/4/2025,James,2,"Mary,Kevin",OFF,30
-Marina Towers,Bedok,2-ROOM,35,320000.0,3-ROOM,25,390000.0,1/4/2025,1/5/2025,Robert,3,William,ON,1004
-Green Haven,Woodlands,2-ROOM,45,260000.0,3-ROOM,30,340000.0,5/5/2025,5/6/2025,Emily,2,"Jennifer,Daniel",OFF,45
+Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officers,Visibility,ProjectID,Available Units 1,Available Units 2
+Sunrise Gardens,Punggol,2-ROOM,50,250000.0,3-ROOM,30,350000.0,1/5/2025,1/6/2025,Robert,3,"",ON,1,50,30
+Parkview Heights,Tampines,2-ROOM,40,300000.0,3-ROOM,20,380000.0,10/4/2025,10/5/2025,Emily,2,"Daniel",ON,1002,40,20
+Lakeside Residences,Jurong,2-ROOM,30,280000.0,3-ROOM,15,360000.0,15/3/2025,15/4/2025,James,2,"Mary,Kevin",ON,1003,30,15
+Marina Towers,Bedok,2-ROOM,35,320000.0,3-ROOM,25,390000.0,1/4/2025,1/5/2025,Robert,3,"William,Jennifer",ON,1004,35,25
+Green Haven,Woodlands,2-ROOM,45,260000.0,3-ROOM,30,340000.0,5/5/2025,5/6/2025,Emily,2,"Jennifer,Daniel",ON,1005,45,29
