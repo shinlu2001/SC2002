@@ -12,8 +12,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+/**
+ * Boundary class handling all user interface operations for Applicants.
+ * <p>
+ * This class manages the interaction between Applicant users and the BTO Management System,
+ * providing a command-line interface for applicants to:
+ * <ul>
+ *   <li>Apply for BTO projects based on eligibility</li>
+ *   <li>View and manage their active applications</li>
+ *   <li>Browse and filter available BTO listings</li>
+ *   <li>Request withdrawal from applications</li>
+ *   <li>Submit and manage enquiries</li>
+ *   <li>View and update account details</li>
+ * </ul>
+ * </p>
+ * 
+ * @author Group 1
+ * @version 1.0
+ * @since 2025-04-24
+ */
 public class ApplicantUI {
 
+    /**
+     * Entry point for applicant functionality, displaying the main menu and handling user choices.
+     * 
+     * @param sc        The Scanner object for user input
+     * @param applicant The authenticated Applicant user
+     */
     public static void start(Scanner sc, Applicant applicant) {
         ApplicantController applicantController = new ApplicantController(applicant);
         ProjectController projectController = new ProjectController();
@@ -53,6 +78,19 @@ public class ApplicantUI {
         }
     }
 
+    /**
+     * Handles the BTO application process for an applicant.
+     * <p>
+     * This method guides the applicant through selecting an eligible project
+     * and flat type, then creates a new application if all criteria are met.
+     * It prevents applicants from applying for multiple projects simultaneously.
+     * </p>
+     * 
+     * @param sc        The Scanner object for user input
+     * @param applicant The Applicant user submitting the application
+     * @param ctrl      The ApplicantController handling business logic
+     * @param projCtrl  The ProjectController providing project data
+     */
     public static void applyForProject(Scanner sc,
             Applicant applicant,
             ApplicantController ctrl,
@@ -96,6 +134,17 @@ public class ApplicantUI {
         }
     }
 
+    /**
+     * Displays details of the applicant's current active application.
+     * <p>
+     * Shows application status, project details, and any pending actions.
+     * Provides appropriate messages if no active application exists or 
+     * if application is in a specific state (e.g., successful, withdrawal requested).
+     * </p>
+     * 
+     * @param sc        The Scanner object for user input
+     * @param applicant The Applicant user whose application is being viewed
+     */
     public static void viewActiveApplication(Scanner sc, Applicant applicant) {
         Optional<BTOApplication> oa = applicant.getCurrentApplication();
         if (oa.isEmpty()) {
@@ -118,6 +167,18 @@ public class ApplicantUI {
         } 
     }
 
+    /**
+     * Displays and filters BTO projects that the applicant is eligible to apply for.
+     * <p>
+     * Provides filtering options by neighborhood and room type to help applicants
+     * find suitable projects. Eligibility is determined based on applicant's marital
+     * status and age.
+     * </p>
+     * 
+     * @param sc        The Scanner object for user input
+     * @param applicant The Applicant user viewing eligible projects
+     * @param ctrl      The ApplicantController determining eligibility
+     */
     protected static void viewEligibleListings(Scanner sc, Applicant applicant,
             ApplicantController ctrl) {
         List<Project> eligible = ctrl.listEligibleProjects();
@@ -231,6 +292,18 @@ public class ApplicantUI {
         }
     }
 
+    /**
+     * Displays and filters all visible BTO projects, regardless of eligibility.
+     * <p>
+     * Provides comprehensive project browsing with filtering options by neighborhood
+     * and room type. Shows all projects with visibility set to ON.
+     * </p>
+     * 
+     * @param sc        The Scanner object for user input
+     * @param projCtrl  The ProjectController providing project data
+     * @param ctrl      The ApplicantController for eligibility checks
+     * @param applicant The Applicant user viewing the projects
+     */
     protected static void viewAllListings(Scanner sc, ProjectController projCtrl,
             ApplicantController ctrl,
             Applicant applicant) {
@@ -349,6 +422,17 @@ public class ApplicantUI {
         }
     }
 
+    /**
+     * Processes a withdrawal request for an applicant's current application.
+     * <p>
+     * Requires NRIC confirmation for security before processing the withdrawal.
+     * The actual withdrawal processing is delegated to the controller.
+     * </p>
+     * 
+     * @param sc        The Scanner object for user input
+     * @param applicant The Applicant requesting withdrawal
+     * @param ctrl      The ApplicantController handling the withdrawal process
+     */
     public static void withdrawApplication(Scanner sc,
             Applicant applicant,
             ApplicantController ctrl) {
@@ -373,6 +457,14 @@ public class ApplicantUI {
         }
     }
 
+    /**
+     * Displays complete account details for the applicant.
+     * <p>
+     * Shows personal information and receipt details if a booking has been made.
+     * </p>
+     * 
+     * @param applicant The Applicant whose details are being displayed
+     */
     public static void viewAccountDetails(Applicant applicant) {
         System.out.println("\nAccount Details:");
         System.out.println(applicant);

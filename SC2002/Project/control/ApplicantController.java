@@ -8,26 +8,65 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Controller for applicant-specific operations:
- * eligibility checks, application creation, viewing, booking, and withdrawal.
+ * Controller responsible for applicant-specific operations in the BTO Management System.
+ * <p>
+ * This controller handles all business logic related to applicant actions:
+ * <ul>
+ *   <li>Eligibility checks for projects and flat types</li>
+ *   <li>Application creation and management</li>
+ *   <li>Project listing and filtering</li>
+ *   <li>Application status management (booking requests, withdrawals)</li>
+ *   <li>Enquiry management</li>
+ * </ul>
+ * </p>
+ * <p>
+ * The controller enforces business rules such as:
+ * <ul>
+ *   <li>Single applicants ≥35 years old can only apply for 2-ROOM flats</li>
+ *   <li>Married applicants ≥21 years old can apply for any flat type</li>
+ *   <li>Applicants can only have one active application at a time</li>
+ *   <li>Officers cannot apply for projects they are registered to handle</li>
+ * </ul>
+ * </p>
+ * 
+ * @author Group 1
+ * @version 1.0
+ * @since 2025-04-24
  */
 public class ApplicantController {
     private final DataStore dataStore = DataStore.getInstance();
     private final Applicant applicant;
 
+    /**
+     * Constructs a new ApplicantController for the specified applicant.
+     * 
+     * @param applicant The applicant this controller will operate on
+     */
     public ApplicantController(Applicant applicant) {
         this.applicant = applicant;
     }
 
     /**
-     * @return the Applicant this controller manages
+     * Gets the applicant associated with this controller.
+     * 
+     * @return The Applicant instance
      */
     public Applicant getApplicant() {
         return applicant;
     }
 
     /**
-     * Eligibility rule: SINGLE >=35 only for 2-ROOM, MARRIED >=21 for any.
+     * Checks if the applicant is eligible for a specific room type based on marital status and age.
+     * <p>
+     * Eligibility rules:
+     * <ul>
+     *   <li>SINGLE applicants ≥35 years old can only apply for 2-ROOM flats</li>
+     *   <li>MARRIED applicants ≥21 years old can apply for any flat type</li>
+     * </ul>
+     * </p>
+     * 
+     * @param roomType The room type to check eligibility for (e.g., "2-ROOM", "3-ROOM")
+     * @return true if the applicant is eligible for the specified room type, false otherwise
      */
     public boolean isEligibleForRoomType(String roomType) {
         MaritalStatus ms = applicant.getMaritalStatus();
@@ -41,8 +80,13 @@ public class ApplicantController {
     }
 
     /**
-     * Checks if an active application exists (PENDING, SUCCESS, or BOOKED).
-     * Prints error and returns true if so.
+     * Checks if the applicant has an active application (PENDING, SUCCESS, or BOOKED).
+     * <p>
+     * This method enforces the requirement that applicants can only have one active 
+     * application at a time. If an active application exists, an error message is displayed.
+     * </p>
+     * 
+     * @return true if an active application exists, false otherwise
      */
     public boolean hasActiveApplication() {
         Optional<BTOApplication> current = applicant.getCurrentApplication();
@@ -62,10 +106,21 @@ public class ApplicantController {
     }
 
     /**
-     * Submits a new BTO application if no active one exists.
-     * Includes checks for officer registration conflicts.
+     * Creates a new BTO application for the applicant.
+     * <p>
+     * This method performs comprehensive validation before creating an application:
+     * <ul>
+     *   <li>Checks for existing active applications</li>
+     *   <li>Verifies officer registration conflicts</li>
+     *   <li>Validates project visibility and open status</li>
+     *   <li>Confirms eligibility for the requested room type</li>
+     *   <li>Ensures flat availability</li>
+     * </ul>
+     * </p>
      * 
-     * @return true if submitted, false otherwise.
+     * @param project The project to apply for
+     * @param roomType The flat type to apply for
+     * @return true if the application was successfully created, false otherwise
      */
     public boolean createApplication(Project project, String roomType) {
         if (hasActiveApplication()) {
@@ -120,8 +175,15 @@ public class ApplicantController {
     }
 
     /**
-     * Finds the project by ID and delegates to createApplication().
-     * Includes active-application guard.
+     * Applies for a project using the project ID and flat type.
+     * <p>
+     * This is a convenience method that finds the project by ID and delegates
+     * to {@link #createApplication(Project, String)}.
+     * </p>
+     * 
+     * @param projectId The ID of the project to apply for
+     * @param flatType The flat type to apply for
+     * @return true if the application was successfully created, false otherwise
      */
     public boolean applyForProject(int projectId, String flatType) {
         if (hasActiveApplication()) {
@@ -139,14 +201,21 @@ public class ApplicantController {
     }
 
     /**
-     * @return optional current application
+     * Gets the applicant's current application.
+     * 
+     * @return An Optional containing the current application, or empty if none exists
      */
     public Optional<BTOApplication> viewCurrentApplication() {
         return applicant.getCurrentApplication();
     }
 
     /**
-     * Requests booking if application status is SUCCESS.
+     * Requests a booking for the applicant's current successful application.
+     * <p>
+     * This can only be done if the application status is SUCCESS.
+     * </p>
+     * 
+     * @return true if the booking request was successful, false otherwise
      */
     public boolean requestBookingForCurrentApplication() {
         Optional<BTOApplication> opt = applicant.getCurrentApplication();
@@ -160,7 +229,17 @@ public class ApplicantController {
     }
 
     /**
-     * Requests withdrawal if status allows it (not REJECTED/WITHDRAWN).
+     * Requests withdrawal of the applicant's current application.
+     * <p>
+     * This method validates that:
+     * <ul>
+     *   <li>An active application exists</li>
+     *   <li>The application status allows withdrawal (not already REJECTED or WITHDRAWN)</li>
+     *   <li>A withdrawal has not already been requested</li>
+     * </ul>
+     * </p>
+     * 
+     * @return true if the withdrawal request was successful, false otherwise
      */
     public boolean requestWithdrawal() {
         Optional<BTOApplication> opt = applicant.getCurrentApplication();
@@ -184,19 +263,36 @@ public class ApplicantController {
         return true;
     }
 
-    // enquiry matters
-
+    /**
+     * Adds an enquiry to the applicant's list of enquiries.
+     * 
+     * @param en The enquiry to add
+     */
     public void addEnquiry(Enquiry en) {
         applicant.getEnquiries().add(en);
     }
 
+    /**
+     * Removes an enquiry from the applicant's list of enquiries.
+     * 
+     * @param en The enquiry to remove
+     */
     public void deleteEnquiry(Enquiry en) {
         applicant.getEnquiries().remove(en);
     }
 
     /**
-     * Lists all visible projects for which the applicant is eligible,
-     * excluding projects the applicant (if an officer) is registered for.
+     * Lists all projects for which the applicant is eligible to apply.
+     * <p>
+     * A project is considered eligible if:
+     * <ul>
+     *   <li>It is visible and currently open for applications</li>
+     *   <li>It offers at least one flat type the applicant is eligible for</li>
+     *   <li>The applicant (if an officer) is not registered to handle this project</li>
+     * </ul>
+     * </p>
+     * 
+     * @return A list of eligible projects
      */
     public List<Project> listEligibleProjects() {
         List<Project> potentiallyEligible = dataStore.getProjects().stream()
@@ -224,8 +320,14 @@ public class ApplicantController {
     }
 
     /**
-     * Check if an applicant is eligible to apply for a given project.
-     * For officers, also checks registration status.
+     * Checks if the applicant is eligible to apply for a specific project.
+     * <p>
+     * Considers project visibility, application period, flat type eligibility,
+     * and officer registration conflicts.
+     * </p>
+     * 
+     * @param project The project to check eligibility for
+     * @return true if the applicant is eligible, false otherwise
      */
     public boolean isEligibleForProject(Project project) {
         // Basic eligibility: visible, open, and has eligible flat types
@@ -253,7 +355,21 @@ public class ApplicantController {
     }
 
     /**
-     * Get a descriptive eligibility reason for a project
+     * Gets a descriptive reason for the applicant's eligibility or ineligibility
+     * for a specific project.
+     * <p>
+     * Possible reasons include:
+     * <ul>
+     *   <li>"Not Visible" - Project is not visible to applicants</li>
+     *   <li>"Not Open" - Project application period is not currently open</li>
+     *   <li>"Officer Registered" - Applicant is an officer registered for this project</li>
+     *   <li>"Not Eligible" - No eligible flat types for this applicant</li>
+     *   <li>"Eligible" - Applicant is eligible to apply</li>
+     * </ul>
+     * </p>
+     * 
+     * @param project The project to check
+     * @return A string describing the eligibility status
      */
     public String getEligibilityReason(Project project) {
         if (!project.isVisible()) {
@@ -283,7 +399,9 @@ public class ApplicantController {
     }
 
     /**
-     * Lists all visible projects in the system.
+     * Lists all projects that are currently visible in the system.
+     * 
+     * @return A list of all visible projects
      */
     public List<Project> listAllVisibleProjects() {
         return dataStore.getProjects().stream()
@@ -293,18 +411,45 @@ public class ApplicantController {
 
     /* ────────── UI‐Friendly Overloads for ApplicantUI ────────── */
 
+    /**
+     * UI-friendly overload for getting eligible projects.
+     * 
+     * @param ignored Ignored parameter (for UI convenience)
+     * @return A list of eligible projects
+     */
     public List<Project> getEligibleProjects(Applicant ignored) {
         return listEligibleProjects();
     }
 
+    /**
+     * UI-friendly overload for checking room type eligibility.
+     * 
+     * @param ignored Ignored parameter (for UI convenience)
+     * @param roomType The room type to check
+     * @return true if eligible, false otherwise
+     */
     public boolean isEligibleForRoomType(Applicant ignored, String roomType) {
         return isEligibleForRoomType(roomType);
     }
 
+    /**
+     * UI-friendly overload for creating an application.
+     * 
+     * @param ignored Ignored parameter (for UI convenience)
+     * @param project The project to apply for
+     * @param roomType The room type to apply for
+     * @return true if successful, false otherwise
+     */
     public boolean createApplication(Applicant ignored, Project project, String roomType) {
         return createApplication(project, roomType);
     }
 
+    /**
+     * UI-friendly overload for requesting withdrawal.
+     * 
+     * @param ignored Ignored parameter (for UI convenience)
+     * @return true if successful, false otherwise
+     */
     public boolean requestWithdrawal(Applicant ignored) {
         return requestWithdrawal();
     }
