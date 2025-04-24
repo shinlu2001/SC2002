@@ -1,6 +1,6 @@
 Enquiry ID,Creator NRIC,Project ID,Flat Type,Content,Response,Respondent NRIC
-5001,S1234567A,1001,2-ROOM,"Is this project near any MRT stations?","Yes, it's within walking distance to Punggol MRT station.",S1234567M
-5002,S2345678B,1001,3-ROOM,"What amenities are available in the area?","The area has shopping malls, schools, and parks nearby.",S1234567O
+5001,S1234567A,,2-ROOM,"Is this project near any MRT stations?","Yes, it's within walking distance to Punggol MRT station.",S1234567M
+5002,S2345678B,,3-ROOM,"What amenities are available in the area?","The area has shopping malls, schools, and parks nearby.",S1234567O
 5003,S3456789C,1002,3-ROOM,"Are there any plans for new schools in this neighborhood?","A new primary school is scheduled to open next year.",S2345678N
 5004,S4567890D,1002,3-ROOM,"What is the expected completion date?","The expected completion date is December 2027.",S3456789Q
 5005,S5678901E,1003,2-ROOM,"Is there a park nearby?","",
