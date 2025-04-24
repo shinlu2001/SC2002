@@ -104,7 +104,7 @@ public class ApplicantUI {
 
             } else {
                 System.out.println("Your most recent application was withdrawn/rejected. You may create a new application.");
-                System.out.println(applicant.getApplicationHistory().getLast());
+                System.out.println(applicant.getApplicationHistory().get(applicant.getApplicationHistory().size() - 1));
             }
             return;
         }
