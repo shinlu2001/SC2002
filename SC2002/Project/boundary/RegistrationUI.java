@@ -83,22 +83,33 @@ public class RegistrationUI {
                 try {
                     System.out.println("Last name (OPTIONAL - letters and digits only):");
                     System.out.print("Enter last name or just press Enter to skip: ");
-                    String input = Input.getStringInput(sc).trim();
-                    // Allow empty last name (user can press Enter to skip)
+                    
+                    // Manual input processing to allow empty last name
+                    String input = sc.nextLine().trim();
+                    
+                    // Check for exit/back commands
+                    if (input.equalsIgnoreCase("exit") || input.equalsIgnoreCase("back")) {
+                        System.out.println("Operation cancelled. Returning to previous menu.");
+                        return;
+                    }
+                    
+                    // Allow empty last name
                     if (input.isEmpty()) {
                         lastName = "";
                         System.out.println("No last name provided. Continuing with first name only.");
                         break;
                     }
+                    
+                    // Validate content if not empty
                     if (!input.matches("[A-Za-z0-9]+")) {
                         System.out.println("Last name may only contain letters and digits.");
                         continue;
                     }
+                    
                     lastName = input;
                     break;
-                } catch (InputExitException e) {
-                    System.out.println("Operation cancelled. Returning to previous menu.");
-                    return;
+                } catch (Exception e) {
+                    System.out.println("An error occurred. Please try again.");
                 }
             }
 
