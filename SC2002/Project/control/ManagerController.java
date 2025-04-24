@@ -407,49 +407,6 @@ public class ManagerController implements StaffControllerInterface {
         return enquiryController.respondToEnquiry(manager, enquiryId, response);
     }
 
-    // ---- Flat Booking Finalization ----
-
-    /**
-     * Finalizes a flat booking by decrementing the available unit count in the
-     * project.
-     * This should be called only after an officer has marked a flat as booked.
-     * This method ensures that unit counts are only decremented when a manager
-     * takes action, not when an officer initially books a flat.
-     * 
-     * @param application The application with the booked flat to finalize
-     * @return true if the booking was successfully finalized, false otherwise
-     */
-    public boolean finalizeBooking(BTOApplication application) {
-        if (application == null || application.getStatus() != ApplicationStatus.BOOKED ||
-                !manager.getManagedProjects().contains(application.getProject())) {
-            return false;
-        }
-
-        // The flat is already marked as booked by the officer, but the project's unit
-        // count
-        // has not been decremented yet. We'll do that now.
-        Project project = application.getProject();
-        String roomType = application.getRoomType();
-
-        // Decrement the available units for this room type
-        return project.decrementAvailableUnits(roomType);
-    }
-
-    /**
-     * Lists all applications that have been booked but not yet finalized.
-     * These are applications in BOOKED status where the project's unit count
-     * has not yet been decremented.
-     * 
-     * @return List of applications that need booking finalization
-     */
-    public List<BTOApplication> getPendingBookingFinalizations() {
-        return manager.getManagedProjects().stream()
-                .flatMap(proj -> appController.listApplicationsForProject(proj.getId()).stream())
-                .filter(app -> app.getStatus() == ApplicationStatus.BOOKED)
-                .collect(Collectors.toList());
-    }
-
-    // …plus stubs for other features: handle officer regs, generate reports…
     // TODO: Implement methods for enquiry management (view all, handle
     // project-specific)
     public List<Enquiry> getPendingEnquiries(EnquiryController enquiryCtrl) {
@@ -474,5 +431,4 @@ public class ManagerController implements StaffControllerInterface {
         }
         return relevantEnquiries;
     }
-
 }

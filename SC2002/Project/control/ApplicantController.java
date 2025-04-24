@@ -276,7 +276,7 @@ public class ApplicantController {
         }
 
         if (!project.getFlatTypes().stream().anyMatch(this::isEligibleForRoomType)) {
-            return "Age/Marital Status";
+            return "Not Eligible";
         }
 
         return "Eligible";

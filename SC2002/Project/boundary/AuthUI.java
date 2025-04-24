@@ -38,6 +38,7 @@ public class AuthUI {
 
             if (authController.changePassword(user, currentPassword, newPassword1)) {
                 System.out.println("Password changed successfully.");
+                System.out.println("Please login again! :D.");
                 return true;
             } else {
                 System.out.println("Password change failed. Please contact support.");

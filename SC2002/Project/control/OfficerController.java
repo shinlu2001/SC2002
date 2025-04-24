@@ -99,14 +99,23 @@ public class OfficerController implements StaffControllerInterface {
 
     /**
      * Process flat booking for an approved application.
-     * This marks the flat as booked but does NOT decrement the project's unit
-     * count.
-     * The manager will later finalize the booking which will decrement the count.
+     * Since the manager already decreased the unit count during application approval,
+     * this just needs to mark the flat as booked.
      * 
      * @param app The application to book a flat for
      * @return A receipt for the booking, or null if booking failed
      */
     public Receipt processFlatBooking(BTOApplication app) {
+        if (app == null) {
+            System.err.println("Error: No application provided for booking");
+            return null;
+        }
+        
+        if (app.getStatus() != ApplicationStatus.SUCCESS) {
+            System.err.println("Error: Application must be in SUCCESS status to book a flat, current status: " + app.getStatus());
+            return null;
+        }
+        
         // Find an available flat
         Optional<Flat> opt = dataStore.getFlats().stream()
                 .filter(f -> f.getProject().equals(app.getProject()))
@@ -114,18 +123,29 @@ public class OfficerController implements StaffControllerInterface {
                 .filter(f -> !f.isBooked())
                 .findFirst();
 
-        if (opt.isEmpty())
+        if (opt.isEmpty()) {
+            System.err.println("Error: No available flats of type " + app.getRoomType() + 
+                " found in project " + app.getProject().getName());
             return null;
+        }
 
         Flat flat = opt.get();
 
-        // Book the flat
+        // Book the flat - no decrement needed as manager already did this during approval
         app.bookFlat(flat);
-
-        // NOTE: We do NOT decrement available units here - that will be done
-        // when the manager finalizes the booking
+        
+        // Verify that booking was successful
+        if (app.getStatus() != ApplicationStatus.BOOKED || app.getBookedFlat() == null) {
+            System.err.println("Error: Booking attempt failed. Status=" + app.getStatus());
+            return null;
+        }
 
         // Generate receipt
-        return new Receipt(app, flat);
+        try {
+            return new Receipt(app, flat);
+        } catch (Exception e) {
+            System.err.println("Error generating receipt: " + e.getMessage());
+            return null;
+        }
     }
 }

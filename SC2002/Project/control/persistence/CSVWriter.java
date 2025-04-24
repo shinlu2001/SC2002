@@ -106,21 +106,26 @@ public final class CSVWriter {
             // Write header
             bw.write("Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1," +
                     "Type 2,Number of units for Type 2,Selling price for Type 2," +
-                    "Application opening date,Application closing date,Manager,Officer Slot,Officers,ProjectID");
+                    "Application opening date,Application closing date,Manager,Officer Slot,Officers,Visibility,ProjectID," +
+                    "Available Units 1,Available Units 2");  // Added available units fields
             bw.newLine();
 
             for (Project p : ds.getProjects()) {
                 // Only support up to 2 flat types for CSV compatibility
                 List<String> types = p.getFlatTypes();
-                List<Integer> units = p.getTotalUnits();
+                List<Integer> totalUnits = p.getTotalUnits();
+                List<Integer> availableUnits = p.getAvailableUnits();  // Get current available units
                 List<Double> prices = p.getPrices();
 
                 String type1 = types.size() > 0 ? types.get(0) : "";
                 String type2 = types.size() > 1 ? types.get(1) : "";
-                String units1 = units.size() > 0 ? String.valueOf(units.get(0)) : "";
-                String units2 = units.size() > 1 ? String.valueOf(units.get(1)) : "";
+                String units1 = totalUnits.size() > 0 ? String.valueOf(totalUnits.get(0)) : "";
+                String units2 = totalUnits.size() > 1 ? String.valueOf(totalUnits.get(1)) : "";
                 String price1 = prices.size() > 0 ? String.valueOf(prices.get(0)) : "";
                 String price2 = prices.size() > 1 ? String.valueOf(prices.get(1)) : "";
+                // Save current available units explicitly
+                String avail1 = availableUnits.size() > 0 ? String.valueOf(availableUnits.get(0)) : "";
+                String avail2 = availableUnits.size() > 1 ? String.valueOf(availableUnits.get(1)) : "";
 
                 String openDate = p.getOpenDate() != null
                         ? p.getOpenDate().format(DF)
@@ -131,6 +136,7 @@ public final class CSVWriter {
 
                 String managerName = p.getManager() != null ? p.getManager().getFirstName() : "";
                 String officerSlot = String.valueOf(p.getOfficerSlotLimit());
+                String visibility = p.getVisibility().name();
 
                 // Get all assigned officers - only include approved registrations
                 String officers = ds.getRegistrations().stream()
@@ -155,7 +161,10 @@ public final class CSVWriter {
                         managerName,
                         officerSlot,
                         '"' + officers + '"',
-                        String.valueOf(p.getId()));
+                        visibility,
+                        String.valueOf(p.getId()),
+                        avail1,
+                        avail2);  // Added available units
                 bw.write(line);
                 bw.newLine();
             }

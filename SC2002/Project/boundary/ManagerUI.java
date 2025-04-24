@@ -982,7 +982,7 @@ public class ManagerUI {
 
         // Display projects and their assigned officers
         System.out.printf("%-5s %-" + Menu.COL_NAME + "s %-15s %-10s %-15s%n",
-                "ID", "Project Name", "Total Slots", "Used Slots", "Assigned Officers");
+                "ID", "Project Name", "Available Slots", "Used Slots", "Assigned Officers");
         System.out.println("-".repeat(5 + Menu.COL_NAME + 15 + 10 + 15 + 4));
 
         for (Project project : managedProjects) {

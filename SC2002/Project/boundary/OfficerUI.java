@@ -51,7 +51,8 @@ public class OfficerUI {
 
                     // Account
                     case 14 -> viewAccountDetails(officer);
-                    case 15 -> AuthUI.changePassword(sc, officer);
+                    case 15 -> {AuthUI.changePassword(sc, officer);
+                        exit = true;} 
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
@@ -424,6 +425,7 @@ public class OfficerUI {
             System.out.println(receipt.getReceiptDetails());
         } else {
             System.out.println("Booking failed. Please check availability or application status.");
+            System.out.println("The system could not find an available flat of the requested type or the application status is incorrect.");
         }
     }
 

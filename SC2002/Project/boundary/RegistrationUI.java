@@ -198,9 +198,6 @@ public class RegistrationUI {
 
             if (result == RegistrationResult.SUCCESS) {
                 System.out.println("Registration successful! Default password = \"password\"");
-                if (roleChoice == 2 || roleChoice == 3) {
-                    System.out.println("Note: Staff accounts require approval by a manager before they can be used.");
-                }
             } else {
                 System.out.println("NRIC already exists. Registration failed.");
             }

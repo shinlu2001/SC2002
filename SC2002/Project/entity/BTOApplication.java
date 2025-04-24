@@ -287,16 +287,14 @@ public class BTOApplication {
     /**
      * Books a flat for this application.
      * Sets the status to BOOKED if the current status is SUCCESS.
-     * Important: This only marks the flat as booked internally but DOES NOT
-     * update the project's flat count. The flat count should only be updated
-     * by a manager's action.
+     * No need to update project's available units as this was already handled during manager approval.
      * 
      * @param flat The flat to book
      */
     public void bookFlat(Flat flat) {
         if (status == ApplicationStatus.SUCCESS && flat != null && !flat.isBooked()) {
             this.bookedFlat = flat;
-            flat.setBooked(true); // Mark as booked but don't decrement project availability
+            flat.setBooked(true); // Mark flat as booked
             setStatus(ApplicationStatus.BOOKED);
         } else {
             System.err.println("Cannot book flat for application ID " + id
