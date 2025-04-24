@@ -376,5 +376,8 @@ public class ApplicantUI {
     public static void viewAccountDetails(Applicant applicant) {
         System.out.println("\nAccount Details:");
         System.out.println(applicant);
+        if (applicant.getReceipt()!=null) {
+            System.out.println(applicant.getReceipt().getReceiptDetails());
+        }
     }
 }

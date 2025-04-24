@@ -37,6 +37,7 @@ public class Applicant extends User {
     private final int id; // unique applicant ID
     private BTOApplication currentApplication; // may be null
     private final List<BTOApplication> applicationHistory;
+    private Receipt receipt=null;
     private List<Enquiry> applicantEnquiries = new ArrayList<>();
 
     /**
@@ -62,7 +63,15 @@ public class Applicant extends User {
     public int getId() {
         return id;
     }
+    
+    public Receipt getReceipt() {
+        return receipt;
+    }
 
+    public void setReceipt(Receipt r) {
+        receipt = r;
+    }
+    
     /**
      * Gets the applicant's unique ID.
      * Added to avoid confusion with User ID if User gets one.

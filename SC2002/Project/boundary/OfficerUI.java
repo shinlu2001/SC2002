@@ -107,6 +107,7 @@ public class OfficerUI {
 
             if (receipt != null) {
                 System.out.println("\nBooking Successful! Generating Receipt...");
+                selectedApp.getApplicant().setReceipt(receipt);
                 System.out.println(receipt.getReceiptDetails());
             } else {
                 System.out.println("Booking failed. Please check availability or application status.");
@@ -135,6 +136,9 @@ public class OfficerUI {
         if (appOpt.isPresent()) {
             System.out.println("\nCurrent Applicant Application:");
             System.out.println("  " + appOpt.get());
+        }
+        if (officer.getReceipt()!=null) {
+            System.out.println(officer.getReceipt().getReceiptDetails());
         }
     }
 
