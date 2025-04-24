@@ -1,4 +1,4 @@
 Name,NRIC,Age,Marital Status,Password
-Robert Ng,S1234567M,45,MARRIED,manager123
-Emily Tan,S2345678N,38,SINGLE,secure456
-James Lim,S3456789P,52,SINGLE,mgr2023pwd
+Robert Ng,S1234567M,45,MARRIED,password
+Emily Tan,S2345678N,38,SINGLE,password
+James Lim,S3456789P,52,SINGLE,password

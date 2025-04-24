@@ -1,6 +1,6 @@
 Name,NRIC,Age,Marital Status,Password
-John Tan,S1234567A,35,MARRIED,password123
-Alice Wong,S2345678B,28,SINGLE,securepass
-Michael Lee,S3456789C,42,MARRIED,applicant2023
-Sarah Chen,S4567890D,31,SINGLE,mypassword
-David Lim,S5678901E,25,SINGLE,safepass2023
+John Tan,S1234567A,35,MARRIED,password
+Alice Wong,S2345678B,28,SINGLE,password
+Michael Lee,S3456789C,42,MARRIED,password
+Sarah Chen,S4567890D,31,SINGLE,password
+David Lim,S5678901E,25,SINGLE,password
