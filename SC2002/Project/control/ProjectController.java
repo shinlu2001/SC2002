@@ -1,15 +1,19 @@
 package SC2002.Project.control;
 
 import SC2002.Project.control.persistence.DataStore;
+import SC2002.Project.entity.BTOApplication;
 import SC2002.Project.entity.Enquiry;
+import SC2002.Project.entity.Flat;
 import SC2002.Project.entity.HDB_Manager;
 import SC2002.Project.entity.HDB_Officer;
 import SC2002.Project.entity.Project;
+import SC2002.Project.entity.enums.ApplicationStatus;
 import SC2002.Project.entity.enums.Visibility;
 import SC2002.Project.util.IdGenerator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
  * Controller for managing BTO housing projects in the system.
@@ -155,6 +159,7 @@ public class ProjectController {
 
     /**
      * Updates the name of an existing project.
+     * Ensures the change is propagated to all related applications and bookings.
      * 
      * @param projectId The ID of the project to update
      * @param newName   The new name for the project
@@ -163,7 +168,9 @@ public class ProjectController {
     public boolean renameProject(int projectId, String newName) {
         Project p = findById(projectId);
         if (p != null) {
+            String oldName = p.getName();
             p.setName(newName);
+            System.out.println("Project name updated from '" + oldName + "' to '" + newName + "'");
             return true;
         }
         return false;
@@ -187,6 +194,7 @@ public class ProjectController {
 
     /**
      * Updates the number of units available for a specific flat type.
+     * Ensures that units can't be reduced below the number already booked.
      * 
      * @param projectId The ID of the project to update
      * @param flatType  The flat type to update (e.g., "2-ROOM")
@@ -196,7 +204,23 @@ public class ProjectController {
     public boolean updateFlatTypeUnits(int projectId, String flatType, int newUnits) {
         Project p = findById(projectId);
         if (p != null) {
-            return p.updateFlatTypeUnits(flatType, newUnits);
+            int index = p.getFlatTypeIndex(flatType.toUpperCase());
+            if (index != -1) {
+                int totalUnits = p.getTotalUnits().get(index);
+                int availableUnits = p.getAvailableUnits().get(index);
+                int bookedUnits = totalUnits - availableUnits;
+
+                // Ensure we don't reduce below the number already booked
+                if (newUnits < bookedUnits) {
+                    System.out.println("Error: Cannot reduce units below the number already booked (" +
+                            bookedUnits + " units currently booked)");
+                    return false;
+                }
+
+                return p.updateFlatTypeUnits(flatType, newUnits);
+            }
+            System.err.println("Error: Flat type " + flatType + " not found in project " + p.getName());
+            return false;
         }
         return false;
     }
@@ -221,6 +245,7 @@ public class ProjectController {
 
     /**
      * Removes a flat type from an existing project.
+     * Ensures all applications for this flat type are updated to REJECTED status.
      * 
      * @param projectId The ID of the project to update
      * @param flatType  The flat type to remove
@@ -229,8 +254,40 @@ public class ProjectController {
     public boolean removeFlatType(int projectId, String flatType) {
         Project p = findById(projectId);
         if (p != null) {
-            int index = p.getFlatTypes().indexOf(flatType);
+            int index = p.getFlatTypes().indexOf(flatType.toUpperCase());
             if (index != -1) {
+                // Find all applications for this project and flat type
+                List<BTOApplication> affectedApplications = dataStore.getApplications().stream()
+                        .filter(app -> app.getProject().getId() == projectId
+                                && app.getRoomType().equalsIgnoreCase(flatType)
+                                && (app.getStatus() == ApplicationStatus.PENDING
+                                        || app.getStatus() == ApplicationStatus.SUCCESS
+                                        || app.getStatus() == ApplicationStatus.BOOKED))
+                        .collect(Collectors.toList());
+
+                // If there are active applications, reject them
+                if (!affectedApplications.isEmpty()) {
+                    System.out.println("Warning: Rejecting " + affectedApplications.size() +
+                            " active applications for " + flatType + " in project " + p.getName());
+                    for (BTOApplication app : affectedApplications) {
+                        // For booked applications, first cancel the booking
+                        if (app.getStatus() == ApplicationStatus.BOOKED && app.getBookedFlat() != null) {
+                            Flat bookedFlat = app.getBookedFlat();
+                            bookedFlat.unbook(); // Clean up flat booking state
+
+                            // Remove the flat reference and directly set status to REJECTED
+                            app.setBookedFlat(null);
+                            app.setStatus(ApplicationStatus.REJECTED);
+
+                            // Increment available units (already handled by unbook)
+                            p.incrementAvailableUnits(flatType);
+                        } else {
+                            // For non-booked applications, just set to REJECTED
+                            app.setStatus(ApplicationStatus.REJECTED);
+                        }
+                    }
+                }
+
                 int currentUnits = p.getTotalUnits().get(index);
                 return p.removeFlatType(flatType, currentUnits);
             }
@@ -626,7 +683,7 @@ public class ProjectController {
     /**
      * Deletes a project from the system.
      * Verifies that the manager requesting deletion is the one assigned to the
-     * project.
+     * project, and updates all related applications to REJECTED status.
      * 
      * @param projectId The ID of the project to delete
      * @param manager   The manager requesting deletion
@@ -635,8 +692,44 @@ public class ProjectController {
     public boolean deleteProject(int projectId, HDB_Manager manager) {
         Project p = findById(projectId);
         if (p != null && p.getManager().equals(manager)) {
+            // Find all applications for this project
+            List<BTOApplication> affectedApplications = dataStore.getApplications().stream()
+                    .filter(app -> app.getProject().getId() == projectId
+                            && (app.getStatus() == ApplicationStatus.PENDING
+                                    || app.getStatus() == ApplicationStatus.SUCCESS
+                                    || app.getStatus() == ApplicationStatus.BOOKED))
+                    .collect(Collectors.toList());
+
+            // If there are active applications, reject them
+            if (!affectedApplications.isEmpty()) {
+                System.out.println("Warning: Rejecting " + affectedApplications.size() +
+                        " active applications for project " + p.getName());
+                for (BTOApplication app : affectedApplications) {
+                    // Handle BOOKED applications specially
+                    if (app.getStatus() == ApplicationStatus.BOOKED && app.getBookedFlat() != null) {
+                        Flat bookedFlat = app.getBookedFlat();
+                        bookedFlat.unbook(); // Properly clean up flat booking state
+                        app.cancelBooking(); // This properly resets the application's booking state
+                    }
+                    app.reject(); // Finally set status to REJECTED
+                }
+            }
+
+            // Remove assigned officers from this project
+            for (HDB_Officer officer : new ArrayList<>(p.getAssignedOfficers())) {
+                officer.removeAssignedProject(p);
+            }
+
+            // Remove all flats associated with this project
+            dataStore.getFlats().removeIf(flat -> flat.getProject().equals(p));
+
+            // Remove all registrations associated with this project
+            dataStore.getRegistrations().removeIf(reg -> reg.getProject().equals(p));
+
+            // Remove from manager and datastore
             manager.removeManagedProject(p);
             dataStore.getProjects().remove(p);
+            System.out.println("Project '" + p.getName() + "' successfully deleted");
             return true;
         }
         return false;

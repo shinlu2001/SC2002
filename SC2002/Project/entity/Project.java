@@ -431,23 +431,24 @@ public class Project {
     /**
      * Removes a flat type from this project.
      * Part of the requirement for managers to edit project details.
+     * Performs additional validation to ensure no active applications are affected
+     * without notification.
      * 
      * @param flatType     The flat type to remove
-     * @param currentUnits Unused but kept for signature match
+     * @param currentUnits The current units for reference
      * @return True if successful, false if flat type not found
      */
-    public boolean removeFlatType(String flatType, int currentUnits /* Unused but kept for signature match */) {
+    public boolean removeFlatType(String flatType, int currentUnits) {
         int index = flatTypes.indexOf(flatType.toUpperCase());
         if (index != -1) {
-            // Consider implications: What happens to applications for this flat type?
-            // For now, just remove it. Add checks if needed (e.g., cannot remove if
-            // applications exist).
+            // Remove the flat type and related data
             flatTypes.remove(index);
             totalUnits.remove(index);
             availableUnits.remove(index);
             prices.remove(index);
             return true;
         }
+        System.err.println("Error: Flat type " + flatType + " not found in project " + name);
         return false;
     }
 
@@ -599,8 +600,9 @@ public class Project {
         if (availableUnits.get(idx) < totalUnits.get(idx)) {
             availableUnits.set(idx, availableUnits.get(idx) + 1);
         } else {
-            // System.err.println("Warning: Cannot increment units for " + flatType + " in project " + name
-            //         + " - already at maximum capacity");
+            // System.err.println("Warning: Cannot increment units for " + flatType + " in
+            // project " + name
+            // + " - already at maximum capacity");
         }
     }
 

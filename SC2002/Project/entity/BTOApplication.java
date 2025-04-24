@@ -181,11 +181,12 @@ public class BTOApplication {
     public LocalDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }
-    
+
     /**
      * Gets the HDB manager associated with this application.
      * 
-     * @return The HDB manager assigned to handle this application, or null if none assigned
+     * @return The HDB manager assigned to handle this application, or null if none
+     *         assigned
      */
     public HDB_Manager getManager() {
         return manager;
@@ -199,7 +200,7 @@ public class BTOApplication {
      * 
      * @param newStatus The new status to set
      */
-    void setStatus(ApplicationStatus newStatus) {
+    public void setStatus(ApplicationStatus newStatus) {
         this.status = newStatus;
         this.lastUpdateDate = LocalDateTime.now();
     }
@@ -223,7 +224,7 @@ public class BTOApplication {
         this.bookingRequested = flag;
         this.lastUpdateDate = LocalDateTime.now();
     }
-    
+
     /**
      * Sets the HDB manager responsible for handling this application.
      * 
@@ -232,6 +233,16 @@ public class BTOApplication {
     public void setManager(HDB_Manager manager) {
         this.manager = manager;
         this.lastUpdateDate = LocalDateTime.now();
+    }
+
+    /**
+     * Package-private method to set the booked flat directly.
+     * This is used during cancellation or rejection of bookings.
+     * 
+     * @param flat The flat to set (or null to clear booking)
+     */
+    public void setBookedFlat(Flat flat) {
+        this.bookedFlat = flat;
     }
 
     // ─── Business Actions ────────────────────────────────────────────────────
@@ -284,10 +295,18 @@ public class BTOApplication {
     /**
      * Manager rejects the application.
      * Fulfills the requirement that managers can reject applications.
-     * Only allowed if application is in PENDING status.
+     * If application is in BOOKED status, cancels the booking first.
      */
     public void reject() {
-        if (status == ApplicationStatus.PENDING) {
+        if (status == ApplicationStatus.PENDING || status == ApplicationStatus.SUCCESS) {
+            setStatus(ApplicationStatus.REJECTED);
+        } else if (status == ApplicationStatus.BOOKED) {
+            // If application is booked, we need to cancel the booking first
+            if (bookedFlat != null) {
+                bookedFlat.unbook();
+                project.incrementAvailableUnits(roomType);
+                bookedFlat = null;
+            }
             setStatus(ApplicationStatus.REJECTED);
         }
     }
@@ -308,7 +327,8 @@ public class BTOApplication {
     /**
      * Books a flat for this application.
      * Sets the status to BOOKED if the current status is SUCCESS.
-     * No need to update project's available units as this was already handled during manager approval.
+     * No need to update project's available units as this was already handled
+     * during manager approval.
      * 
      * @param flat The flat to book
      */
@@ -325,9 +345,9 @@ public class BTOApplication {
     }
 
     /**
-     * Future hook: cancel a booked flat and revert status, re‑increment units.
-     * This method is NOT IN USE currently but provides functionality for future
-     * enhancement.
+     * Cancels a booked flat and reverts status, re‑increments units.
+     * This method is used when an application's booking needs to be cancelled,
+     * such as during withdrawal or when a project/flat type is deleted.
      * 
      * @return True if booking was successfully canceled, false otherwise
      */
@@ -346,8 +366,7 @@ public class BTOApplication {
 
             try {
                 // Attempt to reset the flat booking status
-                flatToReset.setBooked(false);
-                flatToReset.setBookingId(""); // Clear the booking ID
+                flatToReset.unbook();
                 // Attempt to increment available units
                 project.incrementAvailableUnits(roomTypeToIncrement);
                 // If both operations succeed, update application state
@@ -359,6 +378,7 @@ public class BTOApplication {
                 // If an error occurs, attempt to restore original state if needed
                 if (!flatToReset.isBooked()) {
                     flatToReset.setBooked(true); // Restore the flat's booked status
+                    flatToReset.setBookingId(String.valueOf(this.id)); // Restore booking ID
                 }
                 return false;
             }
