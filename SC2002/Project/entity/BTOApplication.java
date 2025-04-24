@@ -49,6 +49,7 @@ public class BTOApplication {
     private Flat bookedFlat = null;
     private final LocalDateTime submissionDate;
     private LocalDateTime lastUpdateDate;
+    private HDB_Manager manager; // Add manager field to track which manager is handling this application
 
     /**
      * Creates a new BTOApplication with an auto-generated ID.
@@ -180,6 +181,15 @@ public class BTOApplication {
     public LocalDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }
+    
+    /**
+     * Gets the HDB manager associated with this application.
+     * 
+     * @return The HDB manager assigned to handle this application, or null if none assigned
+     */
+    public HDB_Manager getManager() {
+        return manager;
+    }
 
     // ─── Mutators ─────────────────────────────────────────────────────────────
 
@@ -211,6 +221,16 @@ public class BTOApplication {
      */
     public void setBookingRequested(boolean flag) {
         this.bookingRequested = flag;
+        this.lastUpdateDate = LocalDateTime.now();
+    }
+    
+    /**
+     * Sets the HDB manager responsible for handling this application.
+     * 
+     * @param manager The HDB manager to assign to this application
+     */
+    public void setManager(HDB_Manager manager) {
+        this.manager = manager;
         this.lastUpdateDate = LocalDateTime.now();
     }
 

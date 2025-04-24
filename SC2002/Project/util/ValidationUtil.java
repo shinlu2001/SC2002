@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 public final class ValidationUtil {
     // Updated regex to match spec: ^[A-Za-z]\d{7}[A-Za-z]$
     private static final Pattern NRIC = Pattern.compile("^[A-Za-z]\\d{7}[A-Za-z]$");
+    // New pattern to ensure NRIC starts with S or T
+    private static final Pattern NRIC_SG = Pattern.compile("^[ST]\\d{7}[A-Za-z]$");
 
     private ValidationUtil() {}
 
@@ -18,6 +20,16 @@ public final class ValidationUtil {
     public static boolean isValidNric(String nric) {
         if (nric == null) return false;
         return NRIC.matcher(nric.toUpperCase()).matches(); // Ensure case-insensitivity for letters
+    }
+    
+    /**
+     * Validates if a string is a properly formatted Singapore NRIC (starts with S or T)
+     * @param nric The NRIC string to validate
+     * @return true if the NRIC is valid, false otherwise
+     */
+    public static boolean isValidSingaporeNric(String nric) {
+        if (nric == null) return false;
+        return NRIC_SG.matcher(nric.toUpperCase()).matches(); // Ensure case-insensitivity for letters
     }
     
     /**
@@ -35,6 +47,24 @@ public final class ValidationUtil {
         if (!NRIC.matcher(nric.toUpperCase()).matches()) {
             return new ValidationResult(false, 
                 "Invalid NRIC format. NRIC must start with a letter, followed by 7 digits, and end with a letter (e.g., S1234567A)");
+        }
+        return new ValidationResult(true, null);
+    }
+    
+    /**
+     * Validates if a string is a properly formatted Singapore NRIC (starts with S or T) and provides a detailed error message if not
+     * @param nric The NRIC string to validate
+     * @return A validation result containing success status and error message if applicable
+     */
+    public static ValidationResult validateSingaporeNric(String nric) {
+        ValidationResult basicValidation = validateNric(nric);
+        if (!basicValidation.isValid()) {
+            return basicValidation;
+        }
+        
+        if (!NRIC_SG.matcher(nric.toUpperCase()).matches()) {
+            return new ValidationResult(false, 
+                "Invalid Singapore NRIC format. NRIC must start with S or T, followed by 7 digits, and end with a letter (e.g., S1234567A)");
         }
         return new ValidationResult(true, null);
     }
