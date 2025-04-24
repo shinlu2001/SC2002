@@ -1,11 +1,11 @@
 Enquiry ID,Creator NRIC,Project ID,Flat Type,Content,Response,Respondent NRIC
 5001,S1234567A,,2-ROOM,"Is this project near any MRT stations?","Yes, it's within walking distance to Punggol MRT station.",S1234567M
 5002,S2345678B,,3-ROOM,"What amenities are available in the area?","The area has shopping malls, schools, and parks nearby.",S1234567O
-5003,S3456789C,1002,3-ROOM,"Are there any plans for new schools in this neighborhood?","A new primary school is scheduled to open next year.",S2345678N
-5004,S4567890D,1002,3-ROOM,"What is the expected completion date?","The expected completion date is December 2027.",S3456789Q
-5005,S5678901E,1003,2-ROOM,"Is there a park nearby?","",
-5006,S1234567A,1003,3-ROOM,"How many parking lots are available?","Each unit comes with one parking space. Additional spaces can be purchased.",S3456789P
-5007,S2345678B,1004,3-ROOM,"Are there any childcare centers in the vicinity?","",
-5008,S3456789C,1004,3-ROOM,"What is the ceiling height of the units?","The standard ceiling height is 2.8 meters.",S1234567O
-5009,S4567890D,1005,2-ROOM,"Is there a limit to the number of occupants?","The occupancy limit follows HDB guidelines based on flat type.",S2345678N
-5010,S5678901E,1005,3-ROOM,"Are pets allowed in the development?","",
+5003,S3456789C,,3-ROOM,"Are there any plans for new schools in this neighborhood?","A new primary school is scheduled to open next year.",S2345678N
+5004,S4567890D,,3-ROOM,"What is the expected completion date?","The expected completion date is December 2027.",S3456789Q
+5005,S5678901E,,2-ROOM,"Is there a park nearby?","",
+5006,S1234567A,,3-ROOM,"How many parking lots are available?","Each unit comes with one parking space. Additional spaces can be purchased.",S3456789P
+5007,S2345678B,,3-ROOM,"Are there any childcare centers in the vicinity?","",
+5008,S3456789C,,3-ROOM,"What is the ceiling height of the units?","The standard ceiling height is 2.8 meters.",S1234567O
+5009,S4567890D,,2-ROOM,"Is there a limit to the number of occupants?","The occupancy limit follows HDB guidelines based on flat type.",S2345678N
+5010,S5678901E,,3-ROOM,"Are pets allowed in the development?","",

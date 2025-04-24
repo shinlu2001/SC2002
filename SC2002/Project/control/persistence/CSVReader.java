@@ -267,7 +267,7 @@ public final class CSVReader {
                     LocalDate closeDate = LocalDate.parse(t[9].trim(), DF);
                     String mgrName = t[10].trim();
                     int slotCount = Integer.parseInt(t[11].trim());
-                    
+
                     // Parse visibility (new field) if present, default to ON if not
                     Visibility visibility = Visibility.ON;
                     if (t.length > 13 && !t[13].trim().isEmpty()) {
@@ -286,27 +286,31 @@ public final class CSVReader {
                             IdGenerator.ensureProjectIdAtLeast(projId);
                         } catch (NumberFormatException e) {
                             // Use the generated ID if parsing fails
+                            System.err.println(
+                                    "Invalid project ID for project '" + name + "', using generated ID: " + projId);
                         }
                     }
 
                     // Get available units if provided
                     int availUnits1 = units1; // Default to total units
                     int availUnits2 = units2;
-                    
+
                     // Read available units from file (new field)
                     if (t.length > 15 && !t[15].trim().isEmpty()) {
                         try {
                             availUnits1 = Integer.parseInt(t[15].trim());
                         } catch (NumberFormatException e) {
-                            System.err.println("Invalid available units value for type 1 in project '" + name + "', using default (total units)");
+                            System.err.println("Invalid available units value for type 1 in project '" + name
+                                    + "', using default (total units)");
                         }
                     }
-                    
+
                     if (t.length > 16 && !t[16].trim().isEmpty()) {
                         try {
                             availUnits2 = Integer.parseInt(t[16].trim());
                         } catch (NumberFormatException e) {
-                            System.err.println("Invalid available units value for type 2 in project '" + name + "', using default (total units)");
+                            System.err.println("Invalid available units value for type 2 in project '" + name
+                                    + "', using default (total units)");
                         }
                     }
 
@@ -321,7 +325,7 @@ public final class CSVReader {
                             closeDate,
                             visibility,
                             slotCount);
-                    
+
                     // Set available units explicitly rather than initializing to total
                     prj.setAvailableUnits(List.of(availUnits1, availUnits2));
 
@@ -350,32 +354,34 @@ public final class CSVReader {
                     ds.getProjects().add(prj);
                     PROJECT_MAP.put(prj.getId(), prj);
 
-                    // Create Flat objects for each flat type based on total units
-                    // We'll create all flats, but mark some as booked based on availability counts
-                    List<String> flatTypes = prj.getFlatTypes();
-                    List<Integer> totalUnits = prj.getTotalUnits();
-                    List<Integer> availableUnits = prj.getAvailableUnits();
-                    List<Double> prices = prj.getPrices();
+                    // Only create flats if we're not using snapshot files
+                    // For snapshot loading, flats will be loaded from the dedicated flat CSV file
+                    if (!useSnapshot) {
+                        // Create Flat objects for each flat type based on total units
+                        List<String> flatTypes = prj.getFlatTypes();
+                        List<Integer> totalUnits = prj.getTotalUnits();
+                        List<Integer> availableUnits = prj.getAvailableUnits();
+                        List<Double> prices = prj.getPrices();
 
-                    // Create Flat objects for each unit in each flat type
-                    for (int i = 0; i < flatTypes.size(); i++) {
-                        String type = flatTypes.get(i);
-                        int numUnits = totalUnits.get(i);
-                        int availUnits = availableUnits.get(i);
-                        double price = prices.get(i);
-                        int bookedUnits = numUnits - availUnits;
+                        // Create Flat objects for each unit in each flat type
+                        for (int i = 0; i < flatTypes.size(); i++) {
+                            String type = flatTypes.get(i);
+                            int numUnits = totalUnits.get(i);
+                            int availUnits = availableUnits.get(i);
+                            double price = prices.get(i);
+                            int bookedUnits = numUnits - availUnits;
 
-                        // Create Flat objects for this flat type
-                        for (int j = 0; j < numUnits; j++) {
-                            Flat flat = new Flat(IdGenerator.nextFlatId(), prj, type, price);
-                            
-                            // Mark flats as booked if they exceed available count
-                            // e.g., if 10 total units but only 8 available, the first 2 should be marked booked
-                            if (j < bookedUnits) {
-                                flat.setBooked(true);
+                            // Create Flat objects for this flat type
+                            for (int j = 0; j < numUnits; j++) {
+                                Flat flat = new Flat(IdGenerator.nextFlatId(), prj, type, price);
+
+                                // Mark flats as booked if they exceed available count
+                                if (j < bookedUnits) {
+                                    flat.setBooked(true);
+                                }
+
+                                ds.getFlats().add(flat);
                             }
-                            
-                            ds.getFlats().add(flat);
                         }
                     }
 
@@ -520,6 +526,23 @@ public final class CSVReader {
                     User user = USER_MAP.get(applicantNric.toLowerCase());
                     Project project = PROJECT_MAP.get(projectId);
 
+                    if (project == null) {
+                        // Try to find project by ID from the data store if not in the map
+                        project = ds.getProjects().stream()
+                                .filter(proj -> proj.getId() == projectId)
+                                .findFirst()
+                                .orElse(null);
+
+                        // Update the PROJECT_MAP if we found the project
+                        if (project != null) {
+                            PROJECT_MAP.put(projectId, project);
+                        } else {
+                            System.err.println("Error: Could not find project with ID " + projectId +
+                                    " for application ID " + id + ". This application will not be loaded.");
+                            continue;
+                        }
+                    }
+
                     if (user instanceof Applicant && project != null) {
                         Applicant applicant = (Applicant) user;
 
@@ -528,9 +551,11 @@ public final class CSVReader {
 
                         // Create application with specified ID and basic details
                         BTOApplication app = new BTOApplication(id, applicant, project, flatType);
-                        
-                        // The manager association is managed through the project
-                        // No need to set manager directly on application since it uses project.getManager()
+
+                        // Explicitly set the manager from the project to ensure the link is established
+                        if (project.getManager() != null) {
+                            app.setManager(project.getManager());
+                        }
 
                         // Apply appropriate state changes based on status
                         try {
@@ -575,6 +600,12 @@ public final class CSVReader {
 
                             // Add to datastore
                             ds.getApplications().add(app);
+
+                            // Verify that the application is properly linked to its project
+                            if (app.getProject() == null || app.getProject().getId() != projectId) {
+                                System.err.println("Warning: Application ID " + id +
+                                        " might have a broken project reference. Check implementation.");
+                            }
                         } catch (IllegalArgumentException e) {
                             System.err.println("Invalid application status: " + status);
                         }
@@ -763,7 +794,7 @@ public final class CSVReader {
                     String flatType = cols[2].trim();
                     double price = Double.parseDouble(cols[3].trim());
                     boolean booked = Boolean.parseBoolean(cols[4].trim());
-                    
+
                     // Read booking ID if available
                     String bookingId = cols.length > 5 ? cols[5].trim() : "";
 

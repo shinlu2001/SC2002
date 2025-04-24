@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ManagerUI {
     private final HDB_Manager manager; // Renamed from 'user' since we're accessing it
@@ -58,8 +59,10 @@ public class ManagerUI {
 
                     // Account
                     case 15 -> viewAccountDetails(user);
-                    case 16 -> {AuthUI.changePassword(sc, user);
-                        exit = true;}
+                    case 16 -> {
+                        AuthUI.changePassword(sc, user);
+                        exit = true;
+                    }
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
@@ -584,10 +587,15 @@ public class ManagerUI {
     }
 
     private static void handleBTOApplications(Scanner sc, ManagerController controller) {
-        List<BTOApplication> pendingApps = controller.getPendingApplications();
-        List<BTOApplication> applicationWithdrawalRequests = controller.getWithdrawalRequests();
+        // Get all pending applications for projects managed by this manager
+        List<BTOApplication> allPendingApps = controller.getPendingApplications();
 
-        if (pendingApps.isEmpty() || !applicationWithdrawalRequests.isEmpty()) {
+        // Filter out applications that have withdrawal requested
+        List<BTOApplication> pendingApps = allPendingApps.stream()
+                .filter(app -> !app.isWithdrawalRequested())
+                .collect(Collectors.toList());
+
+        if (pendingApps.isEmpty()) {
             System.out.println("No pending BTO applications to handle.");
             return;
         }

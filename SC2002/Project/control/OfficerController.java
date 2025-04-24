@@ -76,6 +76,7 @@ public class OfficerController implements StaffControllerInterface {
         // 1. It has been approved (SUCCESS status)
         // 2. It hasn't been booked yet
         // 3. It belongs to a project this officer is assigned to
+        // 4. There are available units of the requested type
 
         if (app == null || app.getStatus() != ApplicationStatus.SUCCESS) {
             return false;
@@ -87,19 +88,16 @@ public class OfficerController implements StaffControllerInterface {
             return false;
         }
 
-        // Check if there are available flats of the requested type
-        Optional<Flat> availableFlat = dataStore.getFlats().stream()
-                .filter(f -> f.getProject().equals(app.getProject()))
-                .filter(f -> f.getFlatType().equalsIgnoreCase(app.getRoomType()))
-                .filter(f -> !f.isBooked())
-                .findFirst();
-
-        return availableFlat.isPresent();
+        // Check if there are available units of the requested type using project's
+        // count
+        int remainingUnits = app.getProject().getRemainingUnits(app.getRoomType());
+        return remainingUnits > 0;
     }
 
     /**
      * Process flat booking for an approved application.
-     * Since the manager already decreased the unit count during application approval,
+     * Since the manager already decreased the unit count during application
+     * approval,
      * this just needs to mark the flat as booked.
      * 
      * @param app The application to book a flat for
@@ -110,30 +108,29 @@ public class OfficerController implements StaffControllerInterface {
             System.err.println("Error: No application provided for booking");
             return null;
         }
-        
+
         if (app.getStatus() != ApplicationStatus.SUCCESS) {
-            System.err.println("Error: Application must be in SUCCESS status to book a flat, current status: " + app.getStatus());
+            System.err.println(
+                    "Error: Application must be in SUCCESS status to book a flat, current status: " + app.getStatus());
             return null;
         }
-        
-        // Find an available flat
-        Optional<Flat> opt = dataStore.getFlats().stream()
-                .filter(f -> f.getProject().equals(app.getProject()))
-                .filter(f -> f.getFlatType().equalsIgnoreCase(app.getRoomType()))
-                .filter(f -> !f.isBooked())
-                .findFirst();
+
+        // Find an available flat using the DataStore's findAvailableFlat method
+        // which creates a new flat object if needed
+        Optional<Flat> opt = dataStore.findAvailableFlat(app.getProject(), app.getRoomType());
 
         if (opt.isEmpty()) {
-            System.err.println("Error: No available flats of type " + app.getRoomType() + 
-                " found in project " + app.getProject().getName());
+            System.err.println("Error: No available flats of type " + app.getRoomType() +
+                    " found in project " + app.getProject().getName());
             return null;
         }
 
         Flat flat = opt.get();
 
-        // Book the flat - no decrement needed as manager already did this during approval
+        // Book the flat - no decrement needed as manager already did this during
+        // approval
         app.bookFlat(flat);
-        
+
         // Verify that booking was successful
         if (app.getStatus() != ApplicationStatus.BOOKED || app.getBookedFlat() == null) {
             System.err.println("Error: Booking attempt failed. Status=" + app.getStatus());

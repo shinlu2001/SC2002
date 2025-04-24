@@ -75,7 +75,8 @@ public final class CSVWriter {
 
             ds.getUsers().stream()
                     .filter(roleClass::isInstance)
-                    .filter(u -> roleClass.isInstance(u) && (u.getClass() == roleClass || !Applicant.class.equals(roleClass)))
+                    .filter(u -> roleClass.isInstance(u)
+                            && (u.getClass() == roleClass || !Applicant.class.equals(roleClass)))
                     .forEach(u -> {
                         String fullName = u.getFirstName() + " " + u.getLastName();
                         String line = String.join(",",
@@ -106,15 +107,16 @@ public final class CSVWriter {
             // Write header
             bw.write("Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1," +
                     "Type 2,Number of units for Type 2,Selling price for Type 2," +
-                    "Application opening date,Application closing date,Manager,Officer Slot,Officers,Visibility,ProjectID," +
-                    "Available Units 1,Available Units 2");  // Added available units fields
+                    "Application opening date,Application closing date,Manager,Officer Slot,Officers,Visibility,ProjectID,"
+                    +
+                    "Available Units 1,Available Units 2"); // Added available units fields
             bw.newLine();
 
             for (Project p : ds.getProjects()) {
                 // Only support up to 2 flat types for CSV compatibility
                 List<String> types = p.getFlatTypes();
                 List<Integer> totalUnits = p.getTotalUnits();
-                List<Integer> availableUnits = p.getAvailableUnits();  // Get current available units
+                List<Integer> availableUnits = p.getAvailableUnits(); // Get current available units
                 List<Double> prices = p.getPrices();
 
                 String type1 = types.size() > 0 ? types.get(0) : "";
@@ -164,7 +166,7 @@ public final class CSVWriter {
                         visibility,
                         String.valueOf(p.getId()),
                         avail1,
-                        avail2);  // Added available units
+                        avail2); // Added available units
                 bw.write(line);
                 bw.newLine();
             }
@@ -265,7 +267,7 @@ public final class CSVWriter {
     }
 
     /**
-     * Save all flats to CSV
+     * Save all flats to CSV, ensuring no duplicate bookings
      */
     private static void writeFlats(DataStore ds, String filename) {
         Path out = BASE.resolve(filename);
@@ -274,7 +276,22 @@ public final class CSVWriter {
             bw.write("Flat ID,Project ID,Flat Type,Price,Booked Status,Booking ID");
             bw.newLine();
 
+            // Create a set to track already processed booking IDs for each project/flat
+            // type combination
+            java.util.Set<String> processedBookings = new java.util.HashSet<>();
+
             for (Flat flat : ds.getFlats()) {
+                // Create a unique key for this booking to prevent duplicates
+                String bookingKey = "";
+                if (flat.isBooked() && !flat.getBookingId().isEmpty()) {
+                    bookingKey = flat.getProject().getId() + "-" + flat.getFlatType() + "-" + flat.getBookingId();
+                    // Skip if we've already processed this booking
+                    if (processedBookings.contains(bookingKey)) {
+                        continue;
+                    }
+                    processedBookings.add(bookingKey);
+                }
+
                 String line = String.join(",",
                         String.valueOf(flat.getId()),
                         String.valueOf(flat.getProject().getId()),

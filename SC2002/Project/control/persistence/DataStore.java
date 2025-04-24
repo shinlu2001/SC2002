@@ -17,14 +17,15 @@ import java.util.stream.Collectors;
 public final class DataStore {
     private static final DataStore INSTANCE = new DataStore();
 
-    private final List<User>           users         = new ArrayList<>();
-    private final List<Project>        projects      = new ArrayList<>();
-    private final List<BTOApplication> applications  = new ArrayList<>();
-    private final List<Enquiry>        enquiries     = new ArrayList<>();
-    private final List<Flat>           flats         = new ArrayList<>();
-    private final List<Registration>   registrations = new ArrayList<>();
+    private final List<User> users = new ArrayList<>();
+    private final List<Project> projects = new ArrayList<>();
+    private final List<BTOApplication> applications = new ArrayList<>();
+    private final List<Enquiry> enquiries = new ArrayList<>();
+    private final List<Flat> flats = new ArrayList<>();
+    private final List<Registration> registrations = new ArrayList<>();
 
-    private DataStore() { }
+    private DataStore() {
+    }
 
     public static DataStore getInstance() {
         return INSTANCE;
@@ -87,50 +88,81 @@ public final class DataStore {
 
     // ───────── Convenience Finders ─────────
 
-    /** Find the first Flat whose `getType()` matches the given string (case‑insensitive). */
+    /**
+     * Find the first Flat whose `getType()` matches the given string
+     * (case‑insensitive).
+     */
     public Optional<Flat> findFlatByType(FlatType wanted) {
         return flats.stream()
-                    .filter(f -> f.getType() == wanted)
-                    .findFirst();
+                .filter(f -> f.getType() == wanted)
+                .findFirst();
     }
 
     /** Find a user by NRIC. */
     public Optional<User> findUserByNric(String nric) {
         return users.stream()
-                    .filter(u -> u.getNric().equalsIgnoreCase(nric))
-                    .findFirst();
+                .filter(u -> u.getNric().equalsIgnoreCase(nric))
+                .findFirst();
     }
 
     /** Find a project by its ID. */
     public Optional<Project> findProjectById(int id) {
         return projects.stream()
-                       .filter(p -> p.getId() == id)
-                       .findFirst();
+                .filter(p -> p.getId() == id)
+                .findFirst();
     }
 
     /** Find a manager by first name (case-insensitive). */
     public Optional<HDB_Manager> findManagerByName(String firstName) {
         return users.stream()
-                    .filter(u -> u instanceof HDB_Manager)
-                    .map(u -> (HDB_Manager) u)
-                    .filter(m -> m.getFirstName().equalsIgnoreCase(firstName))
-                    .findFirst();
+                .filter(u -> u instanceof HDB_Manager)
+                .map(u -> (HDB_Manager) u)
+                .filter(m -> m.getFirstName().equalsIgnoreCase(firstName))
+                .findFirst();
     }
 
     /** All applications for a given applicant NRIC. */
     public List<BTOApplication> getApplicationsForApplicant(String nric) {
         return applications.stream()
-                           .filter(app -> app.getApplicant().getNric().equalsIgnoreCase(nric))
-                           .collect(Collectors.toList());
+                .filter(app -> app.getApplicant().getNric().equalsIgnoreCase(nric))
+                .collect(Collectors.toList());
     }
 
     /** Find the first available Flat object matching this project/type. */
     public Optional<Flat> findAvailableFlat(Project project, String wanted) {
-        return flats.stream()
-                    .filter(f -> f.getProject().equals(project))
-                    .filter(f -> f.getFlatType().equalsIgnoreCase(wanted))
-                    .filter(f -> !f.isBooked())
-                    .findFirst();
+        // First check if there are any available units in the project for this flat
+        // type
+        int flatTypeIndex = project.getFlatTypeIndex(wanted);
+        if (flatTypeIndex == -1) {
+            System.err.println("Error: Flat type " + wanted + " not found in project " + project.getName());
+            return Optional.empty();
+        }
+
+        // Check if there are available units according to the project's count
+        if (project.getRemainingUnits(wanted) <= 0) {
+            System.err.println("Error: No available units of type " + wanted + " in project " + project.getName()
+                    + " according to project count");
+            return Optional.empty();
+        }
+
+        // First try to find an existing unbooked flat in our flats collection
+        Optional<Flat> existingFlat = flats.stream()
+                .filter(f -> f.getProject().getId() == project.getId())
+                .filter(f -> f.getFlatType().equalsIgnoreCase(wanted))
+                .filter(f -> !f.isBooked())
+                .findFirst();
+
+        if (existingFlat.isPresent()) {
+            return existingFlat;
+        }
+
+        // If no existing flat is found but project shows available units,
+        // create a new Flat object on demand
+        System.out.println("Creating new flat object for " + wanted + " in project " + project.getName());
+        double price = project.getFlatTypePrice(wanted);
+        Flat newFlat = new Flat(SC2002.Project.util.IdGenerator.nextFlatId(), project, wanted, price);
+        flats.add(newFlat);
+        return Optional.of(newFlat);
     }
 
     // …add more helpers as needed…
