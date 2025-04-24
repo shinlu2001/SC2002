@@ -89,10 +89,10 @@ public class EnquiryController {
         }
         applicantController.deleteEnquiry(enquiry); // remove from applicant enquiry list
         dataStore.getEnquiries().remove(enquiry); // remove from outer system
-        // if (enquiry.getProject() != null) {
-        //     enquiry.getProject().getEnquiries().remove(enquiry); 
-        // }
-        projectController.deleteEnquiry(enquiry.getProject(), enquiry); //remove from project enquiry list
+        if (enquiry.getProject() != null) {
+            projectController.deleteEnquiry(enquiry.getProject(), enquiry); //remove from project enquiry list
+        }
+        
         return true;
     }
 
