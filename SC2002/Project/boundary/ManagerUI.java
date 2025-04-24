@@ -16,11 +16,6 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class ManagerUI {
-    private final HDB_Manager manager; // Renamed from 'user' since we're accessing it
-
-    private ManagerUI(HDB_Manager manager) {
-        this.manager = manager; // Updated name
-    }
 
     /** Entry point from LoginUI. */
     public static void start(HDB_Manager user, Scanner sc) {
