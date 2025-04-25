@@ -51,8 +51,10 @@ public class OfficerUI {
 
                     // Account
                     case 14 -> viewAccountDetails(officer);
-                    case 15 -> {AuthUI.changePassword(sc, officer);
-                        exit = true;} 
+                    case 15 -> {                        
+                        if (AuthUI.changePassword(sc, officer)){
+                        exit = true;
+                    }} 
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
                 }

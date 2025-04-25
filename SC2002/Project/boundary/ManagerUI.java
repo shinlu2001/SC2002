@@ -55,8 +55,9 @@ public class ManagerUI {
                     // Account
                     case 15 -> viewAccountDetails(user);
                     case 16 -> {
-                        AuthUI.changePassword(sc, user);
-                        exit = true;
+                        if (AuthUI.changePassword(sc, user)){
+                            exit = true;
+                        }
                     }
                     case 0 -> exit = true;
                     default -> System.out.println("Invalid choice. Please try again.");
